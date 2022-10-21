@@ -1,13 +1,13 @@
-#include "MiniEngine.h"
+#include "Razor.h"
 
 
-class SandBoxApp : public Mini::Application
+class SandBoxApp : public Razor::Application
 {
 
 };
 
 
-Mini::Application* Mini::CreateApplication()
+Razor::Application* Razor::CreateApplication()
 {
 	return new SandBoxApp();
 }

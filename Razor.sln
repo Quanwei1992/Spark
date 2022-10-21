@@ -5,7 +5,7 @@ VisualStudioVersion = 17.3.32929.385
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sandbox", ".\Sandbox\Sandbox.vcxproj", "{D64AC53E-6E61-4FB0-A029-9D802DFB8E4A}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MiniEngine", ".\MiniEngine\MiniEngine.vcxproj", "{B88C552C-A77F-457A-87CB-3053B1D955AA}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Razor", ".\Razor\Razor.vcxproj", "{B88C552C-A77F-457A-87CB-3053B1D955AA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

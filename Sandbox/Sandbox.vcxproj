@@ -73,12 +73,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)bin\$(Platform)-$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)intermediate\$(Platform)-$(Configuration)\$(ProjectName)\</IntDir>
-    <IncludePath>$(SolutionDir)MiniEngine\src;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Razor\src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\$(Platform)-$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)intermediate\$(Platform)-$(Configuration)\$(ProjectName)\</IntDir>
-    <IncludePath>$(SolutionDir)MiniEngine\src;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Razor\src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -112,7 +112,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>ME_PLATFORM_WINDOWS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>RZ_PLATFORM_WINDOWS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -126,7 +126,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>ME_PLATFORM_WINDOWS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>RZ_PLATFORM_WINDOWS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -140,7 +140,7 @@
     <ClCompile Include="SandboxApp.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MiniEngine\MiniEngine.vcxproj">
+    <ProjectReference Include="..\Razor\Razor.vcxproj">
       <Project>{b88c552c-a77f-457a-87cb-3053b1d955aa}</Project>
     </ProjectReference>
   </ItemGroup>

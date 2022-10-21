@@ -2,10 +2,10 @@
 
 #include <stdio.h>
 
-#include "MiniEngine/Core.h"
-#include "MiniEngine/Application.h"
+#include "Razor/Core.h"
+#include "Razor/Application.h"
 
 // --- Entry Point -----------------
-#include "MiniEngine/EntryPoint.h"
+#include "Razor/EntryPoint.h"
 
 // ---------------------------------

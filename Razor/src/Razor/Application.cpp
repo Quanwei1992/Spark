@@ -1,6 +1,6 @@
 #include "Application.h"
 
-using namespace Mini;
+using namespace Razor;
 
 Application::Application()
 {

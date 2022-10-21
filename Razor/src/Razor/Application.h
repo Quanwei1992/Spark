@@ -1,8 +1,8 @@
 #pragma once
 #include "Core.h"
-namespace Mini
+namespace Razor
 {
-	class MINI_API Application
+	class RAZOR_API Application
 	{
 	public:
 		Application();

@@ -2,14 +2,14 @@
 #include "Application.h"
 
 
-#ifdef ME_PLATFORM_WINDOWS
+#ifdef RZ_PLATFORM_WINDOWS
 
-extern Mini::Application* Mini::CreateApplication();
+extern Razor::Application* Razor::CreateApplication();
 
 int main(int argc,const char** argv)
 {
 	printf("Hello world");
-	Mini::Application* app = Mini::CreateApplication();
+	Razor::Application* app = Razor::CreateApplication();
 	app->Run();
 	delete app;
 	return 0;
