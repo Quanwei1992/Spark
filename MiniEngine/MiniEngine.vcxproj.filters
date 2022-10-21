@@ -4,15 +4,25 @@
     <Filter Include="src">
       <UniqueIdentifier>{4f6c4eb5-bb8e-48c8-8ba5-40ae9d27055d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\MiniEngine">
+      <UniqueIdentifier>{4c9a3687-7d34-4c68-b30a-62a44fb9c69c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Test.h">
+    <ClInclude Include="src\MiniEngine\Core.h">
+      <Filter>src\MiniEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MiniEngine\Application.h">
+      <Filter>src\MiniEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MiniEngine.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\MiniEngine\EntryPoint.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Test.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="src\MiniEngine\Application.cpp">
+      <Filter>src\MiniEngine</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

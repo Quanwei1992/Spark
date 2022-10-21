@@ -6,7 +6,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Application.cpp">
+    <ClCompile Include="SandboxApp.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
