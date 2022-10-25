@@ -1,3 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="src\Razor\Application.cpp" />
+    <ClCompile Include="src\Razor\Log.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\Razor\Application.h" />
+    <ClInclude Include="src\Razor\Core.h" />
+    <ClInclude Include="src\Razor.h" />
+    <ClInclude Include="src\Razor\EntryPoint.h" />
+    <ClInclude Include="src\Razor\Log.h" />
+  </ItemGroup>
 </Project>
