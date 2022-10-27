@@ -41,7 +41,7 @@ project "Sandbox"
     filter "system:windows"
         cppdialect "C++17"
         staticruntime "On"
-        systemversion "10.0.19041.0"
+        systemversion "latest"
     
         defines
         {
@@ -83,14 +83,15 @@ project "Razor"
 
     includedirs
     {
-        "%{prj.name}/vendor/spdlog/include"
+        "%{prj.name}/vendor/spdlog/include",
+        "%{prj.name}/src"
     }
 
     filter "system:windows"
 
         cppdialect "C++17"
         staticruntime "On"
-        systemversion "10.0.19041.0"
+        systemversion "latest"
 
         defines
         {
