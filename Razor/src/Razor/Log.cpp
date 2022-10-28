@@ -1,3 +1,4 @@
+#include "rzpch.h"
 #include "Log.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
  std::shared_ptr<spdlog::logger> Razor::Log::s_CoreLogger;

@@ -1,10 +1,6 @@
 #include "Event.h"
 #include "Razor/Core.h"
 
-
-#include <string>
-#include <sstream>
-
 namespace Razor
 {
 	class RAZOR_API KeyEvent : public Event

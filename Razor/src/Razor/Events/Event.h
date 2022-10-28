@@ -2,9 +2,6 @@
 
 #include "Razor/Core.h"
 
-#include <string>
-#include <functional>
-
 namespace Razor
 {
 	enum class EventType
