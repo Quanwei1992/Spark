@@ -55,7 +55,7 @@ project "Razor"
         }
 
     filter "configurations:Debug"
-        defines "RZ_DEBUG"
+        defines {"RZ_DEBUG","RZ_ENABLE_ASSERTS"}
         symbols "On"
 
     filter "configurations:Release"

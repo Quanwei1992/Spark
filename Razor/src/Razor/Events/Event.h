@@ -1,5 +1,5 @@
 #pragma once
-
+#include "rzpch.h"
 #include "Razor/Core.h"
 
 namespace Razor

@@ -33,7 +33,7 @@ namespace Razor
 		// Window attributes
 		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
 		virtual void SetVsync(bool enabled) = 0;
-		virtual void IsVsync() const = 0;
+		virtual bool IsVsync() const = 0;
 
 		static Window* Create(const WindowProps& props = WindowProps());
 
