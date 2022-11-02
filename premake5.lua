@@ -54,6 +54,12 @@ project "Razor"
             "RZ_BUILD_DLL"
         }
 
+        postbuildcommands
+        {
+            ("{MKDIR} ../bin/" .. outputdir .. "/Sandbox" ),
+            ("{COPYDIR}  %{cfg.targetdir} ../bin/" .. outputdir .. "/Sandbox" )
+        }
+
     filter "configurations:Debug"
         defines {"RZ_DEBUG","RZ_ENABLE_ASSERTS"}
         symbols "On"

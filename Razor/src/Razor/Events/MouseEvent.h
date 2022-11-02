@@ -39,7 +39,7 @@ namespace Razor
 			return ss.str();
 		}
 
-		EVENT_CLASS_TYPE(MouseMoved)
+		EVENT_CLASS_TYPE(MouseScrolled)
 
 		EVENT_CLASS_CATEGORY(EventCategoryInput | EventCategoryMouse)
 
