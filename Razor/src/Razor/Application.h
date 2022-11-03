@@ -1,8 +1,10 @@
 #pragma once
-#include "Core.h"
-#include "Events/Event.h"
-#include "Events/ApplicationEvent.h"
-#include "Window.h"
+#include "Razor/Core.h"
+#include "Razor/Window.h"
+#include "Razor/Events/Event.h"
+#include "Razor/Events/ApplicationEvent.h"
+#include "Razor/LayerStack.h"
+
 namespace Razor
 {
 	class RAZOR_API Application
@@ -11,7 +13,8 @@ namespace Razor
 		Application();
 		~Application();
 		void Run();
-
+		void PushLayer(Layer* layer);
+		void PushOverlay(Layer* overlay);
 	private:
 		void OnEvent(Event& e);
 		bool OnWindowClosed(WindowCloseEvent& e);
@@ -19,6 +22,7 @@ namespace Razor
 	private:
 		std::unique_ptr<Window> m_Window;
 		bool m_Running = true;
+		LayerStack m_LayerStack;
 
 	};
 

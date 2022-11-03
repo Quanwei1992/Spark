@@ -45,7 +45,7 @@ project "Razor"
     filter "system:windows"
 
         cppdialect "C++17"
-        staticruntime "On"
+        staticruntime "Off"
         systemversion "latest"
 
         defines
@@ -101,23 +101,18 @@ project "Sandbox"
 
     filter "system:windows"
         cppdialect "C++17"
-        staticruntime "On"
+        staticruntime "Off"
         systemversion "latest"
     
         defines
         {
             "RZ_PLATFORM_WINDOWS"
         }
-
-        postbuildcommands
-        {
-            ("{COPYDIR} ../bin/" .. outputdir .. "/Razor %{cfg.targetdir}" )
-        }
-    
-    
+ 
     filter "configurations:Debug"
         defines "RZ_DEBUG"
         symbols "On"
+
     
     filter "configurations:Release"
         defines "RZ_RELEASE"

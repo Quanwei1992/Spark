@@ -1,9 +1,8 @@
 #pragma once
 
-#include <stdio.h>
 
-#include "Razor/Core.h"
 #include "Razor/Application.h"
+#include "Razor/Layer.h"
 #include "Razor/Log.h"
 
 // --- Entry Point -----------------
