@@ -20,7 +20,7 @@ project "GLFW"
     
     filter "system:windows"
         systemversion "latest"
-        staticruntime "On"
+        staticruntime "Off"
         files
         {
             "src/win32_platform.h",
