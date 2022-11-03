@@ -1,8 +1,7 @@
 #include "Razor/Core.h"
 #include "Razor/Window.h"
 
-#include "GLFW/glfw3.h"
-
+struct GLFWwindow;
 namespace Razor
 {
 	class WindowsWindow : public Window

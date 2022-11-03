@@ -55,7 +55,8 @@ project "Razor"
         defines
         {
             "RZ_PLATFORM_WINDOWS",
-            "RZ_BUILD_DLL"
+            "RZ_BUILD_DLL",
+            "GLFW_INCLUDE_NONE"
         }
 
         postbuildcommands
