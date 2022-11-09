@@ -13,8 +13,11 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 InlcudeDir = {}
 InlcudeDir["GLFW"] = "Razor/vendor/GLFW/include"
 InlcudeDir["Glad"] = "Razor/vendor/Glad/include"
+InlcudeDir["ImGui"] = "Razor/vendor/imgui"
 include "Razor/vendor/GLFW"
 include "Razor/vendor/Glad"
+include "Razor/vendor/imgui"
+
 project "Razor"
     location "build/Razor"
     kind "SharedLib"
@@ -36,6 +39,7 @@ project "Razor"
         "%{prj.name}/vendor/spdlog/include",
         "%{InlcudeDir.GLFW}",
         "%{InlcudeDir.Glad}",
+        "%{InlcudeDir.ImGui}",
         "%{prj.name}/src"
     }
 
@@ -43,6 +47,7 @@ project "Razor"
     {
         "GLFW",
         "Glad",
+        "ImGui",
         "opengl32.lib"
     }
 
