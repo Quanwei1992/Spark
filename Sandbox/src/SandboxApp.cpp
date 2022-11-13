@@ -10,12 +10,12 @@ public:
 
 	void OnUpdate() override
 	{
-		RZ_INFO("Examplelayer::Update");
+
 	}
 
 	void OnEvent(Razor::Event& event) override
 	{
-		RZ_TRACE("{0}", event);
+
 	}
 	
 };
@@ -27,6 +27,7 @@ public:
 	Sandbox()
 	{
 		PushLayer(new ExampleLayer());
+		PushLayer(new Razor::ImGuiLayer());
 	}
 };
 

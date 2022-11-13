@@ -17,12 +17,23 @@ project "ImGui"
         "imgui_widgets.cpp",
         "imstb_rectpack.h",
         "imstb_textedit.h",
-        "imstb_truetype.h"
+        "imstb_truetype.h",
+        "backends/imgui_impl_glfw.h",
+        "backends/imgui_impl_glfw.cpp",
+        "backends/imgui_impl_opengl3.h",
+        "backends/imgui_impl_opengl3.cpp",
+
 	}
 
     includedirs
     {
-        "./"
+        "./",
+        "../GLFW/include"
+    }
+ 
+    links
+    {
+        "GLFW",
     }
     
 
