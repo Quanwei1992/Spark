@@ -14,6 +14,7 @@ InlcudeDir = {}
 InlcudeDir["GLFW"] = "Razor/vendor/GLFW/include"
 InlcudeDir["Glad"] = "Razor/vendor/Glad/include"
 InlcudeDir["ImGui"] = "Razor/vendor/imgui"
+InlcudeDir["glm"] = "Razor/vendor/glm"
 include "Razor/vendor/GLFW"
 include "Razor/vendor/Glad"
 include "Razor/vendor/imgui"
@@ -32,6 +33,9 @@ project "Razor"
     {
         "%{prj.name}/src/**.h",
         "%{prj.name}/src/**.cpp",
+        "%{prj.name}/vendor/glm/glm/**.hpp",
+        "%{prj.name}/vendor/glm/glm/**.inl",
+        "%{prj.name}/vendor/glm/util/glm.natvis",
     }
 
     includedirs
@@ -40,6 +44,7 @@ project "Razor"
         "%{InlcudeDir.GLFW}",
         "%{InlcudeDir.Glad}",
         "%{InlcudeDir.ImGui}",
+        "%{InlcudeDir.glm}",
         "%{prj.name}/src"
     }
 
@@ -101,6 +106,7 @@ project "Sandbox"
     includedirs
     {
         "Razor/vendor/spdlog/include",
+        "%{InlcudeDir.glm}",
         "Razor/src/",
     }
 

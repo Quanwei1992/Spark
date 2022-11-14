@@ -6,7 +6,9 @@ class ExampleLayer : public Razor::Layer
 public:
 	ExampleLayer()
 		:Layer("Example")
-	{}
+	{
+
+	}
 
 	void OnUpdate() override
 	{
