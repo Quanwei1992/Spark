@@ -1,6 +1,7 @@
 #include "rzpch.h"
 #include "Application.h"
 #include "Razor/Log.h"
+#include "Razor/Events/Input.h"
 
 #include <glad/glad.h>
 
@@ -53,6 +54,9 @@ namespace Razor
 			{
 				layer->OnUpdate();
 			}
+
+			auto [x, y] = Input::GetMousePosition();
+			RZ_TRACE("{0}, {1}", x, y);
 			m_Window->OnUpdate();
 		};
 	}

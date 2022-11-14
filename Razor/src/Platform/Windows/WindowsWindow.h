@@ -16,6 +16,7 @@ namespace Razor
 		virtual void SetEventCallback(const EventCallbackFn& callback) override;
 		virtual void SetVsync(bool enabled) override;
 		virtual bool IsVsync() const override;
+		inline virtual void* GetNativeWindow() const override { return m_Window; }
 
 	private:
 		virtual void Init(const WindowProps& props);
