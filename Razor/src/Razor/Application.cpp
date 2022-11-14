@@ -2,7 +2,7 @@
 #include "Application.h"
 #include "Razor/Log.h"
 #include "Razor/Events/Input.h"
-
+#include "Razor/ImGui/ImGuiLayer.h"
 #include <glad/glad.h>
 
 
@@ -19,6 +19,9 @@ namespace Razor
 		s_Instance = this;
 		m_Window = std::unique_ptr<Window>(Window::Create());
 		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
+
+		m_ImGuiLayer = new ImGuiLayer();
+		PushOverlay(m_ImGuiLayer);
 	}
 
 	void Application::OnEvent(Event& e)
@@ -55,9 +58,12 @@ namespace Razor
 			{
 				layer->OnUpdate();
 			}
-
-			auto [x, y] = Input::GetMousePosition();
-			RZ_TRACE("{0}, {1}", x, y);
+			m_ImGuiLayer->Begin();
+			for (Layer* layer : m_LayerStack)
+			{
+				layer->OnImGuiRender();
+			}
+			m_ImGuiLayer->End();
 			m_Window->OnUpdate();
 		};
 	}

@@ -10,11 +10,13 @@ namespace Razor
 		ImGuiLayer();
 		 ~ImGuiLayer();
 
-		void OnUpdate() override;
-		void OnEvent(Event& event) override;
-
 		void OnAttach() override;
 		void OnDetach() override;
+
+		void Begin();
+		void End();
+
+		virtual void OnImGuiRender() override;
 
 	private:
 		float m_Time = 0.0f;

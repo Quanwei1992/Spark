@@ -1,5 +1,6 @@
 #include "Razor.h"
 
+#include <imgui.h>
 
 class ExampleLayer : public Razor::Layer
 {
@@ -22,6 +23,13 @@ public:
 	{
 
 	}
+
+	virtual void OnImGuiRender()
+	{
+		//ImGui::Begin("Test");
+		//ImGui::Text("Hello world");
+		//ImGui::End();
+	}
 	
 };
 
@@ -32,7 +40,6 @@ public:
 	Sandbox()
 	{
 		PushLayer(new ExampleLayer());
-		PushLayer(new Razor::ImGuiLayer());
 	}
 };
 

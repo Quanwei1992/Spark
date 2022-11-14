@@ -7,6 +7,8 @@
 
 namespace Razor
 {
+	class ImGuiLayer;
+
 	class RAZOR_API Application
 	{
 	public:
@@ -22,6 +24,7 @@ namespace Razor
 
 	private:
 		std::unique_ptr<Window> m_Window;
+		ImGuiLayer* m_ImGuiLayer;
 		bool m_Running = true;
 		LayerStack m_LayerStack;
 		static Application* s_Instance;

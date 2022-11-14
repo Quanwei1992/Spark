@@ -107,12 +107,14 @@ project "Sandbox"
     {
         "Razor/vendor/spdlog/include",
         "%{InlcudeDir.glm}",
+        "%{InlcudeDir.ImGui}",
         "Razor/src/",
     }
 
     links
     {
-        "Razor"
+        "Razor",
+        "ImGui"
     }
 
     filter "system:windows"
