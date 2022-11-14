@@ -10,7 +10,10 @@ public:
 
 	void OnUpdate() override
 	{
-
+		if (Razor::Input::IsKeyPressed(RZ_KEY_TAB))
+		{
+			RZ_TRACE("Tab key is pressed!");
+		}
 	}
 
 	void OnEvent(Razor::Event& event) override
