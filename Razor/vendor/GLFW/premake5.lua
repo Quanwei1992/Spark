@@ -1,6 +1,7 @@
 project "GLFW"
     kind "StaticLib"
     language "C"   
+    staticruntime "on"
     targetdir("%{wks.location}/bin/" .. outputdir .. "/razor/vendor/%{prj.name}")
     objdir("%{wks.location}/intermediate/" .. outputdir .. "/razor/vendor/%{prj.name}")
     location "%{wks.location}/Razor/vendor"
@@ -20,7 +21,6 @@ project "GLFW"
     
     filter "system:windows"
         systemversion "latest"
-        staticruntime "Off"
         files
         {
             "src/win32_platform.h",
@@ -47,13 +47,8 @@ project "GLFW"
 
     filter "configurations:Debug"
         defines "Debug"
-        symbols "On"
+        symbols "on"
 
     filter "configurations:Release"
         defines "Release"
-        optimize "On"    
-
-    filter "configurations:Dist"
-        defines "Release"
-        optimize "On"
-        symbols "off"
+        optimize "on" 

@@ -4,7 +4,7 @@
 #include "spdlog/fmt/ostr.h"
 namespace Razor
 {
-	class RAZOR_API Log
+	class Log
 	{
 	public:
 		static void Init();

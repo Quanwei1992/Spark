@@ -1,6 +1,7 @@
 project "ImGui"
     kind "StaticLib"
     language "C"   
+    staticruntime "on"
     targetdir("%{wks.location}/bin/" .. outputdir .. "/razor/vendor/%{prj.name}")
     objdir("%{wks.location}/intermediate/" .. outputdir .. "/razor/vendor/%{prj.name}")
     location "%{wks.location}/Razor/vendor"
@@ -39,13 +40,8 @@ project "ImGui"
 
     filter "configurations:Debug"
         defines "Debug"
-        symbols "On"
+        symbols "on"
 
     filter "configurations:Release"
         defines "Release"
-        optimize "On"    
-
-    filter "configurations:Dist"
-        defines "Release"
-        optimize "On"
-        symbols "off"
+        optimize "on"    

@@ -39,7 +39,7 @@ namespace Razor
 
 
 
-	class RAZOR_API Event
+	class Event
 	{
 		friend class EventDispatcher;
 	public:

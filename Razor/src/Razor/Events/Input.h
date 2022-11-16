@@ -3,7 +3,7 @@
 #include "Razor/Core.h"
 namespace Razor
 {
-	class RAZOR_API Input
+	class Input
 	{
 
 	public:

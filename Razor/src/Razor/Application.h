@@ -9,7 +9,7 @@ namespace Razor
 {
 	class ImGuiLayer;
 
-	class RAZOR_API Application
+	class Application
 	{
 	public:
 		Application();

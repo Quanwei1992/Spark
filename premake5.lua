@@ -21,8 +21,9 @@ include "Razor/vendor/imgui"
 
 project "Razor"
     location "build/Razor"
-    kind "SharedLib"
+    kind "StaticLib"
     language "C++"
+    staticruntime "on"
 
     targetdir("build/bin/" .. outputdir .. "/%{prj.name}")
     objdir("build/intermediate/" .. outputdir .. "/%{prj.name}")
@@ -59,33 +60,20 @@ project "Razor"
     filter "system:windows"
 
         cppdialect "C++17"
-        staticruntime "Off"
         systemversion "latest"
-
         defines
         {
             "RZ_PLATFORM_WINDOWS",
-            "RZ_BUILD_DLL",
             "GLFW_INCLUDE_NONE"
-        }
-
-        postbuildcommands
-        {
-            ("{MKDIR} ../bin/" .. outputdir .. "/Sandbox" ),
-            ("{COPYDIR}  %{cfg.targetdir} ../bin/" .. outputdir .. "/Sandbox" )
         }
 
     filter "configurations:Debug"
         defines {"RZ_DEBUG","RZ_ENABLE_ASSERTS"}
-        symbols "On"
+        symbols "on"
 
     filter "configurations:Release"
         defines "RZ_RELEASE"
-        optimize "On"    
-
-    filter "configurations:Dist"
-        defines "RZ_DIST"
-        optimize "On"
+        optimize "on"
 
 --------------------------------------------------------------------------------
 
@@ -93,6 +81,7 @@ project "Sandbox"
     location "build/Sandbox"
     kind "ConsoleApp"
     language "C++"
+    staticruntime "on"
     
     targetdir("build/bin/" .. outputdir .. "/%{prj.name}")
     objdir("build/intermediate/" .. outputdir .. "/%{prj.name}")
@@ -113,15 +102,11 @@ project "Sandbox"
 
     links
     {
-        "Razor",
-        "ImGui"
+        "Razor"
     }
 
     filter "system:windows"
-        cppdialect "C++17"
-        staticruntime "Off"
         systemversion "latest"
-    
         defines
         {
             "RZ_PLATFORM_WINDOWS"
@@ -129,14 +114,10 @@ project "Sandbox"
  
     filter "configurations:Debug"
         defines "RZ_DEBUG"
-        symbols "On"
+        symbols "on"
 
     
     filter "configurations:Release"
         defines "RZ_RELEASE"
-        optimize "On"    
-    
-    filter "configurations:Dist"
-        defines "RZ_DIST"
-        optimize "On"
+        optimize "on" 
 

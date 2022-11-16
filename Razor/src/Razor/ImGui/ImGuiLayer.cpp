@@ -29,11 +29,10 @@ namespace Razor
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-
+		GLFWwindow* window = glfwGetCurrentContext();
 
 		ImGui::StyleColorsDark();
 
-		GLFWwindow* window = glfwGetCurrentContext();
 		ImGui_ImplGlfw_InitForOpenGL(window, true);
 		ImGui_ImplOpenGL3_Init("#version 460");
 	}
@@ -53,7 +52,7 @@ namespace Razor
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		Application& app = Application::Get();
-		io.DisplaySize = ImVec2(app.GetWindow().GetWidth(), app.GetWindow().GetHeight());
+		io.DisplaySize = ImVec2((float)app.GetWindow().GetWidth(), (float)app.GetWindow().GetHeight());
 
 		// Rendering 
 		ImGui::Render();

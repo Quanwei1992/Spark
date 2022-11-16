@@ -7,7 +7,7 @@
 
 namespace Razor
 {
-	class RAZOR_API LayerStack
+	class LayerStack
 	{
 	public:
 		LayerStack();
