@@ -5,8 +5,7 @@
 #include "Razor/Events/ApplicationEvent.h"
 #include "Razor/Events/KeyEvent.h"
 #include "Razor/Events/MouseEvent.h"
-
-#include <glad/glad.h>
+#include "Platform/OpenGL/OpenGLContext.h"
 #include <GLFW/glfw3.h>
 
 
@@ -27,7 +26,7 @@ namespace Razor
 	void WindowsWindow::OnUpdate()
 	{
 		glfwPollEvents();
-		glfwSwapBuffers(m_Window);
+		m_Context->SwapBuffers();
 	}
 
 	WindowsWindow::WindowsWindow(const WindowProps& props)
@@ -63,6 +62,7 @@ namespace Razor
 		m_Data.Height = props.Height;
 		RZ_CORE_INFO("Creating window {0} ({1}, {2})",props.Title,props.Width,props.Height);
 
+
 		if (!s_GLFWInitialized)
 		{
 			int success = glfwInit();
@@ -76,10 +76,8 @@ namespace Razor
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
-		glfwMakeContextCurrent(m_Window);
-
-		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-		RZ_CORE_ASSERT(status, "Failed to initialize Glad!");
+		m_Context = new OpenGLContext(m_Window);
+		m_Context->Init();
 
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVsync(true);

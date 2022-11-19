@@ -4,6 +4,8 @@
 struct GLFWwindow;
 namespace Razor
 {
+	class GraphicsContext;
+
 	class WindowsWindow : public Window
 	{
 	public:
@@ -23,11 +25,12 @@ namespace Razor
 		virtual void Shutdown();
 	private:
 		GLFWwindow* m_Window = nullptr;
+		GraphicsContext* m_Context = nullptr;
 		struct WindowData
 		{
 			std::string Title;
-			unsigned int Width, Height;
-			bool VSync;
+			unsigned int Width = 0, Height = 0;
+			bool VSync = true;
 
 			EventCallbackFn EventCallback;
 		};
