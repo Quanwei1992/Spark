@@ -4,6 +4,7 @@
 #include "Razor/Events/Event.h"
 #include "Razor/Events/ApplicationEvent.h"
 #include "Razor/LayerStack.h"
+#include "Razor/Renderer/Shader.h"
 
 namespace Razor
 {
@@ -30,7 +31,7 @@ namespace Razor
 		static Application* s_Instance;
 
 		uint32_t m_VertexArray, m_VertexBuffer, m_IndexBuffer;
-
+		std::unique_ptr<Shader> m_Shader;
 	};
 
 	Application* CreateApplication();
