@@ -29,6 +29,8 @@ namespace Razor
 		LayerStack m_LayerStack;
 		static Application* s_Instance;
 
+		uint32_t m_VertexArray, m_VertexBuffer, m_IndexBuffer;
+
 	};
 
 	Application* CreateApplication();
