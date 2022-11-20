@@ -29,7 +29,11 @@ namespace Razor
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+		
 		GLFWwindow* window = glfwGetCurrentContext();
+		float xScale, yScale;
+		glfwGetWindowContentScale(window, &xScale, &yScale);
+		io.FontGlobalScale = xScale;
 
 		ImGui::StyleColorsDark();
 
