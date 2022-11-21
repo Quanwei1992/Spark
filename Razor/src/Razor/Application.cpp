@@ -6,6 +6,7 @@
 
 #include "Razor/Renderer/Shader.h"
 #include "Razor/Renderer/Buffer.h"
+#include "Razor/Renderer/VertexArray.h"
 
 #include <glad/glad.h>
 
@@ -17,27 +18,6 @@ namespace Razor
 
 	#define BIND_EVENT_FN(x) std::bind(&Application::x,this,std::placeholders::_1)
 
-
-	static GLenum ShaderDateTypeToOpenGLBaseType(ShaderDataType type)
-	{
-		switch (type)
-		{
-			case ShaderDataType::Float:		return  GL_FLOAT;
-			case ShaderDataType::Float2:	return  GL_FLOAT;
-			case ShaderDataType::Float3:	return  GL_FLOAT;
-			case ShaderDataType::Float4:	return  GL_FLOAT;
-			case ShaderDataType::Mat3:		return  GL_FLOAT;
-			case ShaderDataType::Mat4:		return  GL_FLOAT;
-			case ShaderDataType::Int:		return  GL_INT;
-			case ShaderDataType::Int2:		return  GL_INT;
-			case ShaderDataType::Int3:		return  GL_INT;
-			case ShaderDataType::Int4:		return  GL_INT;
-			case ShaderDataType::Bool:		return  GL_BOOL;
-		}
-		RZ_CORE_ASSERT(false, "Unkown ShaderDataType!");
-		return 0;
-	}
-
 	Application::Application()
 	{
 		RZ_CORE_ASSERT(!s_Instance, "Application already exsits!");
@@ -48,9 +28,7 @@ namespace Razor
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);
 
-
-		glGenVertexArrays(1, &m_VertexArray);
-		glBindVertexArray(m_VertexArray);
+		m_VertexArray.reset(VertexArray::Create());
 	
 		float vertices[3 * 7] = {
 			-0.5f,-0.5f,0.0f,1.0f,0.0f,0.0f,1.0f,
@@ -58,36 +36,46 @@ namespace Razor
 			0.0f,0.5f,0.0f,0.0f,0.0f,1.0f,1.0f,
 		};
 
-
+		std::shared_ptr<VertexBuffer> m_VertexBuffer;
 		m_VertexBuffer.reset(VertexBuffer::Create(vertices, sizeof(vertices)));
-		{
-			BufferLayout layout = {
-				{ShaderDataType::Float3,"a_Position"},
-				{ShaderDataType::Float4,"a_Color"}
-			};
-			m_VertexBuffer->SetLayout(layout);
-		}
 
-		uint32_t index = 0;
-		for (const auto& element : m_VertexBuffer->GetLayout())
-		{
+		m_VertexBuffer->SetLayout({
+			{ShaderDataType::Float3,"a_Position"},
+			{ShaderDataType::Float4,"a_Color"}
+		});
 
-			glEnableVertexAttribArray(index);
-			glVertexAttribPointer(index, 
-				element.GetComponentCount(),
-				ShaderDateTypeToOpenGLBaseType(element.Type),
-				element.Normalized ? GL_TRUE : GL_FALSE, 
-				m_VertexBuffer->GetLayout().GetStride(),
-				(const void*)element.Offset);
-			index++;
-		}
-
+		m_VertexArray->AddVertexBuffer(m_VertexBuffer);
 
 		uint32_t indices[3] = { 0,1,2 };
 
+		std::shared_ptr<IndexBuffer> m_IndexBuffer;
 		m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
+		m_VertexArray->SetIndexBuffer(m_IndexBuffer);
+
+		// Square 
+
+		m_SquareVA.reset(VertexArray::Create());
+
+		float squareVertices[3 * 4] = {
+			-0.75f,-0.75f,0.0f,
+			0.75f,-0.75f,0.0f,
+			0.75f,0.75f,0.0f,
+			-0.75f,0.75f,0.0f
+		};
+		std::shared_ptr<VertexBuffer> squareVB;
+		squareVB.reset(VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
+
+		squareVB->SetLayout({
+				{ShaderDataType::Float3,"a_Position"},
+		});
+
+		m_SquareVA->AddVertexBuffer(squareVB);
 
 
+		uint32_t squareIndices[] = { 0,1,2,2,3,0};
+		std::shared_ptr<IndexBuffer> squareIB;
+		squareIB.reset(IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
+		m_SquareVA->SetIndexBuffer(squareIB);
 
 		std::string vertexSrc = R"(
 			#version 460 core
@@ -119,6 +107,35 @@ namespace Razor
 
 
 		m_Shader.reset(new Shader(vertexSrc,fragmentSrc));
+
+		vertexSrc = R"(
+			#version 460 core
+
+			layout(location = 0) in vec3 a_Position;
+			out vec3 v_Position;
+
+			void main()
+			{
+				v_Position = a_Position;
+				gl_Position = vec4(a_Position,1.0);
+			}
+		)";
+
+
+		fragmentSrc = R"(
+			#version 460 core
+
+			layout(location = 0) out vec4 color;
+			in vec3 v_Position;
+
+			void main()
+			{
+				color = vec4(0.1,0.1,0.8,1.0);
+			}
+		)";
+
+
+		m_BlueShader.reset(new Shader(vertexSrc, fragmentSrc));
 	}
 
 	void Application::OnEvent(Event& e)
@@ -151,8 +168,13 @@ namespace Razor
 			glClearColor(0.1f, 0.1f, 0.1f, 1);
 			glClear(GL_COLOR_BUFFER_BIT);
 
+			m_BlueShader->Bind();
+			m_SquareVA->Bind();
+			glDrawElements(GL_TRIANGLES, m_SquareVA->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+
 			m_Shader->Bind();
-			glDrawElements(GL_TRIANGLES, m_IndexBuffer->GetCount(), GL_UNSIGNED_INT, nullptr);
+			m_VertexArray->Bind();
+			glDrawElements(GL_TRIANGLES, m_VertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 
 			for (Layer* layer : m_LayerStack)
 			{

@@ -26,9 +26,9 @@ public:
 
 	virtual void OnImGuiRender()
 	{
-		//ImGui::Begin("Test");
-		//ImGui::Text("Hello world");
-		//ImGui::End();
+		ImGui::Begin("Test");
+		ImGui::Text("Hello world");
+		ImGui::End();
 	}
 	
 };

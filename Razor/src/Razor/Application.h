@@ -12,6 +12,7 @@ namespace Razor
 	class ImGuiLayer;
 	class VertexBuffer;
 	class IndexBuffer;
+	class VertexArray;
 	class Shader;
 	class Application
 	{
@@ -32,10 +33,12 @@ namespace Razor
 		bool m_Running = true;
 		LayerStack m_LayerStack;
 		static Application* s_Instance;
-		uint32_t m_VertexArray;
-		std::unique_ptr<Shader> m_Shader;
-		std::unique_ptr<VertexBuffer> m_VertexBuffer;
-		std::unique_ptr<IndexBuffer> m_IndexBuffer;
+
+		std::shared_ptr<Shader> m_Shader;
+		std::shared_ptr<VertexArray> m_VertexArray;
+
+		std::shared_ptr<Shader> m_BlueShader;
+		std::shared_ptr<VertexArray> m_SquareVA;
 	};
 
 	Application* CreateApplication();
