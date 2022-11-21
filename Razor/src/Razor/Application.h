@@ -3,7 +3,10 @@
 #include "Razor/Window.h"
 #include "Razor/Events/Event.h"
 #include "Razor/Events/ApplicationEvent.h"
+#include "Razor/Events/KeyEvent.h"
 #include "Razor/LayerStack.h"
+
+#include "Razor/Renderer/OrthographicCamera.h"
 
 #include <memory>
 
@@ -26,6 +29,7 @@ namespace Razor
 		static inline Application& Get() { return *s_Instance; }
 		void OnEvent(Event& e);
 		bool OnWindowClosed(WindowCloseEvent& e);
+		bool OnKeyPressed(KeyPressedEvent& e);
 
 	private:
 		std::unique_ptr<Window> m_Window;
@@ -39,6 +43,8 @@ namespace Razor
 
 		std::shared_ptr<Shader> m_BlueShader;
 		std::shared_ptr<VertexArray> m_SquareVA;
+
+		OrthographicCamera m_Camera;
 	};
 
 	Application* CreateApplication();

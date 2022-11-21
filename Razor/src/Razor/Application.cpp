@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "Razor/Log.h"
 #include "Razor/Events/Input.h"
+#include "Razor/KeyCodes.h"
 #include "Razor/ImGui/ImGuiLayer.h"
 
 #include "Razor/Renderer/Shader.h"
@@ -11,6 +12,9 @@
 #include "Razor/Renderer/Renderer.h"
 #include "Razor/Renderer/RenderCommand.h"
 
+
+
+
 namespace Razor
 {
 
@@ -19,6 +23,7 @@ namespace Razor
 	#define BIND_EVENT_FN(x) std::bind(&Application::x,this,std::placeholders::_1)
 
 	Application::Application()
+		:m_Camera(-1.6f, 1.6f, -0.9f, 0.9f)
 	{
 		RZ_CORE_ASSERT(!s_Instance, "Application already exsits!");
 		s_Instance = this;
@@ -83,12 +88,14 @@ namespace Razor
 			layout(location = 0) in vec3 a_Position;
 			layout(location = 1) in vec4 a_Color;
 
+			uniform mat4 u_ViewProjection;
+
 			out vec4 v_Color;
 
 			void main()
 			{
 				v_Color = a_Color;
-				gl_Position = vec4(a_Position,1.0);
+				gl_Position = u_ViewProjection * vec4(a_Position,1.0);
 			}
 		)";
 
@@ -112,12 +119,13 @@ namespace Razor
 			#version 460 core
 
 			layout(location = 0) in vec3 a_Position;
+			uniform mat4 u_ViewProjection;
 			out vec3 v_Position;
 
 			void main()
 			{
 				v_Position = a_Position;
-				gl_Position = vec4(a_Position,1.0);
+				gl_Position = u_ViewProjection * vec4(a_Position,1.0);
 			}
 		)";
 
@@ -142,6 +150,7 @@ namespace Razor
 	{
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(Application::OnWindowClosed));
+		dispatcher.Dispatch<KeyPressedEvent>(BIND_EVENT_FN(Application::OnKeyPressed));
 
 		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin();)
 		{
@@ -156,6 +165,48 @@ namespace Razor
 		return true;
 	}
 
+	bool Application::OnKeyPressed(KeyPressedEvent& e)
+	{
+		glm::vec3 position = {0,0,0};
+		float rotation = 0.0f;
+		bool handled = false;
+		switch (e.GetKeyCode())
+		{
+		case RZ_KEY_W:
+			position = glm::vec3(0, 0.1f, 0);
+			handled = true;
+			break;
+		case RZ_KEY_S:
+			position = glm::vec3(0, -0.1f, 0);
+			handled = true;
+			break;
+		case RZ_KEY_A:
+			position = glm::vec3(-0.1f, 0, 0);
+			handled = true;
+			break;
+		case RZ_KEY_D:
+			position = glm::vec3(0.1f,0, 0);
+			handled = true;
+			break;
+		case RZ_KEY_Q:
+			rotation = 10.0f;
+			handled = true;
+			break;
+		case RZ_KEY_E:
+			rotation = -10.0f;
+			handled = true;
+			break;
+		}
+
+		if (handled)
+		{
+			m_Camera.SetPosition(m_Camera.GetPosition() + position);
+			m_Camera.SetRotation(m_Camera.GetRotation() + rotation);
+		}
+
+		return handled;
+	}
+
 
 	Application::~Application()
 	{
@@ -168,13 +219,9 @@ namespace Razor
 			RenderCommand::SetClearColor(glm::vec4(0.1f, 0.1f, 0.1f, 1));
 			RenderCommand::Clear();
 
-			Renderer::BeginScene();
-
-			m_BlueShader->Bind();
-			Renderer::Submit(m_SquareVA);
-
-			m_Shader->Bind();
-			Renderer::Submit(m_VertexArray);
+			Renderer::BeginScene(m_Camera);
+			Renderer::Submit(m_BlueShader, m_SquareVA);
+			Renderer::Submit(m_Shader, m_VertexArray);
 
 			Renderer::EndScene();
 
