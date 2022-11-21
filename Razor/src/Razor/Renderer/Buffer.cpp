@@ -11,8 +11,8 @@ namespace Razor
 	{
 		switch (Renderer::GetAPI())
 		{
-			case RendererAPI::None: RZ_CORE_ASSERT(false, "RendererAPI::None is current not support!"); return nullptr;
-			case RendererAPI::OpenGL: return new OpenGLVertexBuffer(vertices, size);
+			case RendererAPI::API::None: RZ_CORE_ASSERT(false, "RendererAPI::None is current not support!"); return nullptr;
+			case  RendererAPI::API::OpenGL: return new OpenGLVertexBuffer(vertices, size);
 		}
 		RZ_CORE_ASSERT(false, "Unknown RendererAPI!");
 		return nullptr;
@@ -21,8 +21,8 @@ namespace Razor
 	{
 		switch (Renderer::GetAPI())
 		{
-		case RendererAPI::None: RZ_CORE_ASSERT(false, "RendererAPI::None is current not support!"); return nullptr;
-		case RendererAPI::OpenGL: return new OpenGLIndexBuffer(indices, count);
+		case  RendererAPI::API::None: RZ_CORE_ASSERT(false, "RendererAPI::None is current not support!"); return nullptr;
+		case  RendererAPI::API::OpenGL: return new OpenGLIndexBuffer(indices, count);
 		}
 		RZ_CORE_ASSERT(false, "Unknown RendererAPI!");
 		return nullptr;
