@@ -25,6 +25,7 @@ namespace Razor
 		static inline Application& Get() { return *s_Instance; }
 		void OnEvent(Event& e);
 		bool OnWindowClosed(WindowCloseEvent& e);
+		bool OnWindowResize(WindowResizeEvent& e);
 		bool OnKeyPressed(KeyPressedEvent& e);
 
 	private:

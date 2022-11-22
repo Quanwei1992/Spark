@@ -1,6 +1,8 @@
 #include "Razor.h"
 #include <imgui.h>
 
+#include <glm/gtc/matrix_transform.hpp>
+
 class ExampleLayer : public Razor::Layer
 {
 public:
@@ -37,10 +39,10 @@ public:
 		m_SquareVA.reset(Razor::VertexArray::Create());
 
 		float squareVertices[3 * 4] = {
-			-0.75f,-0.75f,0.0f,
-			0.75f,-0.75f,0.0f,
-			0.75f,0.75f,0.0f,
-			-0.75f,0.75f,0.0f
+			-0.5f,-0.5f,0.0f,
+			 0.5f,-0.5f,0.0f,
+			 0.5f, 0.5f,0.0f,
+			-0.5f, 0.5f,0.0f
 		};
 		std::shared_ptr<Razor::VertexBuffer> squareVB;
 		squareVB.reset(Razor::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
@@ -64,13 +66,14 @@ public:
 			layout(location = 1) in vec4 a_Color;
 
 			uniform mat4 u_ViewProjection;
+			uniform mat4 u_Transform;
 
 			out vec4 v_Color;
 
 			void main()
 			{
 				v_Color = a_Color;
-				gl_Position = u_ViewProjection * vec4(a_Position,1.0);
+				gl_Position = u_ViewProjection * u_Transform * vec4(a_Position,1.0);
 			}
 		)";
 
@@ -95,12 +98,13 @@ public:
 
 			layout(location = 0) in vec3 a_Position;
 			uniform mat4 u_ViewProjection;
+			uniform mat4 u_Transform;
 			out vec3 v_Position;
 
 			void main()
 			{
 				v_Position = a_Position;
-				gl_Position = u_ViewProjection * vec4(a_Position,1.0);
+				gl_Position = u_ViewProjection * u_Transform * vec4(a_Position,1.0);
 			}
 		)";
 
@@ -113,7 +117,7 @@ public:
 
 			void main()
 			{
-				color = vec4(0.1,0.1,0.8,1.0);
+				color = vec4(v_Position+0.5,1.0);
 			}
 		)";
 
@@ -150,7 +154,6 @@ public:
 			m_CameraRotation -= m_CameraRotateSpeed * ts;
 		}
 
-
 		Razor::RenderCommand::SetClearColor(glm::vec4(0.1f, 0.1f, 0.1f, 1));
 		Razor::RenderCommand::Clear();
 
@@ -158,7 +161,19 @@ public:
 		m_Camera.SetRotation(m_CameraRotation);
 
 		Razor::Renderer::BeginScene(m_Camera);
-		Razor::Renderer::Submit(m_BlueShader, m_SquareVA);
+
+		static glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
+		for (int x = 0; x < 15; x++) 
+		{
+			for (int y = 0; y < 15; y++)
+			{
+				glm::vec3 pos(x * 0.11f, y * 0.11f, 0);
+				glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos) * scale;
+				Razor::Renderer::Submit(m_BlueShader, m_SquareVA, transform);
+			}
+		}
+
+		
 		Razor::Renderer::Submit(m_Shader, m_VertexArray);
 
 		Razor::Renderer::EndScene();
@@ -168,27 +183,11 @@ public:
 	{
 		Razor::EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<Razor::KeyPressedEvent>(RZ_BIND_EVENT_FN(ExampleLayer::OnKeyPressedEvent));
-
 	}
+
 
 	bool OnKeyPressedEvent(Razor::KeyPressedEvent e)
 	{
-		//if (e.GetKeyCode() == RZ_KEY_LEFT)
-		//{
-		//	m_CameraPosition.x -= m_CameraSpeed;
-		//}
-		//if (e.GetKeyCode() == RZ_KEY_RIGHT)
-		//{
-		//	m_CameraPosition.x += m_CameraSpeed;
-		//}
-		//if (e.GetKeyCode() == RZ_KEY_DOWN)
-		//{
-		//	m_CameraPosition.y -= m_CameraSpeed;
-		//}
-		//if (e.GetKeyCode() == RZ_KEY_UP)
-		//{
-		//	m_CameraPosition.y += m_CameraSpeed;
-		//}
 		return false;
 	}
 
@@ -206,7 +205,6 @@ private:
 	float m_CameraRotation = 0.0f;
 	float m_CameraMoveSpeed = 5.0f;
 	float m_CameraRotateSpeed = 180.0f;
-
 };
 
 
