@@ -11,8 +11,16 @@
 
 #include "Razor/ImGui/ImGuiLayer.h"
 
+// --- Renderer -------------------
+#include "Razor/Renderer/Renderer.h"
+#include "Razor/Renderer/RenderCommand.h"
 
+#include "Razor/Renderer/Shader.h"
+#include "Razor/Renderer/Buffer.h"
+#include "Razor/Renderer/VertexArray.h"
 
+#include "Razor/Renderer/OrthographicCamera.h"
+// ---------------------------------
 
 // --- Entry Point -----------------
 #include "Razor/EntryPoint.h"

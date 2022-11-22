@@ -13,8 +13,8 @@ namespace Razor
 		unsigned int Height;
 
 		WindowProps(const std::string& title = "Razor Engine",
-			unsigned int width = 1920,
-			unsigned int height = 1080)
+			unsigned int width = 1204,
+			unsigned int height = 576)
 			:Title(title), Width(width), Height(height)
 		{
 		}
