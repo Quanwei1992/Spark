@@ -121,32 +121,33 @@ public:
 		m_BlueShader.reset(new Razor::Shader(vertexSrc, fragmentSrc));
 	}
 
-	void OnUpdate() override
+	void OnUpdate(Razor::Timestep ts) override
 	{
+		RZ_TRACE("Delta time: {0}s ({1}ms)", ts.GetSeconds(), ts.GetMilliseconds());
 
 		if (Razor::Input::IsKeyPressed(RZ_KEY_LEFT))
 		{
-			m_CameraPosition.x -= m_CameraMoveSpeed;
+			m_CameraPosition.x -= m_CameraMoveSpeed * ts;
 		}
 		else if (Razor::Input::IsKeyPressed(RZ_KEY_RIGHT))
 		{
-			m_CameraPosition.x += m_CameraMoveSpeed;
+			m_CameraPosition.x += m_CameraMoveSpeed * ts;
 		}
 		else if (Razor::Input::IsKeyPressed(RZ_KEY_DOWN))
 		{
-			m_CameraPosition.y -= m_CameraMoveSpeed;
+			m_CameraPosition.y -= m_CameraMoveSpeed * ts;
 		}
 		else if (Razor::Input::IsKeyPressed(RZ_KEY_UP))
 		{
-			m_CameraPosition.y += m_CameraMoveSpeed;
+			m_CameraPosition.y += m_CameraMoveSpeed * ts;
 		}
 		else if (Razor::Input::IsKeyPressed(RZ_KEY_A))
 		{
-			m_CameraRotation += m_CameraRotateSpeed;
+			m_CameraRotation += m_CameraRotateSpeed * ts;
 		}
 		else if (Razor::Input::IsKeyPressed(RZ_KEY_D))
 		{
-			m_CameraRotation -= m_CameraRotateSpeed;
+			m_CameraRotation -= m_CameraRotateSpeed * ts;
 		}
 
 
@@ -203,8 +204,8 @@ private:
 	Razor::OrthographicCamera m_Camera;
 	glm::vec3 m_CameraPosition = { 0,0,0 };
 	float m_CameraRotation = 0.0f;
-	float m_CameraMoveSpeed = 0.01f;
-	float m_CameraRotateSpeed = 2.0f;
+	float m_CameraMoveSpeed = 5.0f;
+	float m_CameraRotateSpeed = 180.0f;
 
 };
 

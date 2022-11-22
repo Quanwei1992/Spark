@@ -2,6 +2,7 @@
 
 #include "Razor/Core.h"
 #include "Razor/Events/Event.h"
+#include "Razor/Core/Timestep.h"
 
 namespace Razor
 {
@@ -13,7 +14,7 @@ namespace Razor
 
 		virtual void OnAttach() {}
 		virtual void OnDetach() {}
-		virtual void OnUpdate() {}
+		virtual void OnUpdate(Timestep st) {}
 		virtual void OnImGuiRender() {}
 		virtual void OnEvent(Event& event) {}
 

@@ -5,6 +5,7 @@
 #include "Razor/Events/ApplicationEvent.h"
 #include "Razor/Events/KeyEvent.h"
 #include "Razor/LayerStack.h"
+#include "Razor/Core/Timestep.h"
 
 
 #include <memory>
@@ -27,6 +28,8 @@ namespace Razor
 		bool OnKeyPressed(KeyPressedEvent& e);
 
 	private:
+		Timestep m_Timestep;
+		float m_LastFrameTime = 0;
 		std::unique_ptr<Window> m_Window;
 		ImGuiLayer* m_ImGuiLayer;
 		bool m_Running = true;

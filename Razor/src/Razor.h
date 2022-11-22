@@ -5,6 +5,8 @@
 #include "Razor/Layer.h"
 #include "Razor/Log.h"
 
+#include "Razor/Core/Timestep.h"
+
 #include "Razor/Events/Input.h"
 #include "Razor/KeyCodes.h"
 #include "Razor/MouseButtonCodes.h"
