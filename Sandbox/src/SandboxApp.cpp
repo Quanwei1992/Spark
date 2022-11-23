@@ -19,7 +19,7 @@ public:
 			0.0f,0.5f,0.0f,0.0f,0.0f,1.0f,1.0f,
 		};
 
-		std::shared_ptr<Razor::VertexBuffer> m_VertexBuffer;
+		Razor::Ref<Razor::VertexBuffer> m_VertexBuffer;
 		m_VertexBuffer.reset(Razor::VertexBuffer::Create(vertices, sizeof(vertices)));
 
 		m_VertexBuffer->SetLayout({
@@ -31,7 +31,7 @@ public:
 
 		uint32_t indices[3] = { 0,1,2 };
 
-		std::shared_ptr<Razor::IndexBuffer> m_IndexBuffer;
+		Razor::Ref<Razor::IndexBuffer> m_IndexBuffer;
 		m_IndexBuffer.reset(Razor::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
 		m_VertexArray->SetIndexBuffer(m_IndexBuffer);
 
@@ -45,7 +45,7 @@ public:
 			 0.5f, 0.5f,0.0f,
 			-0.5f, 0.5f,0.0f
 		};
-		std::shared_ptr<Razor::VertexBuffer> squareVB;
+		Razor::Ref<Razor::VertexBuffer> squareVB;
 		squareVB.reset(Razor::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
 
 		squareVB->SetLayout({
@@ -56,7 +56,7 @@ public:
 
 
 		uint32_t squareIndices[] = { 0,1,2,2,3,0 };
-		std::shared_ptr<Razor::IndexBuffer> squareIB;
+		Razor::Ref<Razor::IndexBuffer> squareIB;
 		squareIB.reset(Razor::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
 		m_SquareVA->SetIndexBuffer(squareIB);
 
@@ -202,10 +202,10 @@ public:
 		ImGui::End();
 	}
 private:
-	std::shared_ptr<Razor::Shader> m_Shader;
-	std::shared_ptr<Razor::VertexArray> m_VertexArray;
-	std::shared_ptr<Razor::Shader> m_FlatShader;
-	std::shared_ptr<Razor::VertexArray> m_SquareVA;
+	Razor::Ref<Razor::Shader> m_Shader;
+	Razor::Ref<Razor::VertexArray> m_VertexArray;
+	Razor::Ref<Razor::Shader> m_FlatShader;
+	Razor::Ref<Razor::VertexArray> m_SquareVA;
 	Razor::OrthographicCamera m_Camera;
 	glm::vec3 m_CameraPosition = { 0,0,0 };
 	float m_CameraRotation = 0.0f;

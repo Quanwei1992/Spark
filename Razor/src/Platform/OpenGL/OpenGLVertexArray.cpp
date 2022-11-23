@@ -47,7 +47,7 @@ namespace Razor
 
 	}
 
-	void OpenGLVertexArray::AddVertexBuffer(std::shared_ptr<VertexBuffer> vertexBuffer) 
+	void OpenGLVertexArray::AddVertexBuffer(Ref<VertexBuffer> vertexBuffer)
 	{
 
 		RZ_CORE_ASSERT(vertexBuffer->GetLayout().GetElements().size(), "Vertex Buffer has no layout!");
@@ -72,19 +72,19 @@ namespace Razor
 		m_VertexBuffers.push_back(vertexBuffer);
 	}
 
-	void OpenGLVertexArray::SetIndexBuffer(std::shared_ptr<IndexBuffer> indexBuffer) 
+	void OpenGLVertexArray::SetIndexBuffer(Ref<IndexBuffer> indexBuffer) 
 	{
 		glBindVertexArray(m_RendererID);
 		indexBuffer->Bind();
 		m_IndexBuffers = indexBuffer;
 	}
 
-	const std::vector<std::shared_ptr<VertexBuffer>> OpenGLVertexArray::GetVertexBuffers() const
+	const std::vector<Ref<VertexBuffer>> OpenGLVertexArray::GetVertexBuffers() const
 	{
 		return m_VertexBuffers;
 	}
 
-	const std::shared_ptr<IndexBuffer> OpenGLVertexArray::GetIndexBuffer() const
+	const Ref<IndexBuffer> OpenGLVertexArray::GetIndexBuffer() const
 	{
 		return m_IndexBuffers;
 	}
