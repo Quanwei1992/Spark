@@ -2,6 +2,7 @@
 #include <imgui.h>
 
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 class ExampleLayer : public Razor::Layer
 {
@@ -91,7 +92,7 @@ public:
 		)";
 
 
-		m_Shader.reset(new Razor::Shader(vertexSrc, fragmentSrc));
+		m_Shader.reset(Razor::Shader::Create(vertexSrc, fragmentSrc));
 
 		vertexSrc = R"(
 			#version 460 core
@@ -114,15 +115,16 @@ public:
 
 			layout(location = 0) out vec4 color;
 			in vec3 v_Position;
+			uniform vec4 u_Color;
 
 			void main()
 			{
-				color = vec4(v_Position+0.5,1.0);
+				color = u_Color;
 			}
 		)";
 
 
-		m_BlueShader.reset(new Razor::Shader(vertexSrc, fragmentSrc));
+		m_FlatShader.reset(Razor::Shader::Create(vertexSrc, fragmentSrc));
 	}
 
 	void OnUpdate(Razor::Timestep ts) override
@@ -163,13 +165,15 @@ public:
 		Razor::Renderer::BeginScene(m_Camera);
 
 		static glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
+
 		for (int x = 0; x < 15; x++) 
 		{
 			for (int y = 0; y < 15; y++)
 			{
 				glm::vec3 pos(x * 0.11f, y * 0.11f, 0);
 				glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos) * scale;
-				Razor::Renderer::Submit(m_BlueShader, m_SquareVA, transform);
+				m_FlatShader->UploadUniformFloat4("u_Color", m_SquareColor);
+				Razor::Renderer::Submit(m_FlatShader, m_SquareVA, transform);
 			}
 		}
 
@@ -193,18 +197,21 @@ public:
 
 	virtual void OnImGuiRender()
 	{
-
+		ImGui::Begin("Setttings");
+		ImGui::ColorEdit4("SquareColor", glm::value_ptr(m_SquareColor));
+		ImGui::End();
 	}
 private:
 	std::shared_ptr<Razor::Shader> m_Shader;
 	std::shared_ptr<Razor::VertexArray> m_VertexArray;
-	std::shared_ptr<Razor::Shader> m_BlueShader;
+	std::shared_ptr<Razor::Shader> m_FlatShader;
 	std::shared_ptr<Razor::VertexArray> m_SquareVA;
 	Razor::OrthographicCamera m_Camera;
 	glm::vec3 m_CameraPosition = { 0,0,0 };
 	float m_CameraRotation = 0.0f;
 	float m_CameraMoveSpeed = 5.0f;
 	float m_CameraRotateSpeed = 180.0f;
+	glm::vec4 m_SquareColor = { 0.2f,0.3f,0.8f,1.0f };
 };
 
 
