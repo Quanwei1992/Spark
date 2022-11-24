@@ -162,6 +162,7 @@ public:
 		m_TextureShader.reset(Razor::Shader::Create(vertexSrc, fragmentSrc));
 
 		m_Texture = Razor::Texture2D::Create("assets/textures/Checkerboard.png");
+		m_LogoTexture = Razor::Texture2D::Create("assets/textures/Logo.png");
 	}
 
 	void OnUpdate(Razor::Timestep ts) override
@@ -214,9 +215,17 @@ public:
 			}
 		}
 		m_Texture->Bind(0);
+		m_LogoTexture->Bind(1);
+
 		m_TextureShader->Bind();
 		m_TextureShader->UploadUniformInt("u_Texture", 0);
 		Razor::Renderer::Submit(m_TextureShader, m_SquareVA, glm::scale(glm::mat4(1.0f),glm::vec3(1.5f)));
+
+		
+		m_TextureShader->Bind();
+		m_TextureShader->UploadUniformInt("u_Texture", 1);
+		Razor::Renderer::Submit(m_TextureShader, m_SquareVA,
+			glm::translate(glm::mat4(1.0f),glm::vec3(0.25f,-0.25f,0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 		// Triangle
 		//Razor::Renderer::Submit(m_Shader, m_VertexArray);
 
@@ -246,7 +255,7 @@ private:
 	Razor::Ref<Razor::VertexArray> m_VertexArray;
 	Razor::Ref<Razor::Shader> m_FlatShader,m_TextureShader;
 	Razor::Ref<Razor::VertexArray> m_SquareVA;
-	Razor::Ref<Razor::Texture2D> m_Texture;
+	Razor::Ref<Razor::Texture2D> m_Texture,m_LogoTexture;
 	Razor::OrthographicCamera m_Camera;
 	glm::vec3 m_CameraPosition = { 0,0,0 };
 	float m_CameraRotation = 0.0f;

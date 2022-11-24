@@ -7,6 +7,10 @@ namespace Razor
 	class RenderCommand
 	{
 	public:
+		static inline void Init()
+		{
+			s_RendererAPI->Init();
+		}
 		static inline void SetClearColor(const glm::vec4& color)
 		{
 			s_RendererAPI->SetClearColor(color);
