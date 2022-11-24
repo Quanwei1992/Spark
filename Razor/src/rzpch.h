@@ -1,6 +1,6 @@
 #pragma once
 
-
+#include "Razor/Core.h"
 #include "Razor/Log.h"
 
 #include <iostream>

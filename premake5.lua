@@ -15,6 +15,8 @@ InlcudeDir["GLFW"] = "Razor/vendor/GLFW/include"
 InlcudeDir["Glad"] = "Razor/vendor/Glad/include"
 InlcudeDir["ImGui"] = "Razor/vendor/imgui"
 InlcudeDir["glm"] = "Razor/vendor/glm"
+InlcudeDir["stb_image"] = "Razor/vendor/stb_image"
+InlcudeDir["spdlog"] = "Razor/vendor/spdlog/include"
 include "Razor/vendor/GLFW"
 include "Razor/vendor/Glad"
 include "Razor/vendor/imgui"
@@ -37,11 +39,14 @@ project "Razor"
         "%{prj.name}/vendor/glm/glm/**.hpp",
         "%{prj.name}/vendor/glm/glm/**.inl",
         "%{prj.name}/vendor/glm/util/glm.natvis",
+        "%{prj.name}/vendor/stb_image/**.h",
+        "%{prj.name}/vendor/stb_image/**.cpp",
     }
 
     includedirs
     {
-        "%{prj.name}/vendor/spdlog/include",
+        "%{InlcudeDir.stb_image}",
+        "%{InlcudeDir.spdlog}",
         "%{InlcudeDir.GLFW}",
         "%{InlcudeDir.Glad}",
         "%{InlcudeDir.ImGui}",
@@ -103,6 +108,10 @@ project "Sandbox"
     links
     {
         "Razor"
+    }
+    postbuildcommands
+    { 
+        "{COPYDIR} %{_MAIN_SCRIPT_DIR}/%{prj.name}/assets  ./assets"
     }
 
     filter "system:windows"

@@ -19,6 +19,7 @@
 
 #include "Razor/Renderer/Shader.h"
 #include "Razor/Renderer/Buffer.h"
+#include "Razor/Renderer/Texture.h"
 #include "Razor/Renderer/VertexArray.h"
 
 #include "Razor/Renderer/OrthographicCamera.h"
