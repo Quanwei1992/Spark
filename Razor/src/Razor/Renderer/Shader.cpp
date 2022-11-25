@@ -16,4 +16,14 @@ namespace Razor
 		RZ_CORE_ASSERT(false, "Unknown RendererAPI!");
 		return nullptr;
 	}
+	Shader* Shader::Create(const std::string& filePath)
+	{
+		switch (Renderer::GetAPI())
+		{
+		case RendererAPI::API::None: RZ_CORE_ASSERT(false, "RendererAPI::None is current not support!"); return nullptr;
+		case RendererAPI::API::OpenGL: return new OpenGLShader(filePath);
+		}
+		RZ_CORE_ASSERT(false, "Unknown RendererAPI!");
+		return nullptr;
+	}
 }
