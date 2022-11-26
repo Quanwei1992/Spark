@@ -13,6 +13,8 @@
 
 #include "Razor/ImGui/ImGuiLayer.h"
 
+#include "Razor/OrthographicCameraController.h"
+
 // --- Renderer -------------------
 #include "Razor/Renderer/Renderer.h"
 #include "Razor/Renderer/RenderCommand.h"
