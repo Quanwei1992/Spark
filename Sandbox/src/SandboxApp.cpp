@@ -93,7 +93,7 @@ public:
 		)";
 
 
-		m_Shader.reset(Razor::Shader::Create(vertexSrc, fragmentSrc));
+		m_Shader = Razor::Shader::Create("TriangleShader", vertexSrc, fragmentSrc);
 
 		// Flat Shader 
 		// -------------------------------------------------------------
@@ -126,9 +126,10 @@ public:
 				color = u_Color;
 			}
 		)";
-		m_FlatShader.reset(Razor::Shader::Create(vertexSrc, fragmentSrc));
+		m_FlatShader = Razor::Shader::Create("FlastShader", vertexSrc, fragmentSrc);
 
-		m_TextureShader.reset(Razor::Shader::Create("assets/shaders/Texture.glsl"));
+		m_ShaderLibrary.Load("assets/shaders/Texture.glsl");
+
 		m_Texture = Razor::Texture2D::Create("assets/textures/Checkerboard.png");
 		m_LogoTexture = Razor::Texture2D::Create("assets/textures/Logo.png");
 	}
@@ -185,14 +186,16 @@ public:
 		m_Texture->Bind(0);
 		m_LogoTexture->Bind(1);
 
-		m_TextureShader->Bind();
-		m_TextureShader->UploadUniformInt("u_Texture", 0);
-		Razor::Renderer::Submit(m_TextureShader, m_SquareVA, glm::scale(glm::mat4(1.0f),glm::vec3(1.5f)));
+		auto textureShader = m_ShaderLibrary.Get("Texture");
+
+		textureShader->Bind();
+		textureShader->UploadUniformInt("u_Texture", 0);
+		Razor::Renderer::Submit(textureShader, m_SquareVA, glm::scale(glm::mat4(1.0f),glm::vec3(1.5f)));
 
 		
-		m_TextureShader->Bind();
-		m_TextureShader->UploadUniformInt("u_Texture", 1);
-		Razor::Renderer::Submit(m_TextureShader, m_SquareVA,
+		textureShader->Bind();
+		textureShader->UploadUniformInt("u_Texture", 1);
+		Razor::Renderer::Submit(textureShader, m_SquareVA,
 			glm::translate(glm::mat4(1.0f),glm::vec3(0.25f,-0.25f,0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 		// Triangle
 		//Razor::Renderer::Submit(m_Shader, m_VertexArray);
@@ -219,9 +222,10 @@ public:
 		ImGui::End();
 	}
 private:
+	Razor::ShaderLibrary m_ShaderLibrary;
 	Razor::Ref<Razor::Shader> m_Shader;
 	Razor::Ref<Razor::VertexArray> m_VertexArray;
-	Razor::Ref<Razor::Shader> m_FlatShader,m_TextureShader;
+	Razor::Ref<Razor::Shader> m_FlatShader;
 	Razor::Ref<Razor::VertexArray> m_SquareVA;
 	Razor::Ref<Razor::Texture2D> m_Texture,m_LogoTexture;
 	Razor::OrthographicCamera m_Camera;

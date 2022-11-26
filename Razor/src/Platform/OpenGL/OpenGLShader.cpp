@@ -19,7 +19,7 @@ namespace Razor
 	std::string OpenGLShader::ReadFile(const std::string filePath)
 	{
 		std::string result;
-		std::ifstream is(filePath, std::ios::in, std::ios::binary);
+		std::ifstream is(filePath, std::ios::in | std::ios::binary);
 		if (is)
 		{
 			is.seekg(0, is.end);
@@ -56,8 +56,10 @@ namespace Razor
 	}
 	void OpenGLShader::Compile(const std::unordered_map<GLenum, std::string>& shaderSouces)
 	{
-		std::vector<GLuint> compiledShaders;
-		
+		RZ_CORE_ASSERT(shaderSouces.size() == 2, "We only support 2 shaders for now");
+
+		std::array<GLenum, 2> compiledShaders;
+		int glShaderIDIndex = 0;
 		for (auto& kv : shaderSouces)
 		{
 			GLenum type = kv.first;
@@ -79,16 +81,15 @@ namespace Razor
 
 				glDeleteShader(shader);
 
-				for (GLuint compiledShader : compiledShaders)
+				for (int index = 0; index < glShaderIDIndex; index++)
 				{
-					glDeleteShader(compiledShader);
+					glDeleteShader(compiledShaders[index]);
 				}
-				compiledShaders.clear();
 				RZ_CORE_ERROR("{0}", infoLog.data());
 				RZ_CORE_ASSERT(false, "Shader compilation failure!");
 				return;
 			}
-			compiledShaders.emplace_back(shader);
+			compiledShaders[glShaderIDIndex++] = shader;
 		}
 
 		GLuint program = glCreateProgram();
@@ -121,8 +122,6 @@ namespace Razor
 			{
 				glDeleteShader(compiledShader);
 			}
-			compiledShaders.clear();
-
 			RZ_CORE_ERROR("{0}", infoLog.data());
 			RZ_CORE_ASSERT(false, "Shader link failure!");
 			return;
@@ -141,10 +140,17 @@ namespace Razor
 		std::string shaderSource = ReadFile(filePath);
 		auto sources = PreProcess(shaderSource);
 		Compile(sources);
+
+		auto lastSlash = filePath.find_last_of("/\\");
+		lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
+		auto lastDot = filePath.rfind('.');
+		auto count = lastDot == std::string::npos ? filePath.size()  - lastSlash : lastDot - lastSlash;
+		m_Name = filePath.substr(lastSlash, count);
 	}
 
-	OpenGLShader::OpenGLShader(const std::string& vertexSrc, const std::string& fragmentSrc)
-		:m_RendererID(0)
+	OpenGLShader::OpenGLShader(const std::string& name,const std::string& vertexSrc, const std::string& fragmentSrc)
+		:m_Name(name)
+		,m_RendererID(0)
 	{
 		std::unordered_map<GLenum, std::string> sources;
 		sources[GL_VERTEX_SHADER] = vertexSrc;
