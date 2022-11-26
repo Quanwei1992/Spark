@@ -1,4 +1,6 @@
 #include "Razor.h"
+
+
 #include <imgui.h>
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -9,7 +11,7 @@ class ExampleLayer : public Razor::Layer
 public:
 	ExampleLayer()
 		:Layer("Example")
-		,m_Camera(-1.6f, 1.6f, -0.9f, 0.9f)
+		,m_CameraController(1920.0f / 1080.0f,true)
 	{
 		m_VertexArray.reset(Razor::VertexArray::Create());
 
@@ -136,40 +138,11 @@ public:
 
 	void OnUpdate(Razor::Timestep ts) override
 	{
-		RZ_TRACE("Delta time: {0}s ({1}ms)", ts.GetSeconds(), ts.GetMilliseconds());
-
-		if (Razor::Input::IsKeyPressed(RZ_KEY_LEFT))
-		{
-			m_CameraPosition.x -= m_CameraMoveSpeed * ts;
-		}
-		else if (Razor::Input::IsKeyPressed(RZ_KEY_RIGHT))
-		{
-			m_CameraPosition.x += m_CameraMoveSpeed * ts;
-		}
-		else if (Razor::Input::IsKeyPressed(RZ_KEY_DOWN))
-		{
-			m_CameraPosition.y -= m_CameraMoveSpeed * ts;
-		}
-		else if (Razor::Input::IsKeyPressed(RZ_KEY_UP))
-		{
-			m_CameraPosition.y += m_CameraMoveSpeed * ts;
-		}
-		else if (Razor::Input::IsKeyPressed(RZ_KEY_A))
-		{
-			m_CameraRotation += m_CameraRotateSpeed * ts;
-		}
-		else if (Razor::Input::IsKeyPressed(RZ_KEY_D))
-		{
-			m_CameraRotation -= m_CameraRotateSpeed * ts;
-		}
-
+		m_CameraController.OnUpdate(ts);
 		Razor::RenderCommand::SetClearColor(glm::vec4(0.1f, 0.1f, 0.1f, 1));
 		Razor::RenderCommand::Clear();
 
-		m_Camera.SetPosition(m_CameraPosition);
-		m_Camera.SetRotation(m_CameraRotation);
-
-		Razor::Renderer::BeginScene(m_Camera);
+		Razor::Renderer::BeginScene(m_CameraController.GetCamera());
 
 		static glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 
@@ -205,15 +178,9 @@ public:
 
 	void OnEvent(Razor::Event& event) override
 	{
-		Razor::EventDispatcher dispatcher(event);
-		dispatcher.Dispatch<Razor::KeyPressedEvent>(RZ_BIND_EVENT_FN(ExampleLayer::OnKeyPressedEvent));
+		m_CameraController.OnEvent(event);
 	}
 
-
-	bool OnKeyPressedEvent(Razor::KeyPressedEvent e)
-	{
-		return false;
-	}
 
 	virtual void OnImGuiRender()
 	{
@@ -228,11 +195,7 @@ private:
 	Razor::Ref<Razor::Shader> m_FlatShader;
 	Razor::Ref<Razor::VertexArray> m_SquareVA;
 	Razor::Ref<Razor::Texture2D> m_Texture,m_LogoTexture;
-	Razor::OrthographicCamera m_Camera;
-	glm::vec3 m_CameraPosition = { 0,0,0 };
-	float m_CameraRotation = 0.0f;
-	float m_CameraMoveSpeed = 5.0f;
-	float m_CameraRotateSpeed = 180.0f;
+	Razor::OrthographicCameraController m_CameraController;
 	glm::vec4 m_SquareColor = { 0.2f,0.3f,0.8f,1.0f };
 };
 
