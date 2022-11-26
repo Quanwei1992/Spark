@@ -24,12 +24,12 @@ namespace Razor
 		inline Window& GetWindow()  { return *m_Window; }
 		static inline Application& Get() { return *s_Instance; }
 		void OnEvent(Event& e);
+	private:
 		bool OnWindowClosed(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);
-		bool OnKeyPressed(KeyPressedEvent& e);
-
 	private:
 		Timestep m_Timestep;
+		bool m_Minimized = false;
 		float m_LastFrameTime = 0;
 		std::unique_ptr<Window> m_Window;
 		ImGuiLayer* m_ImGuiLayer;

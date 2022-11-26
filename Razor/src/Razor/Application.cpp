@@ -7,7 +7,6 @@
 #include "Razor/Renderer/Renderer.h"
 
 #include <GLFW/glfw3.h>
-#include <glad/glad.h>
 
 namespace Razor
 {
@@ -29,7 +28,6 @@ namespace Razor
 	{
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<WindowCloseEvent>(RZ_BIND_EVENT_FN(Application::OnWindowClosed));
-		dispatcher.Dispatch<KeyPressedEvent>(RZ_BIND_EVENT_FN(Application::OnKeyPressed));
 		dispatcher.Dispatch<WindowResizeEvent>(RZ_BIND_EVENT_FN(Application::OnWindowResize));
 
 		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin();)
@@ -47,15 +45,15 @@ namespace Razor
 
 	bool Application::OnWindowResize(WindowResizeEvent& e)
 	{
-		glViewport(0, 0, e.GetWidth(), e.GetHeight());
+		if (e.GetWidth() == 0 || e.GetHeight() == 0)
+		{
+			m_Minimized = true;
+			return false;
+		}
+		m_Minimized = false;
+		Renderer::OnWindowResized(e.GetWidth(), e.GetHeight());
 		return false;
 	}
-
-	bool Application::OnKeyPressed(KeyPressedEvent& e)
-	{
-		return false;
-	}
-
 
 	Application::~Application()
 	{
@@ -69,9 +67,12 @@ namespace Razor
 			Timestep timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
-			for (Layer* layer : m_LayerStack)
+			if (!m_Minimized)
 			{
-				layer->OnUpdate(timestep);
+				for (Layer* layer : m_LayerStack)
+				{
+					layer->OnUpdate(timestep);
+				}
 			}
 			m_ImGuiLayer->Begin();
 			for (Layer* layer : m_LayerStack)

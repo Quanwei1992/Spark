@@ -1,8 +1,6 @@
 #include "Razor.h"
 
-
 #include <imgui.h>
-
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -176,11 +174,10 @@ public:
 		Razor::Renderer::EndScene();
 	}
 
-	void OnEvent(Razor::Event& event) override
+	void OnEvent(Razor::Event& e) override
 	{
-		m_CameraController.OnEvent(event);
+		m_CameraController.OnEvent(e);
 	}
-
 
 	virtual void OnImGuiRender()
 	{

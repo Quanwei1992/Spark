@@ -8,6 +8,10 @@
 #include "Razor/Core/Timestep.h"
 
 #include "Razor/Events/Input.h"
+#include "Razor/Events/ApplicationEvent.h"
+#include "Razor/Events/KeyEvent.h"
+#include "Razor/Events/MouseEvent.h"
+
 #include "Razor/KeyCodes.h"
 #include "Razor/MouseButtonCodes.h"
 
