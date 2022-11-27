@@ -13,11 +13,5 @@ public:
 	virtual void OnEvent(Razor::Event& event)override;
 private:
 	Razor::OrthographicCameraController m_CameraController;
-
-	// Temp
-	Razor::Ref<Razor::VertexArray> m_SquareVA;
-	Razor::Ref<Razor::Shader> m_FlatColorShader;
-
 	glm::vec4 m_SquareColor = { 0.2f,0.3f,0.8f,1.0f };
-
 };
