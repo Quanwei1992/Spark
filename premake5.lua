@@ -26,6 +26,7 @@ project "Razor"
     kind "StaticLib"
     language "C++"
     staticruntime "on"
+    flags { "FatalCompileWarnings" }
 
     targetdir("build/bin/" .. outputdir .. "/%{prj.name}")
     objdir("build/intermediate/" .. outputdir .. "/%{prj.name}")
@@ -87,7 +88,7 @@ project "Sandbox"
     kind "ConsoleApp"
     language "C++"
     staticruntime "on"
-    
+    flags { "FatalCompileWarnings" }
     targetdir("build/bin/" .. outputdir .. "/%{prj.name}")
     objdir("build/intermediate/" .. outputdir .. "/%{prj.name}")
     
