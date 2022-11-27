@@ -152,7 +152,7 @@ public:
 			{
 				glm::vec3 pos(x * 0.11f, y * 0.11f, 0);
 				glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos) * scale;
-				m_FlatShader->UploadUniformFloat4("u_Color", m_SquareColor);
+				m_FlatShader->SetFloat4("u_Color", m_SquareColor);
 				Razor::Renderer::Submit(m_FlatShader, m_SquareVA, transform);
 			}
 		}
@@ -162,12 +162,12 @@ public:
 		auto textureShader = m_ShaderLibrary.Get("Texture");
 
 		textureShader->Bind();
-		textureShader->UploadUniformInt("u_Texture", 0);
+		textureShader->SetInt("u_Texture", 0);
 		Razor::Renderer::Submit(textureShader, m_SquareVA, glm::scale(glm::mat4(1.0f),glm::vec3(1.5f)));
 
 		
 		textureShader->Bind();
-		textureShader->UploadUniformInt("u_Texture", 1);
+		textureShader->SetInt("u_Texture", 1);
 		Razor::Renderer::Submit(textureShader, m_SquareVA,
 			glm::translate(glm::mat4(1.0f),glm::vec3(0.25f,-0.25f,0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 		// Triangle
