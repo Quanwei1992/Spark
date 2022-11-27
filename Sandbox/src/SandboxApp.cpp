@@ -1,5 +1,7 @@
-#include "Razor.h"
+#include "Sandbox2D.h"
 
+#include <Razor.h>
+#include <Razor/Core/EntryPoint.h>
 #include <imgui.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -11,7 +13,7 @@ public:
 		:Layer("Example")
 		,m_CameraController(1920.0f / 1080.0f,true)
 	{
-		m_VertexArray.reset(Razor::VertexArray::Create());
+		m_VertexArray = Razor::VertexArray::Create();
 
 		float vertices[3 * 7] = {
 			-0.5f,-0.5f,0.0f,1.0f,0.0f,0.0f,1.0f,
@@ -37,7 +39,7 @@ public:
 
 		// Square 
 
-		m_SquareVA.reset(Razor::VertexArray::Create());
+		m_SquareVA = Razor::VertexArray::Create();
 
 		float squareVertices[5 * 4] = {
 			-0.5f,-0.5f,0.0f,0,0,
@@ -202,7 +204,8 @@ class Sandbox : public Razor::Application
 public:
 	Sandbox()
 	{
-		PushLayer(new ExampleLayer());
+		//PushLayer(new ExampleLayer());
+		PushLayer(new SandBox2D());
 	}
 };
 
