@@ -2,7 +2,7 @@
 
 #include "rzpch.h"
 
-#include "Razor/Core.h"
+#include "Razor/Core/Core.h"
 #include "Razor/Events/Event.h"
 namespace Razor
 {

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Razor/Core.h"
-#include "Razor/Log.h"
+#include "Razor/Core/Core.h"
+#include "Razor/Core/Log.h"
 
 #include <iostream>
 #include <memory>

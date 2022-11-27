@@ -46,9 +46,7 @@ project "GLFW"
 
 
     filter "configurations:Debug"
-        defines "Debug"
         symbols "on"
 
     filter "configurations:Release"
-        defines "Release"
         optimize "on" 

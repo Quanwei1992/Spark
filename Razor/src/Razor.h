@@ -1,23 +1,20 @@
 #pragma once
 
-
-#include "Razor/Application.h"
-#include "Razor/Layer.h"
-#include "Razor/Log.h"
-
+#include "Razor/Core/Log.h"
+#include "Razor/Core/Layer.h"
 #include "Razor/Core/Timestep.h"
+#include "Razor/Core/KeyCodes.h"
+#include "Razor/Core/Application.h"
+#include "Razor/Core/MouseButtonCodes.h"
 
 #include "Razor/Events/Input.h"
 #include "Razor/Events/ApplicationEvent.h"
 #include "Razor/Events/KeyEvent.h"
 #include "Razor/Events/MouseEvent.h"
 
-#include "Razor/KeyCodes.h"
-#include "Razor/MouseButtonCodes.h"
-
 #include "Razor/ImGui/ImGuiLayer.h"
 
-#include "Razor/OrthographicCameraController.h"
+#include "Razor/Renderer/OrthographicCameraController.h"
 
 // --- Renderer -------------------
 #include "Razor/Renderer/Renderer.h"
@@ -32,6 +29,6 @@
 // ---------------------------------
 
 // --- Entry Point -----------------
-#include "Razor/EntryPoint.h"
+#include "Razor/Core/EntryPoint.h"
 
 // ---------------------------------
