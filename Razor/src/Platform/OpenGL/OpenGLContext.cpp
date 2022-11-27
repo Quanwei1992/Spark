@@ -19,9 +19,9 @@ namespace Razor
 		RZ_CORE_ASSERT(status, "Failed to initialize Glad!");
 
 		RZ_INFO("OpenGL Info:");
-		RZ_INFO(" Vendor: {0}", glGetString(GL_VENDOR));
-		RZ_INFO(" Renderer: {0}", glGetString(GL_RENDERER));
-		RZ_INFO(" Version: {0}", glGetString(GL_VERSION));
+		RZ_INFO(" Vendor: {0}", (const char*)glGetString(GL_VENDOR));
+		RZ_INFO(" Renderer: {0}", (const char*)glGetString(GL_RENDERER));
+		RZ_INFO(" Version: {0}", (const char*)glGetString(GL_VERSION));
 
 	}
 	void OpenGLContext::SwapBuffers()

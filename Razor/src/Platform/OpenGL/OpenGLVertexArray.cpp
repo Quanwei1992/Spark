@@ -64,7 +64,7 @@ namespace Razor
 				ShaderDateTypeToOpenGLBaseType(element.Type),
 				element.Normalized ? GL_TRUE : GL_FALSE,
 				vertexBuffer->GetLayout().GetStride(),
-				(const void*)element.Offset);
+				(const uint32_t*)(0) + element.Offset);
 			index++;
 		}
 
