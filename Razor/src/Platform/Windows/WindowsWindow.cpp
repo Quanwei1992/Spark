@@ -1,6 +1,6 @@
 #include "rzpch.h"
 #include "WindowsWindow.h"
-#include "Razor/Log.h"
+#include "Razor/Core/Log.h"
 
 #include "Razor/Events/ApplicationEvent.h"
 #include "Razor/Events/KeyEvent.h"

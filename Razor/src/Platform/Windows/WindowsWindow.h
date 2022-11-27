@@ -1,5 +1,5 @@
-#include "Razor/Core.h"
-#include "Razor/Window.h"
+#include "Razor/Core/Core.h"
+#include "Razor/Core/Window.h"
 
 struct GLFWwindow;
 namespace Razor

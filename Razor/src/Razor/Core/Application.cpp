@@ -1,8 +1,8 @@
 #include "rzpch.h"
 #include "Application.h"
-#include "Razor/Log.h"
+#include "Razor/Core/Log.h"
 #include "Razor/Events/Input.h"
-#include "Razor/KeyCodes.h"
+#include "Razor/Core/KeyCodes.h"
 #include "Razor/ImGui/ImGuiLayer.h"
 #include "Razor/Renderer/Renderer.h"
 

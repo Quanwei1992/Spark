@@ -2,7 +2,7 @@
 #include "OrthographicCameraController.h"
 
 #include "Razor/Events/Input.h"
-#include "Razor/KeyCodes.h"
+#include "Razor/Core/KeyCodes.h"
 
 namespace Razor
 {

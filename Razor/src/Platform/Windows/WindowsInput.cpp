@@ -1,7 +1,7 @@
 #include "rzpch.h"
 #include "WindowsInput.h"
 
-#include "Razor/Application.h"
+#include "Razor/Core/Application.h"
 
 #include <GLFW/glfw3.h>
 

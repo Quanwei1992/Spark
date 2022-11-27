@@ -1,10 +1,10 @@
 #pragma once
-#include "Razor/Core.h"
-#include "Razor/Window.h"
+#include "Razor/Core/Core.h"
+#include "Razor/Core/Window.h"
 #include "Razor/Events/Event.h"
 #include "Razor/Events/ApplicationEvent.h"
 #include "Razor/Events/KeyEvent.h"
-#include "Razor/LayerStack.h"
+#include "Razor/Core/LayerStack.h"
 #include "Razor/Core/Timestep.h"
 
 

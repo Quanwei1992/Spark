@@ -1,6 +1,6 @@
 #pragma once
 #include "rzpch.h"
-#include "Razor/Core.h"
+#include "Razor/Core/Core.h"
 
 namespace Razor
 {
