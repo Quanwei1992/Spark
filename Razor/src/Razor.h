@@ -28,7 +28,3 @@
 #include "Razor/Renderer/OrthographicCamera.h"
 // ---------------------------------
 
-// --- Entry Point -----------------
-#include "Razor/Core/EntryPoint.h"
-
-// ---------------------------------
