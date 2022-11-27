@@ -3,6 +3,7 @@
 #include "Renderer.h"
 #include "RenderCommand.h"
 #include "Shader.h"
+#include "Renderer2D.h"
 namespace Razor
 {
 	Renderer::SceneData* Renderer::m_SceneData = new Renderer::SceneData();
@@ -10,6 +11,7 @@ namespace Razor
 	void Renderer::Init()
 	{
 		RenderCommand::Init();
+		Renderer2D::Init();
 	}
 
 	void Renderer::OnWindowResized(uint32_t width, uint32_t height)

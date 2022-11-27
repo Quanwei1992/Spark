@@ -51,13 +51,17 @@ void SandBox2D::OnUpdate(Razor::Timestep ts)
 	Razor::RenderCommand::SetClearColor(glm::vec4(0.1f, 0.1f, 0.1f, 1));
 	Razor::RenderCommand::Clear();
 
-	Razor::Renderer::BeginScene(m_CameraController.GetCamera());
-
-	m_FlatColorShader->Bind();
-	m_FlatColorShader->UploadUniformFloat4("u_Color", m_SquareColor);
-	Razor::Renderer::Submit(m_FlatColorShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
-
+	Razor::Renderer2D::BeginScene(m_CameraController.GetCamera());
+	{
+		Razor::Renderer2D::DrawQuad({ 0,0 }, { 1,1 }, {0.8f,0.2f,0.3f,1.0f});
+	}
 	Razor::Renderer::EndScene();
+
+	//m_FlatColorShader->Bind();
+//m_FlatColorShader->UploadUniformFloat4("u_Color", m_SquareColor);
+
+//Razor::Renderer::Submit(m_FlatColorShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+
 }
 
 void SandBox2D::OnImGuiRender()

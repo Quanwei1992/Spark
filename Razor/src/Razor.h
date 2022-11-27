@@ -25,6 +25,8 @@
 #include "Razor/Renderer/Texture.h"
 #include "Razor/Renderer/VertexArray.h"
 
+#include "Razor/Renderer/Renderer2D.h"
+
 #include "Razor/Renderer/OrthographicCamera.h"
 // ---------------------------------
 
