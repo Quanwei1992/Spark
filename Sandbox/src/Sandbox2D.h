@@ -13,5 +13,5 @@ public:
 	virtual void OnEvent(Razor::Event& event)override;
 private:
 	Razor::OrthographicCameraController m_CameraController;
-	glm::vec4 m_SquareColor = { 0.2f,0.3f,0.8f,1.0f };
+	Razor::Ref<Razor::Texture2D> m_CheckerboradTexture;
 };
