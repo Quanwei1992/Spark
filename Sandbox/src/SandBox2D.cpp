@@ -15,7 +15,7 @@ SandBox2D::~SandBox2D()
 
 void SandBox2D::OnAttach()
 {
-
+	m_CheckerboradTexture = Razor::Texture2D::Create("assets/textures/Checkerboard.png");
 }
 
 void SandBox2D::OnDetach()
@@ -33,15 +33,14 @@ void SandBox2D::OnUpdate(Razor::Timestep ts)
 	{
 		Razor::Renderer2D::DrawQuad({ -1.0f,0 }, { 0.8f,0.8f }, { 0.8f,0.2f,0.3f,1.0f });
 		Razor::Renderer2D::DrawQuad({ 0.5f,-0.5f }, { 0.5f,1 }, {0.2f,0.3f,0.8f,1.0f});
+		Razor::Renderer2D::DrawQuad({ 0,0,-0.1f }, { 10,10 }, m_CheckerboradTexture);
 	}
 	Razor::Renderer::EndScene();
 }
 
 void SandBox2D::OnImGuiRender()
 {
-	ImGui::Begin("Setttings");
-	ImGui::ColorEdit4("SquareColor", glm::value_ptr(m_SquareColor));
-	ImGui::End();
+
 }
 
 void SandBox2D::OnEvent(Razor::Event& event)

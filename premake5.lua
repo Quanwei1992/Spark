@@ -91,11 +91,12 @@ project "Sandbox"
     flags { "FatalCompileWarnings" }
     targetdir("build/bin/" .. outputdir .. "/%{prj.name}")
     objdir("build/intermediate/" .. outputdir .. "/%{prj.name}")
-    
+   
     files
     {
         "%{prj.name}/src/**.h",
         "%{prj.name}/src/**.cpp",
+        "%{prj.name}/assets/**.*",
     }
 
     includedirs
