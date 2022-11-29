@@ -11,7 +11,7 @@ namespace Razor
 		switch (Renderer::GetAPI())
 		{
 		case RendererAPI::API::None: RZ_CORE_ASSERT(false, "RendererAPI::None is current not support!"); return nullptr;
-		case RendererAPI::API::OpenGL: return std::make_shared<OpenGLVertexArray>();
+		case RendererAPI::API::OpenGL: return CreateRef<OpenGLVertexArray>();
 		}
 		RZ_CORE_ASSERT(false, "Unknown RendererAPI!");
 		return nullptr;
