@@ -11,7 +11,7 @@ namespace Razor
 		switch (Renderer::GetAPI())
 		{
 		case RendererAPI::API::None: RZ_CORE_ASSERT(false, "RendererAPI::None is current not support!"); return nullptr;
-		case RendererAPI::API::OpenGL: return std::make_shared<OpenGLShader>(name,vertexSrc,fragmentSrc);
+		case RendererAPI::API::OpenGL: return CreateRef<OpenGLShader>(name,vertexSrc,fragmentSrc);
 		}
 		RZ_CORE_ASSERT(false, "Unknown RendererAPI!");
 		return nullptr;
@@ -21,7 +21,7 @@ namespace Razor
 		switch (Renderer::GetAPI())
 		{
 		case RendererAPI::API::None: RZ_CORE_ASSERT(false, "RendererAPI::None is current not support!"); return nullptr;
-		case RendererAPI::API::OpenGL: return std::make_shared<OpenGLShader>(filePath);
+		case RendererAPI::API::OpenGL: return CreateRef<OpenGLShader>(filePath);
 		}
 		RZ_CORE_ASSERT(false, "Unknown RendererAPI!");
 		return nullptr;
