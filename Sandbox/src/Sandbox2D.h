@@ -14,4 +14,5 @@ public:
 private:
 	Razor::OrthographicCameraController m_CameraController;
 	Razor::Ref<Razor::Texture2D> m_CheckerboradTexture;
+	float m_blueQuadRotation = 0.0f;
 };
