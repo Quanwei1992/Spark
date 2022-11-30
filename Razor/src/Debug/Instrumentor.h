@@ -201,7 +201,7 @@ namespace Razor {
 		}
 	}
 }
-#define RZ_PROFILE 1
+#define RZ_PROFILE 0
 #if RZ_PROFILE
 // Resolve which function signature macro will be used. Note that this only
 // is resolved when the (pre)compiler starts, so the syntax highlighting
