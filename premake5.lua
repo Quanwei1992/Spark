@@ -27,7 +27,7 @@ project "Razor"
     language "C++"
     staticruntime "on"
     flags { "FatalCompileWarnings" }
-
+    cppdialect "C++17"
     targetdir("build/bin/" .. outputdir .. "/%{prj.name}")
     objdir("build/intermediate/" .. outputdir .. "/%{prj.name}")
     
@@ -63,9 +63,7 @@ project "Razor"
         "opengl32.lib"
     }
 
-    filter "system:windows"
-
-        cppdialect "C++17"
+    filter "system:windows"    
         systemversion "latest"
         defines
         {
@@ -87,6 +85,7 @@ project "Sandbox"
     location "build/Sandbox"
     kind "ConsoleApp"
     language "C++"
+    cppdialect "C++17"
     staticruntime "on"
     flags { "FatalCompileWarnings" }
     targetdir("build/bin/" .. outputdir .. "/%{prj.name}")
