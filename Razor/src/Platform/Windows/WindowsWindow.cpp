@@ -25,17 +25,20 @@ namespace Razor
 
 	void WindowsWindow::OnUpdate()
 	{
+		RZ_PROFILE_FUNCTION();
 		glfwPollEvents();
 		m_Context->SwapBuffers();
 	}
 
 	WindowsWindow::WindowsWindow(const WindowProps& props)
 	{
+		RZ_PROFILE_FUNCTION();
 		Init(props);
 	}
 
 	WindowsWindow::~WindowsWindow()
 	{
+		RZ_PROFILE_FUNCTION();
 		Shutdown();
 	}
 
@@ -46,6 +49,7 @@ namespace Razor
 
 	void WindowsWindow::SetVsync(bool enabled)
 	{
+		RZ_PROFILE_FUNCTION();
 		glfwSwapInterval(enabled ? 1 : 0);
 		m_Data.VSync = enabled;
 	}
@@ -57,6 +61,7 @@ namespace Razor
 
 	void WindowsWindow::Init(const WindowProps& props)
 	{
+		RZ_PROFILE_FUNCTION();
 		m_Data.Title = props.Title;
 		m_Data.Width = props.Width;
 		m_Data.Height = props.Height;
@@ -65,17 +70,21 @@ namespace Razor
 
 		if (!s_GLFWInitialized)
 		{
+			RZ_PROFILE_SCOPE("glfwInit");
 			int success = glfwInit();
 			RZ_CORE_ASSERT(success, "Could not initialize GLFW!");
 			s_GLFWInitialized = true;
 			glfwSetErrorCallback(GLFWErrorCallback);
 		}
+		{
+			RZ_PROFILE_SCOPE("glfwCreateWindow");
+			glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+			glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+			glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+			m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
+		}
 
-		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
 		m_Context = new OpenGLContext(m_Window);
 		m_Context->Init();
 
@@ -164,6 +173,7 @@ namespace Razor
 
 	void WindowsWindow::Shutdown()
 	{
+		RZ_PROFILE_FUNCTION();
 		glfwDestroyWindow(m_Window);
 	}
 }

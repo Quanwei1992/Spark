@@ -24,7 +24,7 @@ namespace Razor
 
 	void ImGuiLayer::OnAttach()
 	{
-		
+		RZ_PROFILE_FUNCTION();
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -42,18 +42,21 @@ namespace Razor
 	}
 	void ImGuiLayer::OnDetach()
 	{
+		RZ_PROFILE_FUNCTION();
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
 	}
 	void ImGuiLayer::Begin()
 	{
+		RZ_PROFILE_FUNCTION();
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 	}
 	void ImGuiLayer::End()
 	{
+		RZ_PROFILE_FUNCTION();
 		ImGuiIO& io = ImGui::GetIO();
 		Application& app = Application::Get();
 		io.DisplaySize = ImVec2((float)app.GetWindow().GetWidth(), (float)app.GetWindow().GetHeight());

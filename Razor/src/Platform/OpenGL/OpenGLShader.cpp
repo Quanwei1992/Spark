@@ -18,6 +18,7 @@ namespace Razor
 
 	std::string OpenGLShader::ReadFile(const std::string filePath)
 	{
+		RZ_PROFILE_FUNCTION();
 		std::string result;
 		std::ifstream is(filePath, std::ios::in | std::ios::binary);
 		if (is)
@@ -35,6 +36,7 @@ namespace Razor
 	}
 	std::unordered_map<GLenum, std::string> OpenGLShader::PreProcess(const std::string source)
 	{
+		RZ_PROFILE_FUNCTION();
 		std::unordered_map<GLenum, std::string> shaderSources;
 		const char* typeToken = "#type";
 		size_t typeTokenLength = strlen(typeToken);
@@ -56,6 +58,7 @@ namespace Razor
 	}
 	void OpenGLShader::Compile(const std::unordered_map<GLenum, std::string>& shaderSouces)
 	{
+		RZ_PROFILE_FUNCTION();
 		RZ_CORE_ASSERT(shaderSouces.size() == 2, "We only support 2 shaders for now");
 
 		std::array<GLenum, 2> compiledShaders;
@@ -137,6 +140,7 @@ namespace Razor
 
 	OpenGLShader::OpenGLShader(const std::string& filePath)
 	{
+		RZ_PROFILE_FUNCTION();
 		std::string shaderSource = ReadFile(filePath);
 		auto sources = PreProcess(shaderSource);
 		Compile(sources);
@@ -152,6 +156,7 @@ namespace Razor
 		:m_Name(name)
 		,m_RendererID(0)
 	{
+		RZ_PROFILE_FUNCTION();
 		std::unordered_map<GLenum, std::string> sources;
 		sources[GL_VERTEX_SHADER] = vertexSrc;
 		sources[GL_FRAGMENT_SHADER] = fragmentSrc;
@@ -162,42 +167,52 @@ namespace Razor
 
 	OpenGLShader::~OpenGLShader()
 	{
+		RZ_PROFILE_FUNCTION();
 		glDeleteProgram(m_RendererID);
 	}
 	void OpenGLShader::Bind() const
 	{
+		RZ_PROFILE_FUNCTION();
 		glUseProgram(m_RendererID);
 	}
 	void OpenGLShader::Unbind() const
 	{
+		RZ_PROFILE_FUNCTION();
 		glUseProgram(0);
 	}
 	void OpenGLShader::SetInt(const std::string& name, int value)
 	{
+		RZ_PROFILE_FUNCTION();
 		UploadUniformInt(name, value);
 	}
 	void OpenGLShader::SetFloat(const std::string& name, float value)
 	{
+		RZ_PROFILE_FUNCTION();
 		UploadUniformFloat(name, value);
 	}
 	void OpenGLShader::SetFloat2(const std::string& name, const glm::vec2& value)
 	{
+		RZ_PROFILE_FUNCTION();
 		UploadUniformFloat2(name, value);
 	}
 	void OpenGLShader::SetFloat3(const std::string& name, const glm::vec3& value)
 	{
+		RZ_PROFILE_FUNCTION();
 		UploadUniformFloat3(name, value);
 	}
 	void OpenGLShader::SetFloat4(const std::string& name, const glm::vec4& value)
 	{
+		RZ_PROFILE_FUNCTION();
 		UploadUniformFloat4(name, value);
 	}
 	void OpenGLShader::SetMat3(const std::string& name, const glm::mat3& matrix)
 	{
+		RZ_PROFILE_FUNCTION();
 		UploadUniformMat3(name, matrix);
 	}
 	void OpenGLShader::SetMat4(const std::string& name, const glm::mat4& matrix)
 	{
+		RZ_PROFILE_FUNCTION();
 		UploadUniformMat4(name, matrix);
 	}
 
