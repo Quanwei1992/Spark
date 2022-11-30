@@ -22,6 +22,7 @@ namespace Razor
 
 	void Renderer2D::Init()
 	{
+		RZ_PROFILE_FUNCTION();
 		s_Data = new Renderer2DStorage();
 		s_Data->VertexArray = VertexArray::Create();
 
@@ -59,19 +60,21 @@ namespace Razor
 	}
 	void Renderer2D::Shutdown()
 	{
+		RZ_PROFILE_FUNCTION();
 		delete s_Data;
 		s_Data = nullptr;
 	}
 
 	void Renderer2D::BeginScene(const OrthographicCamera& camera)
 	{
+		RZ_PROFILE_FUNCTION();
 		s_Data->TextureShader->Bind();
 		s_Data->TextureShader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
 	}
 
 	void Renderer2D::EndScene()
 	{
-
+		RZ_PROFILE_FUNCTION();
 	}
 
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)
@@ -82,6 +85,7 @@ namespace Razor
 	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
 	{
 	
+		RZ_PROFILE_FUNCTION();
 		s_Data->TextureShader->SetFloat4("u_Color", color);
 		s_Data->WhiteTexture->Bind();
 
@@ -98,6 +102,7 @@ namespace Razor
 	}
 	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<Texture2D>& texture)
 	{
+		RZ_PROFILE_FUNCTION();
 		s_Data->TextureShader->SetFloat4("u_Color",glm::vec4(1.0f));
 		texture->Bind();
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)

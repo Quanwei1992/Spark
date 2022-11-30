@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Razor/Core/Core.h"
-#include "Razor/Core/Log.h"
-
 #include <iostream>
 #include <memory>
 #include <string>
@@ -16,6 +13,9 @@
 #include <sstream>
 #include <cstdint>
 
+#include "Razor/Core/Core.h"
+#include "Razor/Core/Log.h"
+#include "Debug/Instrumentor.h"
 
 
 #ifdef RZ_PLATFORM_WINDOWS
