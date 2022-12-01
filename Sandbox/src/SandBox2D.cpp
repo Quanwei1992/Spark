@@ -15,48 +15,48 @@ SandBox2D::~SandBox2D()
 
 void SandBox2D::OnAttach()
 {
-	RZ_PROFILE_FUNCTION();
+	SK_PROFILE_FUNCTION();
 
-	m_CheckerboradTexture = Razor::Texture2D::Create("assets/textures/Checkerboard.png");
+	m_CheckerboradTexture = Spark::Texture2D::Create("assets/textures/Checkerboard.png");
 }
 
 void SandBox2D::OnDetach()
 {
-	RZ_PROFILE_FUNCTION();
+	SK_PROFILE_FUNCTION();
 }
 
-void SandBox2D::OnUpdate(Razor::Timestep ts)
+void SandBox2D::OnUpdate(Spark::Timestep ts)
 {
-	RZ_PROFILE_FUNCTION();
+	SK_PROFILE_FUNCTION();
 
 	m_CameraController.OnUpdate(ts);
 
 	{
-		RZ_PROFILE_SCOPE("Renderer Prep");
-		Razor::RenderCommand::SetClearColor(glm::vec4(0.1f, 0.1f, 0.1f, 1));
-		Razor::RenderCommand::Clear();
+		SK_PROFILE_SCOPE("Renderer Prep");
+		Spark::RenderCommand::SetClearColor(glm::vec4(0.1f, 0.1f, 0.1f, 1));
+		Spark::RenderCommand::Clear();
 	}
 	{
-		RZ_PROFILE_SCOPE("Renderer Draw");
-		Razor::Renderer2D::BeginScene(m_CameraController.GetCamera());
-		Razor::Renderer2D::DrawQuad({ -1.0f,0 }, { 0.8f,0.8f }, {0.8f,0.2f,0.3f,1.0f });
+		SK_PROFILE_SCOPE("Renderer Draw");
+		Spark::Renderer2D::BeginScene(m_CameraController.GetCamera());
+		Spark::Renderer2D::DrawQuad({ -1.0f,0 }, { 0.8f,0.8f }, {0.8f,0.2f,0.3f,1.0f });
 		m_blueQuadRotation += ts * 180.0f;
-		Razor::Renderer2D::DrawRotatedQuad({ 0.5f,-0.5f }, { 0.5f,1 }, glm::radians(m_blueQuadRotation), {0.2f,0.3f,0.8f,1.0f});
-		Razor::Renderer2D::DrawQuad({ 0,0,-0.1f }, { 10,10 }, m_CheckerboradTexture, 10.0f, {1.0f,0.8f,0.8f,1.0f});
+		Spark::Renderer2D::DrawRotatedQuad({ 0.5f,-0.5f }, { 0.5f,1 }, glm::radians(m_blueQuadRotation), {0.2f,0.3f,0.8f,1.0f});
+		Spark::Renderer2D::DrawQuad({ 0,0,-0.1f }, { 10,10 }, m_CheckerboradTexture, 10.0f, {1.0f,0.8f,0.8f,1.0f});
 
-		Razor::Renderer::EndScene();
+		Spark::Renderer::EndScene();
 	}
 
 }
 
 void SandBox2D::OnImGuiRender()
 {
-	RZ_PROFILE_FUNCTION();
+	SK_PROFILE_FUNCTION();
 	ImGui::Begin("SandBox2D");
 	ImGui::End();
 }
 
-void SandBox2D::OnEvent(Razor::Event& event)
+void SandBox2D::OnEvent(Spark::Event& event)
 {
 	m_CameraController.OnEvent(event);
 }

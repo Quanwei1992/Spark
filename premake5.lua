@@ -1,4 +1,4 @@
-workspace "Razor" 
+workspace "Spark" 
     architecture "x64"
     configurations
     {
@@ -11,18 +11,18 @@ workspace "Razor"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 InlcudeDir = {}
-InlcudeDir["GLFW"] = "Razor/vendor/GLFW/include"
-InlcudeDir["Glad"] = "Razor/vendor/Glad/include"
-InlcudeDir["ImGui"] = "Razor/vendor/imgui"
-InlcudeDir["glm"] = "Razor/vendor/glm"
-InlcudeDir["stb_image"] = "Razor/vendor/stb_image"
-InlcudeDir["spdlog"] = "Razor/vendor/spdlog/include"
-include "Razor/vendor/GLFW"
-include "Razor/vendor/Glad"
-include "Razor/vendor/imgui"
+InlcudeDir["GLFW"] = "Spark/vendor/GLFW/include"
+InlcudeDir["Glad"] = "Spark/vendor/Glad/include"
+InlcudeDir["ImGui"] = "Spark/vendor/imgui"
+InlcudeDir["glm"] = "Spark/vendor/glm"
+InlcudeDir["stb_image"] = "Spark/vendor/stb_image"
+InlcudeDir["spdlog"] = "Spark/vendor/spdlog/include"
+include "Spark/vendor/GLFW"
+include "Spark/vendor/Glad"
+include "Spark/vendor/imgui"
 
-project "Razor"
-    location "build/Razor"
+project "Spark"
+    location "build/Spark"
     kind "StaticLib"
     language "C++"
     staticruntime "on"
@@ -67,16 +67,16 @@ project "Razor"
         systemversion "latest"
         defines
         {
-            "RZ_PLATFORM_WINDOWS",
+            "SK_PLATFORM_WINDOWS",
             "GLFW_INCLUDE_NONE"
         }
 
     filter "configurations:Debug"
-        defines {"RZ_DEBUG","RZ_ENABLE_ASSERTS"}
+        defines {"SK_DEBUG","SK_ENABLE_ASSERTS"}
         symbols "on"
 
     filter "configurations:Release"
-        defines "RZ_RELEASE"
+        defines "SK_RELEASE"
         optimize "on"
 
 --------------------------------------------------------------------------------
@@ -100,15 +100,15 @@ project "Sandbox"
 
     includedirs
     {
-        "Razor/vendor/spdlog/include",
+        "Spark/vendor/spdlog/include",
         "%{InlcudeDir.glm}",
         "%{InlcudeDir.ImGui}",
-        "Razor/src/",
+        "Spark/src/",
     }
 
     links
     {
-        "Razor"
+        "Spark"
     }
     postbuildcommands
     { 
@@ -119,15 +119,15 @@ project "Sandbox"
         systemversion "latest"
         defines
         {
-            "RZ_PLATFORM_WINDOWS"
+            "SK_PLATFORM_WINDOWS"
         }
  
     filter "configurations:Debug"
-        defines "RZ_DEBUG"
+        defines "SK_DEBUG"
         symbols "on"
 
     
     filter "configurations:Release"
-        defines "RZ_RELEASE"
+        defines "SK_RELEASE"
         optimize "on" 
 

@@ -1,19 +1,19 @@
 #include "Sandbox2D.h"
 
-#include <Razor.h>
-#include <Razor/Core/EntryPoint.h>
+#include <Spark.h>
+#include <Spark/Core/EntryPoint.h>
 #include <imgui.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-class ExampleLayer : public Razor::Layer
+class ExampleLayer : public Spark::Layer
 {
 public:
 	ExampleLayer()
 		:Layer("Example")
 		,m_CameraController(1920.0f / 1080.0f,true)
 	{
-		m_VertexArray = Razor::VertexArray::Create();
+		m_VertexArray = Spark::VertexArray::Create();
 
 		float vertices[3 * 7] = {
 			-0.5f,-0.5f,0.0f,1.0f,0.0f,0.0f,1.0f,
@@ -21,25 +21,25 @@ public:
 			0.0f,0.5f,0.0f,0.0f,0.0f,1.0f,1.0f,
 		};
 
-		Razor::Ref<Razor::VertexBuffer> m_VertexBuffer;
-		m_VertexBuffer.reset(Razor::VertexBuffer::Create(vertices, sizeof(vertices)));
+		Spark::Ref<Spark::VertexBuffer> m_VertexBuffer;
+		m_VertexBuffer.reset(Spark::VertexBuffer::Create(vertices, sizeof(vertices)));
 
 		m_VertexBuffer->SetLayout({
-			{Razor::ShaderDataType::Float3,"a_Position"},
-			{Razor::ShaderDataType::Float4,"a_Color"}
+			{Spark::ShaderDataType::Float3,"a_Position"},
+			{Spark::ShaderDataType::Float4,"a_Color"}
 			});
 
 		m_VertexArray->AddVertexBuffer(m_VertexBuffer);
 
 		uint32_t indices[3] = { 0,1,2 };
 
-		Razor::Ref<Razor::IndexBuffer> m_IndexBuffer;
-		m_IndexBuffer.reset(Razor::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
+		Spark::Ref<Spark::IndexBuffer> m_IndexBuffer;
+		m_IndexBuffer.reset(Spark::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
 		m_VertexArray->SetIndexBuffer(m_IndexBuffer);
 
 		// Square 
 
-		m_SquareVA = Razor::VertexArray::Create();
+		m_SquareVA = Spark::VertexArray::Create();
 
 		float squareVertices[5 * 4] = {
 			-0.5f,-0.5f,0.0f,0,0,
@@ -47,20 +47,20 @@ public:
 			 0.5f, 0.5f,0.0f,1,1,
 			-0.5f, 0.5f,0.0f,0,1
 		};
-		Razor::Ref<Razor::VertexBuffer> squareVB;
-		squareVB.reset(Razor::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
+		Spark::Ref<Spark::VertexBuffer> squareVB;
+		squareVB.reset(Spark::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
 
 		squareVB->SetLayout({
-				{Razor::ShaderDataType::Float3,"a_Position"},
-				{Razor::ShaderDataType::Float2,"a_TexCoord"},
+				{Spark::ShaderDataType::Float3,"a_Position"},
+				{Spark::ShaderDataType::Float2,"a_TexCoord"},
 			});
 
 		m_SquareVA->AddVertexBuffer(squareVB);
 
 
 		uint32_t squareIndices[] = { 0,1,2,2,3,0 };
-		Razor::Ref<Razor::IndexBuffer> squareIB;
-		squareIB.reset(Razor::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
+		Spark::Ref<Spark::IndexBuffer> squareIB;
+		squareIB.reset(Spark::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
 		m_SquareVA->SetIndexBuffer(squareIB);
 
 		std::string vertexSrc = R"(
@@ -95,7 +95,7 @@ public:
 		)";
 
 
-		m_Shader = Razor::Shader::Create("TriangleShader", vertexSrc, fragmentSrc);
+		m_Shader = Spark::Shader::Create("TriangleShader", vertexSrc, fragmentSrc);
 
 		// Flat Shader 
 		// -------------------------------------------------------------
@@ -128,21 +128,21 @@ public:
 				color = u_Color;
 			}
 		)";
-		m_FlatShader = Razor::Shader::Create("FlastShader", vertexSrc, fragmentSrc);
+		m_FlatShader = Spark::Shader::Create("FlastShader", vertexSrc, fragmentSrc);
 
 		m_ShaderLibrary.Load("assets/shaders/Texture.glsl");
 
-		m_Texture = Razor::Texture2D::Create("assets/textures/Checkerboard.png");
-		m_LogoTexture = Razor::Texture2D::Create("assets/textures/Logo.png");
+		m_Texture = Spark::Texture2D::Create("assets/textures/Checkerboard.png");
+		m_LogoTexture = Spark::Texture2D::Create("assets/textures/Logo.png");
 	}
 
-	void OnUpdate(Razor::Timestep ts) override
+	void OnUpdate(Spark::Timestep ts) override
 	{
 		m_CameraController.OnUpdate(ts);
-		Razor::RenderCommand::SetClearColor(glm::vec4(0.1f, 0.1f, 0.1f, 1));
-		Razor::RenderCommand::Clear();
+		Spark::RenderCommand::SetClearColor(glm::vec4(0.1f, 0.1f, 0.1f, 1));
+		Spark::RenderCommand::Clear();
 
-		Razor::Renderer::BeginScene(m_CameraController.GetCamera());
+		Spark::Renderer::BeginScene(m_CameraController.GetCamera());
 
 		static glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 
@@ -153,7 +153,7 @@ public:
 				glm::vec3 pos(x * 0.11f, y * 0.11f, 0);
 				glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos) * scale;
 				m_FlatShader->SetFloat4("u_Color", m_SquareColor);
-				Razor::Renderer::Submit(m_FlatShader, m_SquareVA, transform);
+				Spark::Renderer::Submit(m_FlatShader, m_SquareVA, transform);
 			}
 		}
 		m_Texture->Bind(0);
@@ -163,20 +163,20 @@ public:
 
 		textureShader->Bind();
 		textureShader->SetInt("u_Texture", 0);
-		Razor::Renderer::Submit(textureShader, m_SquareVA, glm::scale(glm::mat4(1.0f),glm::vec3(1.5f)));
+		Spark::Renderer::Submit(textureShader, m_SquareVA, glm::scale(glm::mat4(1.0f),glm::vec3(1.5f)));
 
 		
 		textureShader->Bind();
 		textureShader->SetInt("u_Texture", 1);
-		Razor::Renderer::Submit(textureShader, m_SquareVA,
+		Spark::Renderer::Submit(textureShader, m_SquareVA,
 			glm::translate(glm::mat4(1.0f),glm::vec3(0.25f,-0.25f,0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 		// Triangle
-		//Razor::Renderer::Submit(m_Shader, m_VertexArray);
+		//Spark::Renderer::Submit(m_Shader, m_VertexArray);
 
-		Razor::Renderer::EndScene();
+		Spark::Renderer::EndScene();
 	}
 
-	void OnEvent(Razor::Event& e) override
+	void OnEvent(Spark::Event& e) override
 	{
 		m_CameraController.OnEvent(e);
 	}
@@ -188,18 +188,18 @@ public:
 		ImGui::End();
 	}
 private:
-	Razor::ShaderLibrary m_ShaderLibrary;
-	Razor::Ref<Razor::Shader> m_Shader;
-	Razor::Ref<Razor::VertexArray> m_VertexArray;
-	Razor::Ref<Razor::Shader> m_FlatShader;
-	Razor::Ref<Razor::VertexArray> m_SquareVA;
-	Razor::Ref<Razor::Texture2D> m_Texture,m_LogoTexture;
-	Razor::OrthographicCameraController m_CameraController;
+	Spark::ShaderLibrary m_ShaderLibrary;
+	Spark::Ref<Spark::Shader> m_Shader;
+	Spark::Ref<Spark::VertexArray> m_VertexArray;
+	Spark::Ref<Spark::Shader> m_FlatShader;
+	Spark::Ref<Spark::VertexArray> m_SquareVA;
+	Spark::Ref<Spark::Texture2D> m_Texture,m_LogoTexture;
+	Spark::OrthographicCameraController m_CameraController;
 	glm::vec4 m_SquareColor = { 0.2f,0.3f,0.8f,1.0f };
 };
 
 
-class Sandbox : public Razor::Application
+class Sandbox : public Spark::Application
 {
 public:
 	Sandbox()
@@ -210,7 +210,7 @@ public:
 };
 
 
-Razor::Application* Razor::CreateApplication()
+Spark::Application* Spark::CreateApplication()
 {
 	return new Sandbox();
 }
