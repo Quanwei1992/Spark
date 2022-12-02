@@ -10,43 +10,71 @@
 
 namespace Spark
 {
-
-	struct Renderer2DStorage
+	struct QuadVertex
 	{
-		Ref<VertexArray> VertexArray;
-		Ref<Shader> TextureShader;
-		Ref<Texture> WhiteTexture;
+		glm::vec3 Position;
+		glm::vec4 Color;
+		glm::vec2 TexCoord;
 	};
 
-	static Renderer2DStorage* s_Data = nullptr;
+	struct Renderer2DData
+	{
+		const uint32_t MaxQuads = 10000;
+		const uint32_t MaxVertices = MaxQuads * 4;
+		const uint32_t MaxIndices = MaxQuads * 6;
+
+		Ref<VertexArray> VertexArray;
+		Ref<VertexBuffer> VertexBuffer;
+		Ref<Shader> TextureShader;
+		Ref<Texture> WhiteTexture;
+
+		uint32_t QuadIndexCount = 0;
+		QuadVertex* QuadVertexBufferBase = nullptr;
+		QuadVertex* QuadVertexBufferPtr = nullptr;
+
+	};
+
+	static Renderer2DData* s_Data = nullptr;
+
+
 
 	void Renderer2D::Init()
 	{
 		SK_PROFILE_FUNCTION();
-		s_Data = new Renderer2DStorage();
+		s_Data = new Renderer2DData();
 		s_Data->VertexArray = VertexArray::Create();
 
-		float squareVertices[] = {
-			-0.5f,-0.5f,0.0f,0,0,
-			 0.5f,-0.5f,0.0f,1,0,
-			 0.5f, 0.5f,0.0f,1,1,
-			-0.5f, 0.5f,0.0f,0,1
-		};
-		Spark::Ref<Spark::VertexBuffer> squareVB;
-		squareVB.reset(Spark::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
+		s_Data->VertexBuffer = VertexBuffer::Create(s_Data->MaxVertices * sizeof(QuadVertex));
 
-		squareVB->SetLayout({
-				{Spark::ShaderDataType::Float3,"a_Position"},
-				{Spark::ShaderDataType::Float2,"a_TexCoord"}
+		s_Data->VertexBuffer->SetLayout({
+				{ShaderDataType::Float3,"a_Position"},
+				{ShaderDataType::Float4,"a_Color"},
+				{ShaderDataType::Float2,"a_TexCoord"}
 			});
 
-		s_Data->VertexArray->AddVertexBuffer(squareVB);
+		s_Data->VertexArray->AddVertexBuffer(s_Data->VertexBuffer);
+		s_Data->QuadVertexBufferBase = new QuadVertex[s_Data->MaxVertices];
+
+		uint32_t* quadIndices = new uint32_t[s_Data->MaxIndices];
+
+		uint32_t offset = 0;
+		for (uint32_t i = 0; i < s_Data->MaxIndices; i += 6)
+		{
+			quadIndices[i + 0] = offset + 0;
+			quadIndices[i + 1] = offset + 1;
+			quadIndices[i + 2] = offset + 2;
+
+			quadIndices[i + 3] = offset + 2;
+			quadIndices[i + 4] = offset + 3;
+			quadIndices[i + 5] = offset + 0;
+			offset += 4;
+		}
 
 
-		uint32_t squareIndices[] = { 0,1,2,2,3,0 };
-		Spark::Ref<Spark::IndexBuffer> squareIB;
-		squareIB.reset(Spark::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
+		Ref<IndexBuffer> squareIB = IndexBuffer::Create(quadIndices, s_Data->MaxIndices);
 		s_Data->VertexArray->SetIndexBuffer(squareIB);
+
+		delete[] quadIndices;
 
 		s_Data->TextureShader = Shader::Create("assets/shaders/Texture.glsl");
 		s_Data->TextureShader->Bind();
@@ -70,12 +98,14 @@ namespace Spark
 		SK_PROFILE_FUNCTION();
 		s_Data->TextureShader->Bind();
 		s_Data->TextureShader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
+		s_Data->TextureShader->SetFloat("u_TilingFactor", 1.0f);
+		s_Data->WhiteTexture->Bind();
+
+		s_Data->QuadVertexBufferPtr = s_Data->QuadVertexBufferBase;
+		s_Data->QuadIndexCount = 0;
 	}
 
-	void Renderer2D::EndScene()
-	{
-		SK_PROFILE_FUNCTION();
-	}
+
 
 	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const glm::vec4& color)
 	{
@@ -126,16 +156,41 @@ namespace Spark
 	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
 	{
 		SK_PROFILE_FUNCTION();
-		s_Data->TextureShader->SetFloat4("u_Color", color);
-		s_Data->TextureShader->SetFloat("u_TilingFactor", 1.0f);
-		s_Data->WhiteTexture->Bind();
 
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
-			* glm::scale(glm::mat4(1.0f), { size.x,size.y,1.0f });
 
-		s_Data->TextureShader->SetMat4("u_Transform", transform);
-		s_Data->VertexArray->Bind();
-		RenderCommand::DrawIndexed(s_Data->VertexArray);
+		s_Data->QuadVertexBufferPtr->Position = position;
+		s_Data->QuadVertexBufferPtr->Color = color;
+		s_Data->QuadVertexBufferPtr->TexCoord = {0,0};
+		s_Data->QuadVertexBufferPtr++;
+
+		s_Data->QuadVertexBufferPtr->Position = { position.x + size.x,position.y,position.z };
+		s_Data->QuadVertexBufferPtr->Color = color;
+		s_Data->QuadVertexBufferPtr->TexCoord = { 0,0 };
+		s_Data->QuadVertexBufferPtr++;
+
+		s_Data->QuadVertexBufferPtr->Position = { position.x + size.x,position.y + size.y,position.z };
+		s_Data->QuadVertexBufferPtr->Color = color;
+		s_Data->QuadVertexBufferPtr->TexCoord = { 0,0 };
+		s_Data->QuadVertexBufferPtr++;
+
+		s_Data->QuadVertexBufferPtr->Position = { position.x,position.y + size.y,position.z };
+		s_Data->QuadVertexBufferPtr->Color = color;
+		s_Data->QuadVertexBufferPtr->TexCoord = { 0,0 };
+		s_Data->QuadVertexBufferPtr++;
+
+		s_Data->QuadIndexCount+=6;
+
+		//s_Data->TextureShader->SetFloat("u_TilingFactor", 1.0f);
+		//s_Data->WhiteTexture->Bind();
+
+		//glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+		//	* glm::scale(glm::mat4(1.0f), { size.x,size.y,1.0f });
+
+		//s_Data->TextureShader->SetMat4("u_Transform", transform);
+		//s_Data->VertexArray->Bind();
+		//RenderCommand::DrawIndexed(s_Data->VertexArray);
+
+
 	}
 
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<Texture2D>& texture
@@ -159,5 +214,17 @@ namespace Spark
 		RenderCommand::DrawIndexed(s_Data->VertexArray);
 	}
 
+	void Renderer2D::EndScene()
+	{
+		SK_PROFILE_FUNCTION();
 
+		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data->QuadVertexBufferPtr - (uint8_t*)s_Data->QuadVertexBufferBase);
+		s_Data->VertexBuffer->SetData(s_Data->QuadVertexBufferBase, dataSize);
+
+		Flush();
+	}
+	void Renderer2D::Flush()
+	{
+		RenderCommand::DrawIndexed(s_Data->VertexArray, s_Data->QuadIndexCount);
+	}
 }

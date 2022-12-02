@@ -21,8 +21,7 @@ public:
 			0.0f,0.5f,0.0f,0.0f,0.0f,1.0f,1.0f,
 		};
 
-		Spark::Ref<Spark::VertexBuffer> m_VertexBuffer;
-		m_VertexBuffer.reset(Spark::VertexBuffer::Create(vertices, sizeof(vertices)));
+		Spark::Ref<Spark::VertexBuffer> m_VertexBuffer = Spark::VertexBuffer::Create(vertices, sizeof(vertices));
 
 		m_VertexBuffer->SetLayout({
 			{Spark::ShaderDataType::Float3,"a_Position"},
@@ -33,8 +32,7 @@ public:
 
 		uint32_t indices[3] = { 0,1,2 };
 
-		Spark::Ref<Spark::IndexBuffer> m_IndexBuffer;
-		m_IndexBuffer.reset(Spark::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
+		Spark::Ref<Spark::IndexBuffer> m_IndexBuffer = Spark::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
 		m_VertexArray->SetIndexBuffer(m_IndexBuffer);
 
 		// Square 
@@ -47,8 +45,7 @@ public:
 			 0.5f, 0.5f,0.0f,1,1,
 			-0.5f, 0.5f,0.0f,0,1
 		};
-		Spark::Ref<Spark::VertexBuffer> squareVB;
-		squareVB.reset(Spark::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
+		Spark::Ref<Spark::VertexBuffer> squareVB = Spark::VertexBuffer::Create(squareVertices, sizeof(squareVertices));
 
 		squareVB->SetLayout({
 				{Spark::ShaderDataType::Float3,"a_Position"},
@@ -59,8 +56,7 @@ public:
 
 
 		uint32_t squareIndices[] = { 0,1,2,2,3,0 };
-		Spark::Ref<Spark::IndexBuffer> squareIB;
-		squareIB.reset(Spark::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
+		Spark::Ref<Spark::IndexBuffer> squareIB = Spark::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t));
 		m_SquareVA->SetIndexBuffer(squareIB);
 
 		std::string vertexSrc = R"(
