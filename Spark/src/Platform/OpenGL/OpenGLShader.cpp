@@ -138,6 +138,8 @@ namespace Spark
 		m_RendererID = program;
 	}
 
+
+
 	OpenGLShader::OpenGLShader(const std::string& filePath)
 	{
 		SK_PROFILE_FUNCTION();
@@ -185,6 +187,13 @@ namespace Spark
 		SK_PROFILE_FUNCTION();
 		UploadUniformInt(name, value);
 	}
+
+	void OpenGLShader::SetIntArray(const std::string& name, int* values, uint32_t count)
+	{
+		SK_PROFILE_FUNCTION();
+		UploadUniformIntArray(name, values, count);
+	}
+
 	void OpenGLShader::SetFloat(const std::string& name, float value)
 	{
 		SK_PROFILE_FUNCTION();
@@ -221,6 +230,13 @@ namespace Spark
 		GLint location = glGetUniformLocation(m_RendererID, name.c_str());
 		SK_CORE_ASSERT(location != -1, "Not found uniform location!");
 		glUniform1i(location, value);
+	}
+	void OpenGLShader::UploadUniformIntArray(const std::string& name, int* values, uint32_t count)
+	{
+		GLint location = glGetUniformLocation(m_RendererID, name.c_str());
+		SK_CORE_ASSERT(location != -1, "Not found uniform location!");
+		glUniform1iv(location, count, values);
+
 	}
 	void OpenGLShader::UploadUniformFloat(const std::string& name, float value)
 	{
