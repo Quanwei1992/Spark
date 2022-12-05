@@ -29,7 +29,12 @@ void SandBox2D::OnUpdate(Spark::Timestep ts)
 {
 	SK_PROFILE_FUNCTION();
 
+	// Update
+
 	m_CameraController.OnUpdate(ts);
+
+	// Render
+	Spark::Renderer2D::ResetStats();
 
 	{
 		SK_PROFILE_SCOPE("Renderer Prep");
@@ -44,6 +49,19 @@ void SandBox2D::OnUpdate(Spark::Timestep ts)
 		m_blueQuadRotation += ts * 180.0f;
 		Spark::Renderer2D::DrawRotatedQuad({ 0.5f,-0.5f }, { 0.5f,1 }, glm::radians(m_blueQuadRotation), {0.2f,0.3f,0.8f,1.0f});
 		Spark::Renderer2D::DrawQuad({ 0,0,-0.1f }, { 10,10 }, m_CheckerboradTexture, 10.0f, {1.0f,0.8f,0.8f,1.0f});
+		Spark::Renderer2D::EndScene();
+
+		Spark::Renderer2D::BeginScene(m_CameraController.GetCamera());
+
+		float quadSize = 0.1f;
+		for (float y = -5.0f; y < 5.0f; y += quadSize)
+		{
+			for (float x = -5.0f; x < 5.0f; x += quadSize)
+			{
+				glm::vec4 color = {(x+5.0f) / 10.0f,0.4f,(y+5.0f)/10.0f,1.0f};
+				Spark::Renderer2D::DrawQuad({ x,y }, { quadSize * 0.9f,quadSize * 0.9f },color);
+			}
+		}
 
 		Spark::Renderer2D::EndScene();
 	}
@@ -54,6 +72,18 @@ void SandBox2D::OnImGuiRender()
 {
 	SK_PROFILE_FUNCTION();
 	ImGui::Begin("SandBox2D");
+
+	auto stats = Spark::Renderer2D::GetStats();
+
+	ImGui::Text("Renderer2D Stats:");
+	ImGui::Text("Draw Calls %d", stats.DrawCalls);
+	ImGui::Text("Quads %d", stats.QuadCount);
+	ImGui::Text("Vertices %d", stats.GetTotalVertexCount());
+	ImGui::Text("Indices %d", stats.GetTotalIndexCount());
+
+
+
+
 	ImGui::End();
 }
 
