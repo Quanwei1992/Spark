@@ -11,7 +11,7 @@ class ExampleLayer : public Spark::Layer
 public:
 	ExampleLayer()
 		:Layer("Example")
-		,m_CameraController(1920.0f / 1080.0f,true)
+		,m_CameraController(true)
 	{
 		m_VertexArray = Spark::VertexArray::Create();
 

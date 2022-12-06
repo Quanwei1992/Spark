@@ -1,6 +1,8 @@
 #pragma once
 #include <Spark.h>
 
+#include "ParticleSystem.h"
+
 class SandBox2D : public Spark::Layer
 {
 public:
@@ -15,4 +17,6 @@ private:
 	Spark::OrthographicCameraController m_CameraController;
 	Spark::Ref<Spark::Texture2D> m_CheckerboradTexture;
 	float m_blueQuadRotation = 0.0f;
+	ParticleProps m_Particle;
+	ParticleSystem m_ParticleSystem;
 };

@@ -4,6 +4,7 @@
 
 namespace Spark
 {
+
 	class OrthographicCamera
 	{
 	public:

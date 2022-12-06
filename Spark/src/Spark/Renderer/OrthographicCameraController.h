@@ -8,20 +8,35 @@
 
 namespace Spark
 {
+
+	struct OrthographicCameraBounds
+	{
+		float Left, Right;
+		float Bottom, Top;
+
+		float GetWidth() { return Right - Left; }
+		float GetHeight() { return Top - Bottom; }
+	};
+
+
 	class OrthographicCameraController
 	{
 	public:
-		OrthographicCameraController(float aspectRatio,bool rotation = false);
+		OrthographicCameraController(bool rotation = false);
 		void OnUpdate(Timestep ts);
 		void OnEvent(Event& e);
 		OrthographicCamera& GetCamera() { return m_Camera; }
 		const OrthographicCamera& GetCamera() const { return m_Camera; }
+
+		const OrthographicCameraBounds& GetBounds() const { return m_Bounds; }
+
 	public:
 		bool OnMouseScrolled(MouseScrolledEvent& e);
 		bool OnWindowResized(WindowResizeEvent& e);
 	private:
-		float m_AspectRatio;
-		float m_ZoomLevel;
+		OrthographicCameraBounds m_Bounds;
+		float m_AspectRatio = 1.0f;
+		float m_ZoomLevel = 1.0f;
 		bool m_Rotation;
 		OrthographicCamera m_Camera;
 		glm::vec3 m_CameraPosition = {0,0,0};
