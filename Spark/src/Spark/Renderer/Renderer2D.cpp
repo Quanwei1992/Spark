@@ -47,8 +47,6 @@ namespace Spark
 
 	static Renderer2DData* s_Data = nullptr;
 
-
-
 	void Renderer2D::Init()
 	{
 		SK_PROFILE_FUNCTION();
@@ -146,26 +144,13 @@ namespace Spark
 		s_Data->TextureSlotIndex = 1;
 	}
 
-
-
-	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const glm::vec4& color)
+	inline void Renderer2D::DrawQuadImpl(const glm::mat4& transform, const glm::vec4& color)
 	{
-		DrawRotatedQuad({ position.x,position.y,0.0f }, size,rotation, color);
-	}
 
-	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& color)
-	{
-		SK_PROFILE_FUNCTION();
-
-		if (s_Data->QuadIndexCount  >= Renderer2DData::MaxIndices)
+		if (s_Data->QuadIndexCount >= Renderer2DData::MaxIndices)
 		{
 			FlushAndReset();
 		}
-
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
-			* glm::rotate(glm::mat4(1.0f), rotation, glm::vec3(0.0f, 0.0f, 1.0f))
-			* glm::scale(glm::mat4(1.0f), { size.x,size.y,1.0f });
-
 		for (size_t i = 0; i < 4; i++)
 		{
 			s_Data->QuadVertexBufferPtr->Position = transform * s_Data->QuadVertexPositions[i];
@@ -180,11 +165,76 @@ namespace Spark
 		s_Data->Stats.QuadCount++;
 	}
 
+	inline void Renderer2D::DrawQuadImpl(const glm::mat4& transform, const Ref<Texture2D>& texture, const glm::vec2* texCoords, float tilingFactor, const glm::vec4& tintColor)
+	{
+
+		if (s_Data->QuadIndexCount >= Renderer2DData::MaxIndices)
+		{
+			FlushAndReset();
+		}
+
+		constexpr glm::vec4 color = { 1.0f,1.0f,1.0f,1.0f };
+
+		int32_t textureIndex = 0;
+		for (uint32_t i = 1; i < s_Data->TextureSlotIndex; i++)
+		{
+			if (*s_Data->TextureSlots[i].get() == *(texture).get())
+			{
+				textureIndex = i;
+				break;
+			}
+		}
+
+		if (textureIndex == 0)
+		{
+			textureIndex = s_Data->TextureSlotIndex;
+			s_Data->TextureSlots[s_Data->TextureSlotIndex] = texture;
+			s_Data->TextureSlotIndex++;
+		}
+
+		for (size_t i = 0; i < 4; i++)
+		{
+			s_Data->QuadVertexBufferPtr->Position = transform * s_Data->QuadVertexPositions[i];
+			s_Data->QuadVertexBufferPtr->Color = color;
+			s_Data->QuadVertexBufferPtr->TexCoord = texCoords[i];
+			s_Data->QuadVertexBufferPtr->TexIndex = (float)textureIndex;
+			s_Data->QuadVertexBufferPtr->TilingFactor = tilingFactor;
+			s_Data->QuadVertexBufferPtr++;
+		}
+		s_Data->QuadIndexCount += 6;
+
+		s_Data->Stats.QuadCount++;
+	}
+
+
+
+
+	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const glm::vec4& color)
+	{
+		DrawRotatedQuad({ position.x,position.y,0.0f }, size,rotation, color);
+	}
+
+	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& color)
+	{
+		SK_PROFILE_FUNCTION();
+
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+			* glm::rotate(glm::mat4(1.0f), rotation, glm::vec3(0.0f, 0.0f, 1.0f))
+			* glm::scale(glm::mat4(1.0f), { size.x,size.y,1.0f });
+
+		DrawQuadImpl(transform, color);
+	}
+
 
 	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture
 		, float tilingFactor, const glm::vec4& tintColor)
 	{
 		DrawRotatedQuad({ position.x,position.y,0.0f }, size,rotation, texture, tilingFactor, tintColor);
+	}
+	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<SubTexture2D>& texture
+		, float tilingFactor, const glm::vec4& tintColor)
+	{
+		DrawRotatedQuad({ position.x,position.y,0.0f }, size, rotation, texture, tilingFactor, tintColor);
 	}
 
 	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture
@@ -192,27 +242,23 @@ namespace Spark
 	{
 		SK_PROFILE_FUNCTION();
 
-		if (s_Data->QuadIndexCount >= Renderer2DData::MaxIndices)
-		{
-			FlushAndReset();
-		}
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+			* glm::rotate(glm::mat4(1.0f), rotation, glm::vec3(0.0f, 0.0f, 1.0f))
+			* glm::scale(glm::mat4(1.0f), { size.x,size.y,1.0f });
+
+		DrawQuadImpl(transform, texture,s_Data->QuadVertexTexCoords, tilingFactor, tintColor);
+	}
+
+	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Ref<SubTexture2D>& texture
+		, float tilingFactor, const glm::vec4& tintColor)
+	{
+		SK_PROFILE_FUNCTION();
 
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
 			* glm::rotate(glm::mat4(1.0f), rotation, glm::vec3(0.0f, 0.0f, 1.0f))
 			* glm::scale(glm::mat4(1.0f), { size.x,size.y,1.0f });
 
-		for (size_t i = 0; i < 4; i++)
-		{
-			s_Data->QuadVertexBufferPtr->Position = transform * s_Data->QuadVertexPositions[i];
-			s_Data->QuadVertexBufferPtr->Color = glm::vec4(1.0f);
-			s_Data->QuadVertexBufferPtr->TexCoord = s_Data->QuadVertexTexCoords[i];
-			s_Data->QuadVertexBufferPtr->TexIndex = 0.0f;
-			s_Data->QuadVertexBufferPtr->TilingFactor = tilingFactor;
-			s_Data->QuadVertexBufferPtr++;
-		}
-		s_Data->QuadIndexCount += 6;
-
-		s_Data->Stats.QuadCount++;
+		DrawQuadImpl(transform, texture->GetTexture(), texture->GetTexCoords(), tilingFactor, tintColor);
 	}
 
 
@@ -227,32 +273,20 @@ namespace Spark
 		DrawQuad({ position.x,position.y,0.0f }, size, texture, tilingFactor, tintColor);
 	}
 
-
+	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<SubTexture2D>& texture
+		, float tilingFactor, const glm::vec4& tintColor)
+	{
+		DrawQuad({ position.x,position.y,0.0f }, size, texture, tilingFactor, tintColor);
+	}
 
 	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
 	{
 		SK_PROFILE_FUNCTION();
 
-		if (s_Data->QuadIndexCount >= Renderer2DData::MaxIndices)
-		{
-			FlushAndReset();
-		}
-
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
 			* glm::scale(glm::mat4(1.0f), { size.x,size.y,1.0f });
 
-		for (size_t i = 0; i < 4; i++)
-		{
-			s_Data->QuadVertexBufferPtr->Position = transform * s_Data->QuadVertexPositions[i];
-			s_Data->QuadVertexBufferPtr->Color = color;
-			s_Data->QuadVertexBufferPtr->TexCoord = s_Data->QuadVertexTexCoords[i];
-			s_Data->QuadVertexBufferPtr->TexIndex = 0.0f;
-			s_Data->QuadVertexBufferPtr->TilingFactor = 1.0f;
-			s_Data->QuadVertexBufferPtr++;
-		}
-		s_Data->QuadIndexCount += 6;
-
-		s_Data->Stats.QuadCount++;
+		DrawQuadImpl(transform, color);
 	}
 
 
@@ -261,51 +295,30 @@ namespace Spark
 	{
 		SK_PROFILE_FUNCTION();
 
-		if (s_Data->QuadIndexCount >= Renderer2DData::MaxIndices)
-		{
-			FlushAndReset();
-		}
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+			* glm::scale(glm::mat4(1.0f), { size.x,size.y,1.0f });
+
+		DrawQuadImpl(transform, texture, s_Data->QuadVertexTexCoords, tilingFactor, tintColor);
+	}
+
+
+	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<SubTexture2D>& texture
+		, float tilingFactor, const glm::vec4& tintColor)
+	{
+		SK_PROFILE_FUNCTION();
+
 
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
 			* glm::scale(glm::mat4(1.0f), { size.x,size.y,1.0f });
 
-		constexpr glm::vec4 color = { 1.0f,1.0f,1.0f,1.0f };
-
-		int32_t textureIndex = 0;
-		for (uint32_t i = 1; i < s_Data->TextureSlotIndex; i++)
-		{
-			if (*s_Data->TextureSlots[i].get() == *texture.get())
-			{
-				textureIndex = i;
-				break;
-			}
-		}
-
-		if (textureIndex == 0)
-		{
-			textureIndex = s_Data->TextureSlotIndex;
-			s_Data->TextureSlots[s_Data->TextureSlotIndex] = texture;
-			s_Data->TextureSlotIndex++;
-		}
-
-
-		for (size_t i = 0; i < 4; i++)
-		{
-			s_Data->QuadVertexBufferPtr->Position = transform * s_Data->QuadVertexPositions[i];
-			s_Data->QuadVertexBufferPtr->Color = color;
-			s_Data->QuadVertexBufferPtr->TexCoord = s_Data->QuadVertexTexCoords[i];
-			s_Data->QuadVertexBufferPtr->TexIndex = (float)textureIndex;
-			s_Data->QuadVertexBufferPtr->TilingFactor = tilingFactor;
-			s_Data->QuadVertexBufferPtr++;
-		}
-		s_Data->QuadIndexCount += 6;
-
-		s_Data->Stats.QuadCount++;
+		DrawQuadImpl(transform, texture->GetTexture(), texture->GetTexCoords(), tilingFactor, tintColor);
 	}
 
 	void Renderer2D::EndScene()
 	{
 		SK_PROFILE_FUNCTION();
+
+		if (s_Data->QuadIndexCount == 0) return;
 
 		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data->QuadVertexBufferPtr - (uint8_t*)s_Data->QuadVertexBufferBase);
 		s_Data->VertexBuffer->SetData(s_Data->QuadVertexBufferBase, dataSize);

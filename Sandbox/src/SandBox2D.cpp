@@ -8,7 +8,7 @@
 SandBox2D::SandBox2D()
 	:Layer("SandBox2D")
 	,m_CameraController(true)
-	,m_ParticleSystem(99999)
+	,m_ParticleSystem(1000)
 {
 }
 
@@ -21,11 +21,15 @@ void SandBox2D::OnAttach()
 	SK_PROFILE_FUNCTION();
 
 	m_CheckerboradTexture = Spark::Texture2D::Create("assets/textures/Checkerboard.png");
+	m_SpriteSheet = Spark::Texture2D::Create("assets/game/textures/RPGpack_sheet_2X.png");
+	m_TextureStairs = Spark::SubTexture2D::CreateFromCoords(m_SpriteSheet, { 7,6 }, { 128,128 });
+	m_TextureBarrel = Spark::SubTexture2D::CreateFromCoords(m_SpriteSheet, { 2,2 }, { 128,128 });
+	m_TextureTree = Spark::SubTexture2D::CreateFromCoords(m_SpriteSheet, { 0,1 }, { 128,128 }, {1.0f,2.0f});
 
 	m_Particle.ColorBegin = { 254 / 255.0f, 212 / 255.0f, 123 / 255.0f, 1.0f };
 	m_Particle.ColorEnd = { 254 / 255.0f, 109 / 255.0f, 41 / 255.0f, 1.0f };
 	m_Particle.SizeBegin = 0.1f, m_Particle.SizeVariation = 0.3f, m_Particle.SizeEnd = 0.0f;
-	m_Particle.LifeTime = 5.0f;
+	m_Particle.LifeTime = 1.0f;
 	m_Particle.Velocity = { 0.0f, 0.0f };
 	m_Particle.VelocityVariation = { 3.0f, 1.0f };
 	m_Particle.Position = { 0.0f, 0.0f };
@@ -59,18 +63,20 @@ void SandBox2D::OnUpdate(Spark::Timestep ts)
 	}
 	{
 		SK_PROFILE_SCOPE("Renderer Draw");
-		Spark::Renderer2D::BeginScene(m_CameraController.GetCamera());
+		
+#if 0
 		{
+			Spark::Renderer2D::BeginScene(m_CameraController.GetCamera());
 			Spark::Renderer2D::DrawQuad({ -1.0f,0 }, { 0.8f,0.8f }, { 0.8f,0.2f,0.3f,1.0f });
 			Spark::Renderer2D::DrawQuad({ 0.5f,0.5f }, { 0.5f,0.75f }, { 0.2f,0.8f,0.3f,1.0f });
 			m_blueQuadRotation += ts * 180.0f;
 			Spark::Renderer2D::DrawRotatedQuad({ 0.5f,-0.5f }, { 0.5f,1 }, glm::radians(m_blueQuadRotation), { 0.2f,0.3f,0.8f,1.0f });
 			Spark::Renderer2D::DrawQuad({ 0,0,-0.1f }, { 10,10 }, m_CheckerboradTexture, 10.0f, { 1.0f,0.8f,0.8f,1.0f });
+			Spark::Renderer2D::EndScene();
 		}
-		Spark::Renderer2D::EndScene();
 
-		Spark::Renderer2D::BeginScene(m_CameraController.GetCamera());
 		{
+			Spark::Renderer2D::BeginScene(m_CameraController.GetCamera());
 			float quadSize = 0.5f;
 			for (float y = -5.0f; y < 5.0f; y += quadSize)
 			{
@@ -80,12 +86,15 @@ void SandBox2D::OnUpdate(Spark::Timestep ts)
 					Spark::Renderer2D::DrawQuad({ x,y }, { quadSize * 0.9f,quadSize * 0.9f }, color);
 				}
 			}
+			Spark::Renderer2D::EndScene();
 		}
-		Spark::Renderer2D::EndScene();
+#endif // 0
 
+		
 
-		Spark::Renderer2D::BeginScene(m_CameraController.GetCamera());
+	
 		{
+			Spark::Renderer2D::BeginScene(m_CameraController.GetCamera());
 			if (Spark::Input::IsMouseButtonPressed(SK_MOUSE_BUTTON_LEFT))
 			{
 				auto [x, y] = Spark::Input::GetMousePosition();
@@ -99,17 +108,23 @@ void SandBox2D::OnUpdate(Spark::Timestep ts)
 				m_Particle.Position = { x + pos.x, y + pos.y };
 				m_Particle.ColorBegin = GenerateRandomColor();
 				m_Particle.ColorEnd = GenerateRandomColor();
-				for (int i = 0; i < 50; i++)
+				for (int i = 0; i < 5; i++)
 					m_ParticleSystem.Emit(m_Particle);
 			}
 
 			m_ParticleSystem.OnUpdate(ts);
 			m_ParticleSystem.OnRender();
+			Spark::Renderer2D::EndScene();
 		}
-
-		Spark::Renderer2D::EndScene();
-
 		
+
+		Spark::Renderer2D::BeginScene(m_CameraController.GetCamera());
+		{
+			Spark::Renderer2D::DrawQuad({ 0,0,0.1f }, { 1,1 }, m_TextureStairs, 1.0f, glm::vec4(1.0f));
+			Spark::Renderer2D::DrawQuad({ 1,0,0.1f }, { 1,1 }, m_TextureBarrel, 1.0f, glm::vec4(1.0f));
+			Spark::Renderer2D::DrawQuad({ -1,0,0.1f }, { 1,1 }, m_TextureTree, 1.0f, glm::vec4(1.0f));
+		}
+		Spark::Renderer2D::EndScene();
 	}
 
 }
@@ -123,9 +138,6 @@ void SandBox2D::OnImGuiRender()
 	ImGui::Text("Quads %d", stats.QuadCount);
 	ImGui::Text("Vertices %d", stats.GetTotalVertexCount());
 	ImGui::Text("Indices %d", stats.GetTotalIndexCount());
-
-
-
 
 	ImGui::End();
 }
