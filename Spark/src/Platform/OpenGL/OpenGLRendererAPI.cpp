@@ -1,4 +1,4 @@
-#include "rzpch.h"
+#include "skpch.h"
 #include "OpenGLRendererAPI.h"
 #include <glad/glad.h>
 namespace Spark

@@ -1,4 +1,4 @@
-#include "rzpch.h"
+#include "skpch.h"
 #include "Shader.h"
 
 #include "Platform/OpenGL/OpenGLShader.h"

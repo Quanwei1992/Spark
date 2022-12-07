@@ -31,8 +31,8 @@ project "Spark"
     targetdir("build/bin/" .. outputdir .. "/%{prj.name}")
     objdir("build/intermediate/" .. outputdir .. "/%{prj.name}")
     
-    pchheader "rzpch.h"
-    pchsource "%{prj.name}/src/rzpch.cpp"
+    pchheader "skpch.h"
+    pchsource "%{prj.name}/src/skpch.cpp"
     files
     {
         "%{prj.name}/src/**.h",
