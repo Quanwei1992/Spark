@@ -25,6 +25,7 @@
 #include "Spark/Renderer/Texture.h"
 #include "Spark/Renderer/SubTexture2D.h"
 #include "Spark/Renderer/VertexArray.h"
+#include "Spark/Renderer/Framebuffer.h"
 
 #include "Spark/Renderer/Renderer2D.h"
 
