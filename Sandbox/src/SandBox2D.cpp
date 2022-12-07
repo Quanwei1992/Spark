@@ -5,6 +5,31 @@
 
 #include "Random.h"
 
+
+static const uint32_t s_MapWidth = 38;
+static const char s_MapTiles[] =
+"WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"
+"WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"
+"WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"
+"WWWWWWWWDDDDDDDDDDDDDDWWWWWWWWWWWWWWWW"
+"WWWWWWWWDDDDDDDDDDDDDDWWWWWWWWWWWWWWWW"
+"WWWWWWWWDDDDDDDDDDDDDDWWWWWWWWWWWWWWWW"
+"WWWWWWWWWWDDDDDDWWWWWWWWWWWWWWWWWWWWWW"
+"WWWWWWWWWWDDDDDDWWWWWWWWWWWWWWWWWWWWWW"
+"WWWWWWWWWWDDDDDDWWWWWWWWWWWWWWWWWWWWWW"
+"WWWWWWWWWWDDDDDDWWWWWWWWWWWWWWWWWWWWWW"
+"WWWWWWWWWWDDDDDDWWWWWWWWWWWWWWWWWWWWWW"
+"WWWWWWWWWWDDDDDDWWWWWWWWWWWWWWWWWWWWWW"
+"WWWWWWWWWWDDDDDDWWWWWWWWWWWWWWWWWWWWWW"
+"WWWWWWWWWWDDDDDDWWWWWWWWWWWWWWWWWWWWWW"
+"WWWWWWWWWWDDDDDDWWWWWWWWWWWWWWWWWWWWWW"
+"WWWWWWWWWWDDDDDDWWWWWWWWWWWWWWWWWWWWWW"
+"WWWWWWWWWWDDDDDDWWWWWWWWWWWWWWWWWWWWWW"
+"WWWWWWWWWWDDDDDDWWWWWWWWWWWWWWWWWWWWWW"
+"WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"
+"WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"
+;
+
 SandBox2D::SandBox2D()
 	:Layer("SandBox2D")
 	,m_CameraController(true)
@@ -22,9 +47,13 @@ void SandBox2D::OnAttach()
 
 	m_CheckerboradTexture = Spark::Texture2D::Create("assets/textures/Checkerboard.png");
 	m_SpriteSheet = Spark::Texture2D::Create("assets/game/textures/RPGpack_sheet_2X.png");
-	m_TextureStairs = Spark::SubTexture2D::CreateFromCoords(m_SpriteSheet, { 7,6 }, { 128,128 });
-	m_TextureBarrel = Spark::SubTexture2D::CreateFromCoords(m_SpriteSheet, { 2,2 }, { 128,128 });
-	m_TextureTree = Spark::SubTexture2D::CreateFromCoords(m_SpriteSheet, { 0,1 }, { 128,128 }, {1.0f,2.0f});
+
+	m_TextureMap['W'] = Spark::SubTexture2D::CreateFromCoords(m_SpriteSheet, { 11,11 }, { 128,128 });
+	m_TextureMap['D'] = Spark::SubTexture2D::CreateFromCoords(m_SpriteSheet, { 6,11 }, { 128,128 });
+
+	m_MapWidth = s_MapWidth;
+	m_MapHeight = sizeof(s_MapTiles) / s_MapWidth;
+
 
 	m_Particle.ColorBegin = { 254 / 255.0f, 212 / 255.0f, 123 / 255.0f, 1.0f };
 	m_Particle.ColorEnd = { 254 / 255.0f, 109 / 255.0f, 41 / 255.0f, 1.0f };
@@ -33,6 +62,8 @@ void SandBox2D::OnAttach()
 	m_Particle.Velocity = { 0.0f, 0.0f };
 	m_Particle.VelocityVariation = { 3.0f, 1.0f };
 	m_Particle.Position = { 0.0f, 0.0f };
+
+	m_CameraController.SetZoomLevel(5.0f);
 }
 
 void SandBox2D::OnDetach()
@@ -120,9 +151,17 @@ void SandBox2D::OnUpdate(Spark::Timestep ts)
 
 		Spark::Renderer2D::BeginScene(m_CameraController.GetCamera());
 		{
-			Spark::Renderer2D::DrawQuad({ 0,0,0.1f }, { 1,1 }, m_TextureStairs, 1.0f, glm::vec4(1.0f));
-			Spark::Renderer2D::DrawQuad({ 1,0,0.1f }, { 1,1 }, m_TextureBarrel, 1.0f, glm::vec4(1.0f));
-			Spark::Renderer2D::DrawQuad({ -1,0,0.1f }, { 1,1 }, m_TextureTree, 1.0f, glm::vec4(1.0f));
+			for (uint32_t y = 0; y < m_MapHeight; y++)
+			{
+				for (uint32_t x = 0; x < m_MapWidth; x++)
+				{
+					auto subTexture = m_TextureMap[s_MapTiles[y * m_MapWidth + x]];
+					glm::vec3 position = { 0,0,0 };
+					position.x = (float)x - (float)m_MapWidth / 2.0f;
+					position.y = (float)m_MapHeight / 2.0f - (float)y;
+					Spark::Renderer2D::DrawQuad(position, { 1,1 }, subTexture, 1.0f, glm::vec4(1.0f));
+				}
+			}
 		}
 		Spark::Renderer2D::EndScene();
 	}

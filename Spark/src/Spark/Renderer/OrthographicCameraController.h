@@ -27,10 +27,13 @@ namespace Spark
 		void OnEvent(Event& e);
 		OrthographicCamera& GetCamera() { return m_Camera; }
 		const OrthographicCamera& GetCamera() const { return m_Camera; }
-
 		const OrthographicCameraBounds& GetBounds() const { return m_Bounds; }
 
-	public:
+		void SetZoomLevel(float level);
+		float GetZoomLevel() const;
+
+	private:
+		void CalculateView();
 		bool OnMouseScrolled(MouseScrolledEvent& e);
 		bool OnWindowResized(WindowResizeEvent& e);
 	private:

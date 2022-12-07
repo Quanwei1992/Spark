@@ -17,8 +17,10 @@ private:
 	Spark::OrthographicCameraController m_CameraController;
 	Spark::Ref<Spark::Texture2D> m_CheckerboradTexture;
 	Spark::Ref<Spark::Texture2D> m_SpriteSheet;
-	Spark::Ref<Spark::SubTexture2D> m_TextureStairs,m_TextureBarrel,m_TextureTree;
 	float m_blueQuadRotation = 0.0f;
 	ParticleProps m_Particle;
 	ParticleSystem m_ParticleSystem;
+
+	uint32_t m_MapWidth, m_MapHeight;
+	std::unordered_map<char, Spark::Ref<Spark::SubTexture2D>> m_TextureMap;
 };
