@@ -95,6 +95,11 @@ namespace Spark
 		};
 	}
 
+	void Application::Exit()
+	{
+		m_Running = false;
+	}
+
 	void Application::PushLayer(Layer* layer)
 	{
 		SK_PROFILE_FUNCTION();

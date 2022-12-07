@@ -19,6 +19,7 @@ namespace Spark
 		Application();
 		~Application();
 		void Run();
+		void Exit();
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* overlay);
 		inline Window& GetWindow()  { return *m_Window; }
