@@ -25,6 +25,7 @@ namespace Spark
 		inline Window& GetWindow()  { return *m_Window; }
 		static inline Application& Get() { return *s_Instance; }
 		void OnEvent(Event& e);
+		ImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
 	private:
 		bool OnWindowClosed(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);

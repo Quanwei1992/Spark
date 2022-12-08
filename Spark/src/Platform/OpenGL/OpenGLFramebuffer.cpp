@@ -67,8 +67,9 @@ namespace Spark
 	}
 	void OpenGLFramebuffer::Resize(uint32_t width, uint32_t height)
 	{
-		m_Specification.Width = width;
-		m_Specification.Height = height;
+
+		m_Specification.Width = std::max((uint32_t)2,width);
+		m_Specification.Height = std::max((uint32_t)2,height);
 
 		Invalidate();
 	}

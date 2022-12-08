@@ -49,9 +49,12 @@ namespace Spark
 	}
 	void ImGuiLayer::OnEvent(Event& e)
 	{
-		ImGuiIO& io = ImGui::GetIO();
-		e.Handled |= e.IsInCategoty(EventCategoryMouse) & io.WantCaptureMouse;
-		e.Handled |= e.IsInCategoty(EventCategoryKeyboard) & io.WantCaptureKeyboard;
+		if (m_BlockEvents)
+		{
+			ImGuiIO& io = ImGui::GetIO();
+			e.Handled |= e.IsInCategoty(EventCategoryMouse) & io.WantCaptureMouse;
+			e.Handled |= e.IsInCategoty(EventCategoryKeyboard) & io.WantCaptureKeyboard;
+		}
 	}
 
 	void ImGuiLayer::Begin()

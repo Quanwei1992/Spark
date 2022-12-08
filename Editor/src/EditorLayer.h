@@ -19,8 +19,9 @@ namespace Spark
 		Ref<Texture2D> m_CheckerboradTexture;
 		Ref<Framebuffer> m_Framebuffer;
 		float m_blueQuadRotation = 0.0f;
-
 		glm::vec2 m_ViewportSize = {0,0};
+		bool m_ViewportFocused = false;
+		bool m_ViewportHoverd = false;
 	};
 }
 

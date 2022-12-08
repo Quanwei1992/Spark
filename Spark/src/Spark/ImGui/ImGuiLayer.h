@@ -17,10 +17,13 @@ namespace Spark
 		void Begin();
 		void End();
 
+		void BlockEvents(bool block) { m_BlockEvents = block; }
+
 		virtual void OnImGuiRender() override;
 
 	private:
 		float m_Time = 0.0f;
+		bool m_BlockEvents = true;
 
 
 	};
