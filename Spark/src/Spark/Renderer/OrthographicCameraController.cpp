@@ -7,8 +7,9 @@
 
 namespace Spark
 {
-	OrthographicCameraController::OrthographicCameraController(bool rotation)
+	OrthographicCameraController::OrthographicCameraController(float aspectRadio,bool rotation)
 		:m_Rotation(rotation)
+		,m_AspectRatio(aspectRadio)
 		,m_Camera(0,0,0,0)
 	{
 		CalculateView();
@@ -76,9 +77,15 @@ namespace Spark
 		return m_ZoomLevel;
 	}
 
+	void OrthographicCameraController::SetAspectRadio(float aspectRadio)
+	{
+		m_AspectRatio = aspectRadio;
+		CalculateView();
+	}
+
 	void OrthographicCameraController::CalculateView()
 	{
-		m_AspectRatio = (float)Application::Get().GetWindow().GetWidth() / (float)Application::Get().GetWindow().GetHeight();
+		
 		m_Bounds = { -m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel };
 		m_Camera = { m_Bounds.Left, m_Bounds.Right, m_Bounds.Bottom, m_Bounds.Top };
 		m_Camera.SetProjection(m_Bounds.Left, m_Bounds.Right, m_Bounds.Bottom, m_Bounds.Top);
@@ -94,7 +101,8 @@ namespace Spark
 
 	bool OrthographicCameraController::OnWindowResized(WindowResizeEvent& e)
 	{
-		CalculateView();
+		//m_AspectRatio = (float)Application::Get().GetWindow().GetWidth() / (float)Application::Get().GetWindow().GetHeight();
+		//CalculateView();
 		return false;
 	}
 

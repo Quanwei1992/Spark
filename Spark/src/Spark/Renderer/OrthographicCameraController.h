@@ -22,7 +22,7 @@ namespace Spark
 	class OrthographicCameraController
 	{
 	public:
-		OrthographicCameraController(bool rotation = false);
+		OrthographicCameraController(float aspectRadio,bool rotation = false);
 		void OnUpdate(Timestep ts);
 		void OnEvent(Event& e);
 		OrthographicCamera& GetCamera() { return m_Camera; }
@@ -31,6 +31,8 @@ namespace Spark
 
 		void SetZoomLevel(float level);
 		float GetZoomLevel() const;
+
+		void SetAspectRadio(float aspectRadio);
 
 	private:
 		void CalculateView();

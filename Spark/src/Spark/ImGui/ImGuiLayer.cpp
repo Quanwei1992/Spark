@@ -47,6 +47,13 @@ namespace Spark
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
 	}
+	void ImGuiLayer::OnEvent(Event& e)
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		e.Handled |= e.IsInCategoty(EventCategoryMouse) & io.WantCaptureMouse;
+		e.Handled |= e.IsInCategoty(EventCategoryKeyboard) & io.WantCaptureKeyboard;
+	}
+
 	void ImGuiLayer::Begin()
 	{
 		SK_PROFILE_FUNCTION();

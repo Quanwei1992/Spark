@@ -8,7 +8,7 @@ namespace Spark
 {
 	EditorLayer::EditorLayer()
 		:Layer("EditorLayer")
-		, m_CameraController(true)
+		, m_CameraController(16.0f/9.0f,true)
 	{
 	}
 
@@ -21,11 +21,14 @@ namespace Spark
 		SK_PROFILE_FUNCTION();
 
 		m_CheckerboradTexture = Texture2D::Create("assets/textures/Checkerboard.png");
-		m_CameraController.SetZoomLevel(5.0f);
+
 		FramebufferSpecification fbSpec;
 		fbSpec.Width = 1280;
 		fbSpec.Height = 720;
 		m_Framebuffer = Framebuffer::Create(fbSpec);
+
+		m_CameraController.SetZoomLevel(5.0f);
+		m_CameraController.SetAspectRadio((float)fbSpec.Width / (float)fbSpec.Height);
 
 	}
 
@@ -150,14 +153,38 @@ namespace Spark
 		}
 
 		ImGui::Begin("Renderer2D Stats");
-		auto stats = Spark::Renderer2D::GetStats();
-		ImGui::Text("Draw Calls %d", stats.DrawCalls);
-		ImGui::Text("Quads %d", stats.QuadCount);
-		ImGui::Text("Vertices %d", stats.GetTotalVertexCount());
-		ImGui::Text("Indices %d", stats.GetTotalIndexCount());
-		uint64_t rendererID = (uint64_t)m_Framebuffer->GetColorAttachmentRendererID();
-		ImGui::Image((void*)rendererID, ImVec2{ 1204,576 }, ImVec2{ 0,1 }, ImVec2{1,0});
+		{
+			auto stats = Spark::Renderer2D::GetStats();
+			ImGui::Text("Draw Calls %d", stats.DrawCalls);
+			ImGui::Text("Quads %d", stats.QuadCount);
+			ImGui::Text("Vertices %d", stats.GetTotalVertexCount());
+			ImGui::Text("Indices %d", stats.GetTotalIndexCount());
+		}
 		ImGui::End();
+
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0,0 });
+		ImGui::Begin("Viewport");
+		{
+			ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
+			if ((uint32_t)viewportPanelSize.x != (uint32_t)m_ViewportSize.x || (uint32_t)viewportPanelSize.y != (uint32_t)m_ViewportSize.y)
+			{
+				m_ViewportSize = { viewportPanelSize.x,viewportPanelSize.y };
+				m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+				m_CameraController.SetAspectRadio((float)m_ViewportSize.x / (float)m_ViewportSize.y);
+				SK_WARN("Viewport size {0}, {1}", viewportPanelSize.x, viewportPanelSize.y);
+			}
+			
+
+			uint64_t rendererID = (uint64_t)m_Framebuffer->GetColorAttachmentRendererID();
+			ImGui::Image((void*)rendererID, viewportPanelSize, ImVec2{ 0,1 }, ImVec2{ 1,0 });
+
+		}
+		ImGui::End();
+		ImGui::PopStyleVar();
+
+		
+
 		ImGui::End();
 	}
 

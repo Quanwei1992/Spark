@@ -6,10 +6,10 @@
 
 namespace Spark
 {
-	class SparkEditor : public Application
+	class EditorApplication : public Application
 	{
 	public:
-		SparkEditor()
+		EditorApplication()
 			:Application("Spark Editor")
 		{
 			PushLayer(new EditorLayer());
@@ -18,7 +18,7 @@ namespace Spark
 
 	Application* CreateApplication()
 	{
-		return new SparkEditor();
+		return new EditorApplication();
 	}
 }
 

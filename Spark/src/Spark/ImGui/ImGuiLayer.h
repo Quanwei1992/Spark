@@ -12,6 +12,7 @@ namespace Spark
 
 		void OnAttach() override;
 		void OnDetach() override;
+		virtual void OnEvent(Event& event) override;
 
 		void Begin();
 		void End();
