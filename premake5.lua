@@ -1,6 +1,6 @@
 workspace "Spark" 
     architecture "x64"
-    startproject "Spark-Editor"
+    startproject "Editor"
     configurations
     {
         "Debug",
@@ -144,8 +144,8 @@ project "Sandbox"
 
 --------------------------------------------------------------------------------
 
-project "Spark-Editor"
-    location "build/Spark-Editor"
+project "Editor"
+    location "build/Editor"
     kind "ConsoleApp"
     language "C++"
     cppdialect "C++17"
