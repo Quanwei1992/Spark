@@ -16,7 +16,7 @@ namespace Spark
 	class Application
 	{
 	public:
-		Application();
+		Application(const std::string& name = "Spark");
 		~Application();
 		void Run();
 		void Exit();
@@ -37,6 +37,7 @@ namespace Spark
 		bool m_Running = true;
 		LayerStack m_LayerStack;
 		static Application* s_Instance;
+		std::string m_Name;
 	};
 
 	Application* CreateApplication();

@@ -1,5 +1,6 @@
 workspace "Spark" 
     architecture "x64"
+    startproject "Spark-Editor"
     configurations
     {
         "Debug",
@@ -10,6 +11,7 @@ workspace "Spark"
 
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+
 InlcudeDir = {}
 InlcudeDir["GLFW"] = "Spark/vendor/GLFW/include"
 InlcudeDir["Glad"] = "Spark/vendor/Glad/include"
@@ -17,9 +19,13 @@ InlcudeDir["ImGui"] = "Spark/vendor/imgui"
 InlcudeDir["glm"] = "Spark/vendor/glm"
 InlcudeDir["stb_image"] = "Spark/vendor/stb_image"
 InlcudeDir["spdlog"] = "Spark/vendor/spdlog/include"
-include "Spark/vendor/GLFW"
-include "Spark/vendor/Glad"
-include "Spark/vendor/imgui"
+
+group "Dependcies"
+    include "Spark/vendor/GLFW"
+    include "Spark/vendor/Glad"
+    include "Spark/vendor/imgui"
+group ""
+
 
 project "Spark"
     location "build/Spark"
@@ -79,6 +85,8 @@ project "Spark"
         defines "SK_RELEASE"
         optimize "on"
 
+
+
 --------------------------------------------------------------------------------
 
 project "Sandbox"
@@ -131,3 +139,57 @@ project "Sandbox"
         defines "SK_RELEASE"
         optimize "on" 
 
+
+
+
+--------------------------------------------------------------------------------
+
+project "Spark-Editor"
+    location "build/Spark-Editor"
+    kind "ConsoleApp"
+    language "C++"
+    cppdialect "C++17"
+    staticruntime "on"
+    flags { "FatalCompileWarnings" }
+    targetdir("build/bin/" .. outputdir .. "/%{prj.name}")
+    objdir("build/intermediate/" .. outputdir .. "/%{prj.name}")
+   
+    files
+    {
+        "%{prj.name}/src/**.h",
+        "%{prj.name}/src/**.cpp",
+        "%{prj.name}/assets/**.*",
+    }
+
+    includedirs
+    {
+        "Spark/vendor/spdlog/include",
+        "%{InlcudeDir.glm}",
+        "%{InlcudeDir.ImGui}",
+        "Spark/src/",
+    }
+
+    links
+    {
+        "Spark"
+    }
+    postbuildcommands
+    { 
+        "{COPYDIR} %{_MAIN_SCRIPT_DIR}/%{prj.name}/assets  ./assets"
+    }
+
+    filter "system:windows"
+        systemversion "latest"
+        defines
+        {
+            "SK_PLATFORM_WINDOWS"
+        }
+ 
+    filter "configurations:Debug"
+        defines "SK_DEBUG"
+        symbols "on"
+
+    
+    filter "configurations:Release"
+        defines "SK_RELEASE"
+        optimize "on"         
