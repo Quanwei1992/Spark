@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Spark/Core/Core.h"
+#include "Spark/Core/Base.h"
 #include "Spark/Events/Event.h"
 #include "Spark/Core/Timestep.h"
 

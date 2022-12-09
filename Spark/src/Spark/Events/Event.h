@@ -1,6 +1,6 @@
 #pragma once
 #include "skpch.h"
-#include "Spark/Core/Core.h"
+#include "Spark/Core/Base.h"
 
 namespace Spark
 {

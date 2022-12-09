@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Event.h"
-#include "Spark/Core/Core.h"
+#include "Spark/Core/Base.h"
 
 namespace Spark
 {

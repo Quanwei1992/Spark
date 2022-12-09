@@ -2,7 +2,7 @@
 
 #include "skpch.h"
 
-#include "Spark/Core/Core.h"
+#include "Spark/Core/Base.h"
 #include "Spark/Events/Event.h"
 namespace Spark
 {

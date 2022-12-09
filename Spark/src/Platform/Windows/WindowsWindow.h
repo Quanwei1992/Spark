@@ -1,4 +1,4 @@
-#include "Spark/Core/Core.h"
+#include "Spark/Core/Base.h"
 #include "Spark/Core/Window.h"
 
 struct GLFWwindow;

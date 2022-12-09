@@ -1,5 +1,5 @@
 #pragma once
-#include "Spark/Core/Core.h"
+#include "Spark/Core/Base.h"
 #include "Spark/Core/Window.h"
 #include "Spark/Events/Event.h"
 #include "Spark/Events/ApplicationEvent.h"

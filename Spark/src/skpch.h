@@ -13,7 +13,7 @@
 #include <sstream>
 #include <cstdint>
 
-#include "Spark/Core/Core.h"
+#include "Spark/Core/Base.h"
 #include "Spark/Core/Log.h"
 #include "Debug/Instrumentor.h"
 

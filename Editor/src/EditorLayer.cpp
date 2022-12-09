@@ -170,7 +170,8 @@ namespace Spark
 			m_ViewportHoverd = ImGui::IsWindowHovered();
 			Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused || !m_ViewportHoverd);
 			ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
-			if ((uint32_t)viewportPanelSize.x != (uint32_t)m_ViewportSize.x || (uint32_t)viewportPanelSize.y != (uint32_t)m_ViewportSize.y)
+			if ((viewportPanelSize.x >0 && viewportPanelSize.y > 0) && 
+				((uint32_t)viewportPanelSize.x != (uint32_t)m_ViewportSize.x || (uint32_t)viewportPanelSize.y != (uint32_t)m_ViewportSize.y))
 			{
 				m_ViewportSize = { viewportPanelSize.x,viewportPanelSize.y };
 				m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
