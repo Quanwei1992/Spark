@@ -17,6 +17,7 @@ InlcudeDir["GLFW"] = "Spark/vendor/GLFW/include"
 InlcudeDir["Glad"] = "Spark/vendor/Glad/include"
 InlcudeDir["ImGui"] = "Spark/vendor/imgui"
 InlcudeDir["glm"] = "Spark/vendor/glm"
+InlcudeDir["EnTT"] = "Spark/vendor/EnTT/include"
 InlcudeDir["stb_image"] = "Spark/vendor/stb_image"
 InlcudeDir["spdlog"] = "Spark/vendor/spdlog/include"
 
@@ -48,6 +49,7 @@ project "Spark"
         "%{prj.name}/vendor/glm/util/glm.natvis",
         "%{prj.name}/vendor/stb_image/**.h",
         "%{prj.name}/vendor/stb_image/**.cpp",
+        "%{prj.name}/vendor/EnTT/include/**.hpp",
     }
 
     includedirs
@@ -58,6 +60,7 @@ project "Spark"
         "%{InlcudeDir.Glad}",
         "%{InlcudeDir.ImGui}",
         "%{InlcudeDir.glm}",
+        "%{InlcudeDir.EnTT}",
         "%{prj.name}/src"
     }
 
@@ -110,6 +113,7 @@ project "Sandbox"
     {
         "Spark/vendor/spdlog/include",
         "%{InlcudeDir.glm}",
+        "%{InlcudeDir.EnTT}",
         "%{InlcudeDir.ImGui}",
         "Spark/src/",
     }
@@ -166,6 +170,7 @@ project "Editor"
         "Spark/vendor/spdlog/include",
         "%{InlcudeDir.glm}",
         "%{InlcudeDir.ImGui}",
+        "%{InlcudeDir.EnTT}",
         "Spark/src/",
     }
 
