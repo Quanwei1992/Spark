@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <glm/glm.hpp>
 
 #ifdef SK_ENABLE_ASSERTS
 	#define SK_ASSERT(x, ...) {if(!(x)){SK_ERROR("Assertion Failed: {0}",__VA_ARGS__);__debugbreak();}}
@@ -32,4 +33,8 @@ namespace Spark
 	{
 		return std::make_shared<T>(std::forward<Args>(args)...);
 	}
+
+	// Base Types
+	typedef glm::vec4 Color4f;
+	typedef glm::vec3 Color3f;
 }

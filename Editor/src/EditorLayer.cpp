@@ -30,6 +30,13 @@ namespace Spark
 		m_CameraController.SetZoomLevel(5.0f);
 		m_CameraController.SetAspectRadio((float)fbSpec.Width / (float)fbSpec.Height);
 
+		m_ActiveScene = CreateRef<Scene>();
+
+		m_SquareEntity = m_ActiveScene->CreateEntity();
+		m_ActiveScene->Reg().emplace<TransformCompoent>(m_SquareEntity);
+		m_ActiveScene->Reg().emplace<SpriteRendererCompoent>(m_SquareEntity, Color4f{0.0f,1.0f,0.0f,1.0f});
+
+
 	}
 
 	void EditorLayer::OnDetach()
@@ -52,28 +59,15 @@ namespace Spark
 
 
 		m_Framebuffer->Bind();
-
 		Spark::RenderCommand::SetClearColor(glm::vec4(0.1f, 0.1f, 0.1f, 1));
 		Spark::RenderCommand::Clear();
 
-		Spark::Renderer2D::BeginScene(m_CameraController.GetCamera());
-		Spark::Renderer2D::DrawQuad({ -1.0f,0 }, { 0.8f,0.8f }, { 0.8f,0.2f,0.3f,1.0f });
-		Spark::Renderer2D::DrawQuad({ 0.5f,0.5f }, { 0.5f,0.75f }, { 0.2f,0.8f,0.3f,1.0f });
-		m_blueQuadRotation += ts * 180.0f;
-		Spark::Renderer2D::DrawRotatedQuad({ 0.5f,-0.5f }, { 0.5f,1 }, glm::radians(m_blueQuadRotation), { 0.2f,0.3f,0.8f,1.0f });
-		Spark::Renderer2D::DrawQuad({ 0,0,-0.1f }, { 10,10 }, m_CheckerboradTexture, 10.0f, { 1.0f,0.8f,0.8f,1.0f });
-		Spark::Renderer2D::EndScene();
 
 		Spark::Renderer2D::BeginScene(m_CameraController.GetCamera());
-		float quadSize = 0.5f;
-		for (float y = -5.0f; y < 5.0f; y += quadSize)
-		{
-			for (float x = -5.0f; x < 5.0f; x += quadSize)
-			{
-				glm::vec4 color = { (x + 5.0f) / 10.0f,0.4f,(y + 5.0f) / 10.0f,1.0f };
-				Spark::Renderer2D::DrawQuad({ x,y }, { quadSize * 0.9f,quadSize * 0.9f }, color);
-			}
-		}
+
+		m_ActiveScene->OnUpdate(ts);
+
+		
 		Spark::Renderer2D::EndScene();
 
 		m_Framebuffer->Unbind();
@@ -159,6 +153,14 @@ namespace Spark
 			ImGui::Text("Quads %d", stats.QuadCount);
 			ImGui::Text("Vertices %d", stats.GetTotalVertexCount());
 			ImGui::Text("Indices %d", stats.GetTotalIndexCount());
+		}
+		ImGui::End();
+
+		ImGui::Begin("Color");
+		{
+			Color4f& color = m_ActiveScene->Reg().get<SpriteRendererCompoent>(m_SquareEntity).Color;
+			ImGui::ColorEdit4("SquareColor", glm::value_ptr(color));
+
 		}
 		ImGui::End();
 

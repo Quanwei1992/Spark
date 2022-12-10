@@ -261,6 +261,21 @@ namespace Spark
 		DrawQuadImpl(transform, texture->GetTexture(), texture->GetTexCoords(), tilingFactor, tintColor);
 	}
 
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color)
+	{
+		DrawQuadImpl(transform, color);
+	}
+
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
+	{
+		DrawQuadImpl(transform, texture, s_Data->QuadVertexTexCoords, tilingFactor, tintColor);
+	}
+
+	void Renderer2D::DrawQuad(const glm::mat4& transform,const Ref<SubTexture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
+	{
+		DrawQuadImpl(transform, texture->GetTexture(), texture->GetTexCoords(), tilingFactor, tintColor);
+	}
+
 
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)
 	{

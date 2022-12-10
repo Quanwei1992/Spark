@@ -22,6 +22,8 @@ namespace Spark
 		glm::vec2 m_ViewportSize = {0,0};
 		bool m_ViewportFocused = false;
 		bool m_ViewportHoverd = false;
+		Ref<Scene> m_ActiveScene;
+		entt::entity m_SquareEntity;
 	};
 }
 

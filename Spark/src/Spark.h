@@ -32,3 +32,8 @@
 #include "Spark/Renderer/OrthographicCamera.h"
 // ---------------------------------
 
+// --- Scene -----------------------
+#include "Spark/Scene/Scene.h"
+#include "Spark/Scene/Components.h"
+
+// ---------------------------------

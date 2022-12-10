@@ -2,6 +2,8 @@
 
 #include "entt.hpp"
 
+#include "Spark/Core/Timestep.h"
+
 namespace Spark
 {
 	class Scene
@@ -9,6 +11,12 @@ namespace Spark
 	public:
 		Scene();
 		~Scene();
+		void OnUpdate(Timestep ts);
+
+		entt::entity CreateEntity();
+
+		// TEMP
+		entt::registry& Reg() { return m_Registry; }
 
 	private:
 		entt::registry m_Registry;
