@@ -32,7 +32,7 @@ namespace Spark
 		void SetZoomLevel(float level);
 		float GetZoomLevel() const;
 
-		void SetAspectRadio(float aspectRadio);
+		void OnResize(uint32_t width, uint32_t height);
 
 	private:
 		void CalculateView();

@@ -133,15 +133,28 @@ namespace Spark
 		s_Data->TextureSlotIndex = 1;
 	}
 
-	void Renderer2D::BeginScene(const OrthographicCamera& camera)
+	void Renderer2D::BeginSceneImpl(const glm::mat4& viewProjection)
 	{
-		SK_PROFILE_FUNCTION();
 		s_Data->TextureShader->Bind();
-		s_Data->TextureShader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
+		s_Data->TextureShader->SetMat4("u_ViewProjection", viewProjection);
 
 		s_Data->QuadVertexBufferPtr = s_Data->QuadVertexBufferBase;
 		s_Data->QuadIndexCount = 0;
 		s_Data->TextureSlotIndex = 1;
+	}
+
+	void Renderer2D::BeginScene(const OrthographicCamera& camera)
+	{
+		SK_PROFILE_FUNCTION();
+		BeginSceneImpl(camera.GetViewProjectionMatrix());
+	}
+
+	void Renderer2D::BeginScene(const Camera& camera, const glm::mat4& transform)
+	{
+		SK_PROFILE_FUNCTION();
+
+		glm::mat4 viewProj = camera.GetProjection() * transform;
+		BeginSceneImpl(viewProj);
 	}
 
 	inline void Renderer2D::DrawQuadImpl(const glm::mat4& transform, const glm::vec4& color)

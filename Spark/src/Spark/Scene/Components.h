@@ -1,7 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
-
+#include "Spark/Renderer/Camera.h"
 namespace Spark
 {
 
@@ -15,27 +15,38 @@ namespace Spark
 			: Tag(tag) {}
 	};
 
-	struct TransformCompoent
+	struct TransformComponent
 	{
 		glm::mat4 Transform = glm::mat4(1.0f);
 
-		TransformCompoent() = default;
-		TransformCompoent(const TransformCompoent&) = default;
-		TransformCompoent(const glm::mat4& transform)
+		TransformComponent() = default;
+		TransformComponent(const TransformComponent&) = default;
+		TransformComponent(const glm::mat4& transform)
 			: Transform(transform) {}
 
 		operator glm::mat4& () { return Transform; }
 		operator const glm::mat4& () const { return Transform; }
 	};
 
-	struct SpriteRendererCompoent
+	struct SpriteRendererComponent
 	{
 		Color4f Color{ 1.0f, 1.0f, 1.0f, 1.0f };
 
-		SpriteRendererCompoent() = default;
-		SpriteRendererCompoent(const SpriteRendererCompoent&) = default;
-		SpriteRendererCompoent(const Color4f& color)
+		SpriteRendererComponent() = default;
+		SpriteRendererComponent(const SpriteRendererComponent&) = default;
+		SpriteRendererComponent(const Color4f& color)
 			: Color(color) {}
 	};
 	
+
+	struct CameraComponent
+	{
+		Spark::Camera Camera;
+		bool Primary = true;
+
+		CameraComponent() = default;
+		CameraComponent(const CameraComponent&) = default;
+		CameraComponent(const glm::mat4& projection)
+			: Camera(projection) {}
+	};
 }

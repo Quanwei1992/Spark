@@ -7,11 +7,7 @@ namespace Spark
 	class Entity
 	{
 	public:
-		Entity()
-			:m_EntityHandle()
-			,m_Scene(nullptr)
-		{
-		}
+		Entity() = default;
 		Entity(entt::entity handle,Scene* scene);
 		Entity(const Entity& other) = default;
 
@@ -42,11 +38,11 @@ namespace Spark
 			m_Scene->m_Registry.remove<T>(m_EntityHandle);
 		}
 
-		operator bool() const { return m_Scene != nullptr; }
+		operator bool() const { return m_EntityHandle != entt::null; }
 
 
 	private:
-		entt::entity m_EntityHandle;
-		Scene* m_Scene;
+		entt::entity m_EntityHandle {entt::null};
+		Scene* m_Scene = nullptr;
 	};
 }

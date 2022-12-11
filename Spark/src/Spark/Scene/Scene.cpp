@@ -26,20 +26,42 @@ namespace Spark
 	}
 	void Scene::OnUpdate(Timestep ts)
 	{
-		auto group = m_Registry.group<TransformCompoent>(entt::get<SpriteRendererCompoent>);
+
+		// Render 2D
+		Camera* mainCamera = nullptr;
+		glm::mat4* mainCameraTransform = nullptr;
+		auto view = m_Registry.view<TransformComponent,CameraComponent>();
+		for (auto&& [entity, transfrom, camera] : view.each()) {
+			if (camera.Primary) {
+				mainCamera = &camera.Camera;
+				mainCameraTransform = &transfrom.Transform;
+				break;
+			}
+		}
+
+		if (!mainCamera)
+		{
+			return;
+		}
+
+		Renderer2D::BeginScene(*mainCamera, *mainCameraTransform);
+
+		auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
 		for (auto entity : group )
 		{
-			auto& [transform, sprite] = group.get<TransformCompoent, SpriteRendererCompoent>(entity);
+			auto& [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
 
 			Renderer2D::DrawQuad(transform, sprite.Color);
 		}
+
+		Renderer2D::EndScene();
 	}
 	Entity Scene::CreateEntity(const std::string& name)
 	{
 		Entity entity = { m_Registry.create() ,this };
 		auto& tag = entity.AddComponent<TagComponent>();
 		tag.Tag = name.empty() ? "Entity" : name;
-		entity.AddComponent<TransformCompoent>();
+		entity.AddComponent<TransformComponent>();
 
 		return entity;
 	}

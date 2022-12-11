@@ -77,9 +77,9 @@ namespace Spark
 		return m_ZoomLevel;
 	}
 
-	void OrthographicCameraController::SetAspectRadio(float aspectRadio)
+	void OrthographicCameraController::OnResize(uint32_t width, uint32_t height)
 	{
-		m_AspectRatio = aspectRadio;
+		m_AspectRatio = (float)width / (float)height;
 		CalculateView();
 	}
 

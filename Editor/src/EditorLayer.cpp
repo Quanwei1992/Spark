@@ -28,12 +28,18 @@ namespace Spark
 		m_Framebuffer = Framebuffer::Create(fbSpec);
 
 		m_CameraController.SetZoomLevel(5.0f);
-		m_CameraController.SetAspectRadio((float)fbSpec.Width / (float)fbSpec.Height);
-
+		m_CameraController.OnResize(fbSpec.Width, fbSpec.Height);
 		m_ActiveScene = CreateRef<Scene>();
 
 		m_SquareEntity = m_ActiveScene->CreateEntity("Square");
-		m_SquareEntity.AddComponent<SpriteRendererCompoent>(Color4f{ 0.0f,1.0f,0.0f,1.0f });
+		m_SquareEntity.AddComponent<SpriteRendererComponent>(Color4f{ 0.0f,1.0f,0.0f,1.0f });
+
+		m_CameraEntity = m_ActiveScene->CreateEntity("Camera Entity");
+		m_CameraEntity.AddComponent<CameraComponent>(glm::ortho(-16.0f,16.0f,-9.0f, 9.0f,-1.0f,1.0f));
+
+		m_SecondCamera = m_ActiveScene->CreateEntity("Clip-Space Entity");
+		auto& cc =  m_SecondCamera.AddComponent<CameraComponent>(glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f));
+		cc.Primary = false;
 
 	}
 
@@ -47,6 +53,14 @@ namespace Spark
 	{
 		SK_PROFILE_FUNCTION();	
 
+		// Resize
+		const FramebufferSpecification& fbSpec = m_Framebuffer->GetSpecification();
+		if (fbSpec.Width != (uint32_t)m_ViewportSize.x || fbSpec.Height != (uint32_t)m_ViewportSize.y)
+		{
+			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_CameraController.OnResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		}
+
 		// Update
 		if(m_ViewportFocused)
 			m_CameraController.OnUpdate(ts);
@@ -54,19 +68,11 @@ namespace Spark
 
 		// Render
 		Spark::Renderer2D::ResetStats();
-
-
 		m_Framebuffer->Bind();
 		Spark::RenderCommand::SetClearColor(glm::vec4(0.1f, 0.1f, 0.1f, 1));
 		Spark::RenderCommand::Clear();
-
-
-		Spark::Renderer2D::BeginScene(m_CameraController.GetCamera());
-
+		// Update scene
 		m_ActiveScene->OnUpdate(ts);
-
-		
-		Spark::Renderer2D::EndScene();
 
 		m_Framebuffer->Unbind();
 
@@ -156,10 +162,18 @@ namespace Spark
 			{
 				ImGui::Separator();
 				ImGui::Text("%s", m_SquareEntity.GetComponent<TagComponent>().Tag.c_str());
-				Color4f& color = m_SquareEntity.GetComponent<SpriteRendererCompoent>().Color;
+				Color4f& color = m_SquareEntity.GetComponent<SpriteRendererComponent>().Color;
 				ImGui::ColorEdit4("SquareColor", glm::value_ptr(color));
 			}
 
+
+			ImGui::DragFloat3("Camera Transform", glm::value_ptr(m_CameraEntity.GetComponent<TransformComponent>().Transform[3]));
+			
+			if(ImGui::Checkbox("Camera A", &m_PrimaryCamera))
+			{
+				m_CameraEntity.GetComponent<CameraComponent>().Primary = m_PrimaryCamera;
+				m_SecondCamera.GetComponent<CameraComponent>().Primary = !m_PrimaryCamera;
+			}
 		}
 		ImGui::End();
 
@@ -175,10 +189,7 @@ namespace Spark
 				((uint32_t)viewportPanelSize.x != (uint32_t)m_ViewportSize.x || (uint32_t)viewportPanelSize.y != (uint32_t)m_ViewportSize.y))
 			{
 				m_ViewportSize = { viewportPanelSize.x,viewportPanelSize.y };
-				m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-				m_CameraController.SetAspectRadio((float)m_ViewportSize.x / (float)m_ViewportSize.y);
 			}
-			
 
 			uint64_t rendererID = (uint64_t)m_Framebuffer->GetColorAttachmentRendererID();
 			ImGui::Image((void*)rendererID, viewportPanelSize, ImVec2{ 0,1 }, ImVec2{ 1,0 });
