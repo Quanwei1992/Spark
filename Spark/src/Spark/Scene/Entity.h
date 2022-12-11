@@ -1,0 +1,52 @@
+#pragma once
+
+#include "Scene.h"
+#include "entt.hpp"
+namespace Spark
+{
+	class Entity
+	{
+	public:
+		Entity()
+			:m_EntityHandle()
+			,m_Scene(nullptr)
+		{
+		}
+		Entity(entt::entity handle,Scene* scene);
+		Entity(const Entity& other) = default;
+
+		template<typename T> 
+		bool HasComponent()
+		{
+			return m_Scene->m_Registry.all_of<T>(m_EntityHandle);
+		}
+
+		template<typename T,typename... Args>
+		T& AddComponent(Args&&... args)
+		{
+			SK_CORE_ASSERT(!HasComponent<T>(),"Entity already has component!");
+			return m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
+		}
+
+		template<typename T>
+		T& GetComponent()
+		{
+			SK_CORE_ASSERT(HasComponent<T>(), "Entity does not have component!");
+			return m_Scene->m_Registry.get<T>(m_EntityHandle);
+		}
+
+		template<typename T>
+		void RemoveComponent()
+		{
+			SK_CORE_ASSERT(HasComponent<T>(), "Entity does not have component!");
+			m_Scene->m_Registry.remove<T>(m_EntityHandle);
+		}
+
+		operator bool() const { return m_Scene != nullptr; }
+
+
+	private:
+		entt::entity m_EntityHandle;
+		Scene* m_Scene;
+	};
+}

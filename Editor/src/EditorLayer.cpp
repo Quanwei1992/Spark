@@ -32,10 +32,8 @@ namespace Spark
 
 		m_ActiveScene = CreateRef<Scene>();
 
-		m_SquareEntity = m_ActiveScene->CreateEntity();
-		m_ActiveScene->Reg().emplace<TransformCompoent>(m_SquareEntity);
-		m_ActiveScene->Reg().emplace<SpriteRendererCompoent>(m_SquareEntity, Color4f{0.0f,1.0f,0.0f,1.0f});
-
+		m_SquareEntity = m_ActiveScene->CreateEntity("Square");
+		m_SquareEntity.AddComponent<SpriteRendererCompoent>(Color4f{ 0.0f,1.0f,0.0f,1.0f });
 
 	}
 
@@ -146,20 +144,21 @@ namespace Spark
 			ImGui::EndMenuBar();
 		}
 
-		ImGui::Begin("Renderer2D Stats");
+		ImGui::Begin("Settings");
 		{
 			auto stats = Spark::Renderer2D::GetStats();
 			ImGui::Text("Draw Calls %d", stats.DrawCalls);
 			ImGui::Text("Quads %d", stats.QuadCount);
 			ImGui::Text("Vertices %d", stats.GetTotalVertexCount());
 			ImGui::Text("Indices %d", stats.GetTotalIndexCount());
-		}
-		ImGui::End();
 
-		ImGui::Begin("Color");
-		{
-			Color4f& color = m_ActiveScene->Reg().get<SpriteRendererCompoent>(m_SquareEntity).Color;
-			ImGui::ColorEdit4("SquareColor", glm::value_ptr(color));
+			if (m_SquareEntity)
+			{
+				ImGui::Separator();
+				ImGui::Text("%s", m_SquareEntity.GetComponent<TagComponent>().Tag.c_str());
+				Color4f& color = m_SquareEntity.GetComponent<SpriteRendererCompoent>().Color;
+				ImGui::ColorEdit4("SquareColor", glm::value_ptr(color));
+			}
 
 		}
 		ImGui::End();

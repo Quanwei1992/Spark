@@ -23,7 +23,7 @@ namespace Spark
 		bool m_ViewportFocused = false;
 		bool m_ViewportHoverd = false;
 		Ref<Scene> m_ActiveScene;
-		entt::entity m_SquareEntity;
+		Entity m_SquareEntity;
 	};
 }
 

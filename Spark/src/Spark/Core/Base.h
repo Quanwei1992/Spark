@@ -35,6 +35,10 @@ namespace Spark
 	}
 
 	// Base Types
+	typedef glm::vec2 Float2;
+	typedef glm::vec3 Float3;
+	typedef glm::vec4 Float4;
+
 	typedef glm::vec4 Color4f;
 	typedef glm::vec3 Color3f;
 }

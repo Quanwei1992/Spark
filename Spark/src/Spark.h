@@ -35,5 +35,6 @@
 // --- Scene -----------------------
 #include "Spark/Scene/Scene.h"
 #include "Spark/Scene/Components.h"
+#include "Spark/Scene/Entity.h"
 
 // ---------------------------------
