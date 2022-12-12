@@ -1,7 +1,9 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include "Spark/Renderer/Camera.h"
+
+#include "SceneCamera.h"
+
 namespace Spark
 {
 
@@ -41,12 +43,11 @@ namespace Spark
 
 	struct CameraComponent
 	{
-		Spark::Camera Camera;
+		Spark::SceneCamera Camera;
 		bool Primary = true;
+		bool FixedAspectRatio = false;
 
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent&) = default;
-		CameraComponent(const glm::mat4& projection)
-			: Camera(projection) {}
 	};
 }

@@ -56,6 +56,21 @@ namespace Spark
 
 		Renderer2D::EndScene();
 	}
+
+	void Scene::OnViewportResize(uint32_t width, uint32_t height)
+	{
+		m_ViewportWidth = width;
+		m_ViewportHeight = height;
+
+		auto view = m_Registry.view<CameraComponent>();
+		for (auto&& [entity,camera] : view.each()) {
+			if (!camera.FixedAspectRatio)
+			{
+				camera.Camera.SetViewportSize(width, height);
+			}
+		}
+	}
+
 	Entity Scene::CreateEntity(const std::string& name)
 	{
 		Entity entity = { m_Registry.create() ,this };
