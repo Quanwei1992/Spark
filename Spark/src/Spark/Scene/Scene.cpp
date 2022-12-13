@@ -26,6 +26,20 @@ namespace Spark
 	}
 	void Scene::OnUpdate(Timestep ts)
 	{
+		// Update scripts
+		{
+			auto view = m_Registry.view<NativeScriptComponent>();
+			for (auto&& [entity,nsc] : view.each()) {
+				if (nsc.Instance == nullptr)
+				{
+					nsc.Instance = nsc.InstantiateScript();
+					nsc.Instance->m_Entity = Entity{ entity ,this};
+					nsc.Instance->OnCreate();
+				}
+				nsc.Instance->OnUpdate(ts);
+			}
+		}
+
 
 		// Render 2D
 		Camera* mainCamera = nullptr;

@@ -3,6 +3,9 @@
 #include <glm/glm.hpp>
 
 #include "SceneCamera.h"
+#include "Spark/Renderer/Camera.h"
+#include "Spark/Core/Timestep.h"
+#include "Spark/Scene/ScriptableEntity.h"
 
 namespace Spark
 {
@@ -49,5 +52,20 @@ namespace Spark
 
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent&) = default;
+	};
+
+	struct NativeScriptComponent
+	{
+		ScriptableEntity* Instance = nullptr;
+		ScriptableEntity*(*InstantiateScript)();
+		void (*DestoryScript)(NativeScriptComponent*);
+
+		template<typename T>
+		void Bind()
+		{
+			InstantiateScript = []() { return static_cast<ScriptableEntity*>(new T()); };
+			DestoryScript = [](NativeScriptComponent* nsc) {delete nsc->Instance; nsc->Instance = nullptr; };
+		}
+
 	};
 }

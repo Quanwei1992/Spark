@@ -37,9 +37,41 @@ namespace Spark
 		m_CameraEntity = m_ActiveScene->CreateEntity("Camera Entity");
 		m_CameraEntity.AddComponent<CameraComponent>();
 
-		m_SecondCamera = m_ActiveScene->CreateEntity("Clip-Space Entity");
-		auto& cc =  m_SecondCamera.AddComponent<CameraComponent>();
-		cc.Primary = false;
+		class CameraController : public ScriptableEntity
+		{
+		public:
+			void OnCreate() override
+			{
+				
+			}
+			void OnDestory() override
+			{
+				
+			}
+			void OnUpdate(Timestep ts) override
+			{
+				auto& transform = GetComponent<TransformComponent>().Transform;
+				float speed = 5.0f;
+				if (Input::IsKeyPressed(SK_KEY_A))
+				{
+					transform[3][0] -= speed * ts;
+				}
+				if (Input::IsKeyPressed(SK_KEY_D))
+				{
+					transform[3][0] += speed * ts;
+				}
+				if (Input::IsKeyPressed(SK_KEY_W))
+				{
+					transform[3][1] += speed * ts;
+				}
+				if (Input::IsKeyPressed(SK_KEY_S))
+				{
+					transform[3][1] -= speed * ts;
+				}
+			}
+		};
+
+		m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraController>();
 
 	}
 
@@ -166,24 +198,7 @@ namespace Spark
 				Color4f& color = m_SquareEntity.GetComponent<SpriteRendererComponent>().Color;
 				ImGui::ColorEdit4("SquareColor", glm::value_ptr(color));
 			}
-
-
 			ImGui::DragFloat3("Camera Transform", glm::value_ptr(m_CameraEntity.GetComponent<TransformComponent>().Transform[3]));
-			
-			if(ImGui::Checkbox("Camera A", &m_PrimaryCamera))
-			{
-				m_CameraEntity.GetComponent<CameraComponent>().Primary = m_PrimaryCamera;
-				m_SecondCamera.GetComponent<CameraComponent>().Primary = !m_PrimaryCamera;
-			}
-
-			{
-				auto& camera = m_SecondCamera.GetComponent<CameraComponent>();
-				float orthoSize = camera.Camera.GetOrthographicSize();
-				if (ImGui::DragFloat("Second Camera Ortho Size", &orthoSize))
-				{
-					camera.Camera.SetOrthographicSize(orthoSize);
-				}
-			}
 		}
 		ImGui::End();
 
