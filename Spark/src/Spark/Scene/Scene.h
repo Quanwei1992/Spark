@@ -24,6 +24,7 @@ namespace Spark
 		uint32_t m_ViewportHeight;
 
 		friend class Entity;
+		friend class SceneHierarchyPanel;
 	};
 
 }

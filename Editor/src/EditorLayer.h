@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Panels/SceneHierarchyPanel.h"
+
 #include <Spark.h>
 
 namespace Spark
@@ -26,6 +28,9 @@ namespace Spark
 		Entity m_SquareEntity;
 		Entity m_CameraEntity;
 		bool m_PrimaryCamera = true;
+
+		// Panels
+		SceneHierarchyPanel m_SceneHierarchyPanel;
 	};
 }
 

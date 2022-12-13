@@ -73,6 +73,8 @@ namespace Spark
 
 		m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraController>();
 
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+
 	}
 
 	void EditorLayer::OnDetach()
@@ -183,6 +185,8 @@ namespace Spark
 			ImGui::EndMenuBar();
 		}
 
+		m_SceneHierarchyPanel.OnImGuiRender();
+
 		ImGui::Begin("Settings");
 		{
 			auto stats = Spark::Renderer2D::GetStats();
@@ -201,6 +205,8 @@ namespace Spark
 			ImGui::DragFloat3("Camera Transform", glm::value_ptr(m_CameraEntity.GetComponent<TransformComponent>().Transform[3]));
 		}
 		ImGui::End();
+
+
 
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0,0 });
