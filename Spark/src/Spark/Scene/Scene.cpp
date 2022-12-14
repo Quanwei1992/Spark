@@ -43,12 +43,12 @@ namespace Spark
 
 		// Render 2D
 		Camera* mainCamera = nullptr;
-		glm::mat4* mainCameraTransform = nullptr;
+		glm::mat4 mainCameraTransform;
 		auto view = m_Registry.view<TransformComponent,CameraComponent>();
 		for (auto&& [entity, transfrom, camera] : view.each()) {
 			if (camera.Primary) {
 				mainCamera = &camera.Camera;
-				mainCameraTransform = &transfrom.Transform;
+				mainCameraTransform = transfrom.GetTransform();
 				break;
 			}
 		}
@@ -58,14 +58,14 @@ namespace Spark
 			return;
 		}
 
-		Renderer2D::BeginScene(*mainCamera, *mainCameraTransform);
+		Renderer2D::BeginScene(*mainCamera, mainCameraTransform);
 
 		auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
 		for (auto entity : group )
 		{
 			auto& [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
 
-			Renderer2D::DrawQuad(transform, sprite.Color);
+			Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color);
 		}
 
 		Renderer2D::EndScene();

@@ -50,23 +50,23 @@ namespace Spark
 			}
 			void OnUpdate(Timestep ts) override
 			{
-				auto& transform = GetComponent<TransformComponent>().Transform;
+				auto& transform = GetComponent<TransformComponent>();
 				float speed = 5.0f;
 				if (Input::IsKeyPressed(SK_KEY_A))
 				{
-					transform[3][0] -= speed * ts;
+					transform.Translation.x -= speed * ts;
 				}
 				if (Input::IsKeyPressed(SK_KEY_D))
 				{
-					transform[3][0] += speed * ts;
+					transform.Translation.x += speed * ts;
 				}
 				if (Input::IsKeyPressed(SK_KEY_W))
 				{
-					transform[3][1] += speed * ts;
+					transform.Translation.y += speed * ts;
 				}
 				if (Input::IsKeyPressed(SK_KEY_S))
 				{
-					transform[3][1] -= speed * ts;
+					transform.Translation.y -= speed * ts;
 				}
 			}
 		};
