@@ -84,6 +84,19 @@ namespace Spark
 
 		}
 
+
+		if (entity.HasComponent<SpriteRendererComponent>())
+		{
+			if (ImGui::TreeNodeEx((void*)typeid(SpriteRendererComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Sprite Renderer"))
+			{
+				auto& spriteRenderer = entity.GetComponent<SpriteRendererComponent>();
+				ImGui::ColorEdit4("Color", glm::value_ptr(spriteRenderer.Color));
+				ImGui::TreePop();
+			}
+
+		}
+
+
 		if (entity.HasComponent<CameraComponent>())
 		{
 			if (ImGui::TreeNodeEx((void*)typeid(CameraComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Camera"))

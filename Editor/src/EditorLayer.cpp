@@ -194,15 +194,6 @@ namespace Spark
 			ImGui::Text("Quads %d", stats.QuadCount);
 			ImGui::Text("Vertices %d", stats.GetTotalVertexCount());
 			ImGui::Text("Indices %d", stats.GetTotalIndexCount());
-
-			if (m_SquareEntity)
-			{
-				ImGui::Separator();
-				ImGui::Text("%s", m_SquareEntity.GetComponent<TagComponent>().Tag.c_str());
-				Color4f& color = m_SquareEntity.GetComponent<SpriteRendererComponent>().Color;
-				ImGui::ColorEdit4("SquareColor", glm::value_ptr(color));
-			}
-			ImGui::DragFloat3("Camera Transform", glm::value_ptr(m_CameraEntity.GetComponent<TransformComponent>().Transform[3]));
 		}
 		ImGui::End();
 
