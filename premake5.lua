@@ -135,7 +135,7 @@ project "Sandbox"
         }
  
     filter "configurations:Debug"
-        defines "SK_DEBUG"
+        defines {"SK_DEBUG","SK_ENABLE_ASSERTS"}
         symbols "on"
 
     
@@ -191,7 +191,7 @@ project "Editor"
         }
  
     filter "configurations:Debug"
-        defines "SK_DEBUG"
+        defines {"SK_DEBUG","SK_ENABLE_ASSERTS"}
         symbols "on"
 
     

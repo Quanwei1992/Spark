@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Spark/Core/Log.h"
+#include "Spark/Core/Base.h"
 #include "Spark/Core/Layer.h"
 #include "Spark/Core/Timestep.h"
 #include "Spark/Core/KeyCodes.h"

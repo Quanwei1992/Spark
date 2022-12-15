@@ -31,12 +31,42 @@ namespace Spark
 			m_SelectionContext = {};
 		}
 
+		if (ImGui::BeginPopupContextWindow(0, ImGuiPopupFlags_NoOpenOverItems | ImGuiPopupFlags_MouseButtonRight))
+		{
+			if (ImGui::MenuItem("Create Empty Entity"))
+			{
+				m_Context->CreateEntity("Empty Entity");
+			}
+			ImGui::EndPopup();
+		}
+
 		ImGui::End();
 
 		ImGui::Begin("Properties");
 		if(m_SelectionContext)
 		{
 			DrawComponents(m_SelectionContext);
+
+			if (ImGui::Button("Add Component"))
+			{
+				ImGui::OpenPopup("AddComponent");
+			}
+
+			if (ImGui::BeginPopup("AddComponent"))
+			{
+				if (ImGui::MenuItem("Camera"))
+				{
+					m_SelectionContext.AddComponent<CameraComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+				if (ImGui::MenuItem("Sprite Renderer"))
+				{
+					m_SelectionContext.AddComponent<SpriteRendererComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::EndPopup();
+			}
+
 		}
 		ImGui::End();
 	}
@@ -53,6 +83,16 @@ namespace Spark
 		if (ImGui::IsItemClicked())
 		{
 			m_SelectionContext = entity;
+		}
+
+		if (ImGui::BeginPopupContextItem())
+		{
+			if (ImGui::MenuItem("Delete Entity"))
+			{
+				m_Context->DestoryEntity(entity);
+				m_SelectionContext = Entity::Empty;
+			}
+			ImGui::EndPopup();
 		}
 
 		if (opened)
@@ -124,6 +164,9 @@ namespace Spark
 
 	void SceneHierarchyPanel::DrawComponents(Entity& entity)
 	{
+
+		const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap;
+
 		if (entity.HasComponent<TagComponent>())
 		{
 			auto& tag = entity.GetComponent<TagComponent>().Tag;
@@ -135,30 +178,53 @@ namespace Spark
 				tag = std::string(buffer);
 			}
 		}
-	
+
 		if (entity.HasComponent<TransformComponent>())
 		{
-			if (ImGui::TreeNodeEx((void*)typeid(TransformComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Transform"))
+			if (ImGui::TreeNodeEx((void*)typeid(TransformComponent).hash_code(), treeNodeFlags, "Transform"))
 			{
 				auto& transform = entity.GetComponent<TransformComponent>();
-				DrawVec3Control("Translation", transform.Translation,0.0f,180.0f);
+				DrawVec3Control("Translation", transform.Translation, 0.0f, 180.0f);
 				glm::vec3 rotation = glm::degrees(transform.Rotation);
 				DrawVec3Control("Rotation", rotation, 0.0f, 180.0f);
 				transform.Rotation = glm::radians(rotation);
 				DrawVec3Control("Scale", transform.Scale, 1.0f, 180.0f);
 				ImGui::TreePop();
 			}
-
 		}
-
 
 		if (entity.HasComponent<SpriteRendererComponent>())
 		{
-			if (ImGui::TreeNodeEx((void*)typeid(SpriteRendererComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Sprite Renderer"))
+			bool removeComponent = false;
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2 { 4,4 });
+			bool open = ImGui::TreeNodeEx((void*)typeid(SpriteRendererComponent).hash_code(), treeNodeFlags, "Sprite Renderer");
+			ImGui::SameLine(ImGui::GetWindowWidth() - 25.0f);
+			if (ImGui::Button("+", ImVec2{20,20}))
 			{
-				auto& spriteRenderer = entity.GetComponent<SpriteRendererComponent>();
-				ImGui::ColorEdit4("Color", glm::value_ptr(spriteRenderer.Color));
+				ImGui::OpenPopup("ComponentSettings");
+			}
+			ImGui::PopStyleVar();
+
+			if (ImGui::BeginPopup("ComponentSettings"))
+			{
+				if (ImGui::MenuItem("Remove Component"))
+				{
+					removeComponent = true;
+				}
+				ImGui::EndPopup();
+			}
+
+
+			if (open)
+			{
+				auto& component = entity.GetComponent<SpriteRendererComponent>();
+				ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
 				ImGui::TreePop();
+			}
+
+			if (removeComponent)
+			{
+				entity.RemoveComponent<SpriteRendererComponent>();
 			}
 
 		}
@@ -166,7 +232,7 @@ namespace Spark
 
 		if (entity.HasComponent<CameraComponent>())
 		{
-			if (ImGui::TreeNodeEx((void*)typeid(CameraComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Camera"))
+			if (ImGui::TreeNodeEx((void*)typeid(CameraComponent).hash_code(), treeNodeFlags, "Camera"))
 			{
 				auto& cameraComponent = entity.GetComponent<CameraComponent>();
 				auto& camera = cameraComponent.Camera;
@@ -226,7 +292,7 @@ namespace Spark
 					{
 						camera.SetOrthographicSize(orthoSize);
 					}
-					
+
 					float nearClip = camera.GetOrthographicNearClip();
 					if (ImGui::DragFloat("Near", &nearClip))
 					{
