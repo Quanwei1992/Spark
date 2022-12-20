@@ -7,6 +7,8 @@
 namespace Spark
 {
 	class Entity;
+	class SceneSerializer;
+
 	class Scene
 	{
 	public:
@@ -28,6 +30,7 @@ namespace Spark
 
 		friend class Entity;
 		friend class SceneHierarchyPanel;
+		friend class SceneSerializer;
 	};
 
 }

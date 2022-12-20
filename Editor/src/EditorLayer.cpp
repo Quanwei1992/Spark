@@ -1,4 +1,5 @@
 #include "EditorLayer.h"
+#include "Spark/Scene/SceneSerializer.h"
 
 #include <imgui.h>
 #include <glm/gtc/matrix_transform.hpp>
@@ -20,22 +21,20 @@ namespace Spark
 	{
 		SK_PROFILE_FUNCTION();
 
-		m_CheckerboradTexture = Texture2D::Create("assets/textures/Checkerboard.png");
-
 		FramebufferSpecification fbSpec;
-		fbSpec.Width = 1280;
-		fbSpec.Height = 720;
+		fbSpec.Width = 1920;
+		fbSpec.Height = 1080;
 		m_Framebuffer = Framebuffer::Create(fbSpec);
 
 		m_CameraController.SetZoomLevel(5.0f);
 		m_CameraController.OnResize(fbSpec.Width, fbSpec.Height);
 		m_ActiveScene = CreateRef<Scene>();
 
-		m_SquareEntity = m_ActiveScene->CreateEntity("Square");
-		m_SquareEntity.AddComponent<SpriteRendererComponent>(Color4f{ 0.0f,1.0f,0.0f,1.0f });
+		//m_SquareEntity = m_ActiveScene->CreateEntity("Square");
+		//m_SquareEntity.AddComponent<SpriteRendererComponent>(Color4f{ 0.0f,1.0f,0.0f,1.0f });
 
-		m_CameraEntity = m_ActiveScene->CreateEntity("Camera Entity");
-		m_CameraEntity.AddComponent<CameraComponent>();
+		//m_CameraEntity = m_ActiveScene->CreateEntity("Camera Entity");
+		//m_CameraEntity.AddComponent<CameraComponent>();
 
 		class CameraController : public ScriptableEntity
 		{
@@ -71,10 +70,9 @@ namespace Spark
 			}
 		};
 
-		m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraController>();
+		//m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraController>();
 
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
-
 	}
 
 	void EditorLayer::OnDetach()
@@ -178,8 +176,19 @@ namespace Spark
 		{
 			if (ImGui::BeginMenu("File"))
 			{
-				// Disabling fullscreen would allow the window to be moved to the front of other windows,
-				// which we can't undo at the moment without finer window depth/z control.
+
+				if (ImGui::MenuItem("Serialize"))
+				{
+
+					SceneSerializer serializer(m_ActiveScene);
+					serializer.Serialize("d:/Example.spark");		
+				}
+
+				if (ImGui::MenuItem("Deserialize"))
+				{
+					SceneSerializer serializer(m_ActiveScene);
+					serializer.Deserialize("d:/Example.spark");
+				}
 
 				if (ImGui::MenuItem("Exit"))
 				{
