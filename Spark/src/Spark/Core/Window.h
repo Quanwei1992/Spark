@@ -13,8 +13,8 @@ namespace Spark
 		uint32_t Height;
 
 		WindowProps(const std::string& title= "Spark",
-			uint32_t width = 1204,
-			uint32_t height = 576)
+			uint32_t width = 1920,
+			uint32_t height = 1080)
 			:Title(title), Width(width), Height(height)
 		{
 		}
