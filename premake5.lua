@@ -20,11 +20,13 @@ InlcudeDir["glm"] = "Spark/vendor/glm"
 InlcudeDir["EnTT"] = "Spark/vendor/EnTT/include"
 InlcudeDir["stb_image"] = "Spark/vendor/stb_image"
 InlcudeDir["spdlog"] = "Spark/vendor/spdlog/include"
+InlcudeDir["yaml_cpp"] = "Spark/vendor/yaml-cpp/include"
 
 group "Dependcies"
     include "Spark/vendor/GLFW"
     include "Spark/vendor/Glad"
     include "Spark/vendor/imgui"
+    include "Spark/vendor/yaml-cpp"
 group ""
 
 
@@ -61,6 +63,7 @@ project "Spark"
         "%{InlcudeDir.ImGui}",
         "%{InlcudeDir.glm}",
         "%{InlcudeDir.EnTT}",
+        "%{InlcudeDir.yaml_cpp}",
         "%{prj.name}/src"
     }
 
@@ -69,7 +72,8 @@ project "Spark"
         "GLFW",
         "Glad",
         "ImGui",
-        "opengl32.lib"
+        "opengl32.lib",
+        "yaml-cpp"
     }
 
     filter "system:windows"    
