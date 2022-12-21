@@ -153,7 +153,7 @@ namespace Spark
 	{
 		SK_PROFILE_FUNCTION();
 
-		glm::mat4 viewProj = camera.GetProjection() * transform;
+		glm::mat4 viewProj = camera.GetProjection() *  glm::inverse(transform);
 		BeginSceneImpl(viewProj);
 	}
 
