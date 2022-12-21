@@ -21,6 +21,7 @@ InlcudeDir["EnTT"] = "Spark/vendor/EnTT/include"
 InlcudeDir["stb_image"] = "Spark/vendor/stb_image"
 InlcudeDir["spdlog"] = "Spark/vendor/spdlog/include"
 InlcudeDir["yaml_cpp"] = "Spark/vendor/yaml-cpp/include"
+InlcudeDir["ImGuizmo"] = "Spark/vendor/ImGuizmo"
 
 group "Dependcies"
     include "Spark/vendor/GLFW"
@@ -52,8 +53,10 @@ project "Spark"
         "%{prj.name}/vendor/stb_image/**.h",
         "%{prj.name}/vendor/stb_image/**.cpp",
         "%{prj.name}/vendor/EnTT/include/**.hpp",
+        "%{prj.name}/vendor/ImGuizmo/ImGuizmo.h",
+        "%{prj.name}/vendor/ImGuizmo/ImGuizmo.cpp"
     }
-
+    
     includedirs
     {
         "%{InlcudeDir.stb_image}",
@@ -64,6 +67,7 @@ project "Spark"
         "%{InlcudeDir.glm}",
         "%{InlcudeDir.EnTT}",
         "%{InlcudeDir.yaml_cpp}",
+        "%{InlcudeDir.ImGuizmo}",
         "%{prj.name}/src"
     }
 
@@ -91,6 +95,9 @@ project "Spark"
     filter "configurations:Release"
         defines "SK_RELEASE"
         optimize "on"
+
+    filter "files:Spark/vendor/ImGuizmo/**.cpp"
+        flags {"NoPCH"}
 
 
 
@@ -175,6 +182,7 @@ project "Editor"
         "%{InlcudeDir.glm}",
         "%{InlcudeDir.ImGui}",
         "%{InlcudeDir.EnTT}",
+        "%{InlcudeDir.ImGuizmo}",
         "Spark/src/",
     }
 
