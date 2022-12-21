@@ -1,5 +1,6 @@
 #include "EditorLayer.h"
 #include "Spark/Scene/SceneSerializer.h"
+#include "Spark/Utils/PlatformUtils.h"
 
 #include <imgui.h>
 #include <glm/gtc/matrix_transform.hpp>
@@ -176,18 +177,19 @@ namespace Spark
 		{
 			if (ImGui::BeginMenu("File"))
 			{
-
-				if (ImGui::MenuItem("Serialize"))
+				if (ImGui::MenuItem("New","Ctrl+N"))
 				{
-
-					SceneSerializer serializer(m_ActiveScene);
-					serializer.Serialize("d:/Example.spark");		
+					NewScene();
 				}
 
-				if (ImGui::MenuItem("Deserialize"))
+				if (ImGui::MenuItem("Open...","Ctrl+O"))
 				{
-					SceneSerializer serializer(m_ActiveScene);
-					serializer.Deserialize("d:/Example.spark");
+					OpenScene();
+				}
+
+				if (ImGui::MenuItem("Save As...","Ctrl+Shift+S"))
+				{
+					SaveSceneAs();
 				}
 
 				if (ImGui::MenuItem("Exit"))
@@ -239,9 +241,78 @@ namespace Spark
 		ImGui::End();
 	}
 
-	void EditorLayer::OnEvent(Spark::Event& event)
+	void EditorLayer::OnEvent(Spark::Event& e)
 	{
-		m_CameraController.OnEvent(event);
+		m_CameraController.OnEvent(e);
+
+		EventDispatcher dispatcher(e);
+		dispatcher.Dispatch<KeyPressedEvent>(SK_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
+	}
+
+	bool EditorLayer::OnKeyPressed(KeyPressedEvent& e)
+	{
+		if (e.GetRepeatcount() > 0) return 0;
+		bool control = Input::IsKeyPressed(SK_KEY_LEFT_CONTROL) || Input::IsKeyPressed(SK_KEY_RIGHT_CONTROL);
+		bool shift = Input::IsKeyPressed(SK_KEY_LEFT_SHIFT) || Input::IsKeyPressed(SK_KEY_RIGHT_SHIFT);
+		switch (e.GetKeyCode())
+		{
+		case SK_KEY_O:
+		{
+			if (control)
+			{
+				OpenScene();
+			}
+			break;
+		}
+		case SK_KEY_S:
+		{
+			if (control && shift)
+			{
+				SaveSceneAs();
+			}
+			break;
+		}
+		case SK_KEY_N:
+		{
+			if (control)
+			{
+				NewScene();
+			}
+			break;
+		}
+		}
+		return false;
+	}
+
+	void EditorLayer::NewScene()
+	{
+		m_ActiveScene = CreateRef<Scene>();
+		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+	}
+
+	void EditorLayer::OpenScene()
+	{
+		auto filepath = FileDialogs::OpenFile("Spark Scene (*.spark)\0*.spark\0");
+		if (!filepath.empty())
+		{
+			m_ActiveScene = CreateRef<Scene>();
+			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+
+			SceneSerializer serializer(m_ActiveScene);
+			serializer.Deserialize(filepath);
+		}
+	}
+
+	void EditorLayer::SaveSceneAs()
+	{
+		auto filepath = FileDialogs::SaveFile("Spark Scene (*.spark)\0*.spark\0");
+		if (!filepath.empty())
+		{
+			SceneSerializer serializer(m_ActiveScene);
+			serializer.Serialize(filepath);
+		}
 	}
 
 }

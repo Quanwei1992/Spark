@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Panels/SceneHierarchyPanel.h"
+#include "Spark/Events/KeyEvent.h"
 
 #include <Spark.h>
 
@@ -16,6 +17,12 @@ namespace Spark
 		virtual void OnUpdate(Timestep ts) override;
 		virtual void OnImGuiRender() override;
 		virtual void OnEvent(Event& event)override;
+
+	private:
+		bool OnKeyPressed(KeyPressedEvent& e);
+		void NewScene();
+		void OpenScene();
+		void SaveSceneAs();
 	private:
 		OrthographicCameraController m_CameraController;
 		Ref<Framebuffer> m_Framebuffer;
