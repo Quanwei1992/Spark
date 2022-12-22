@@ -85,6 +85,17 @@ namespace Spark
 		}
 	}
 
+	Entity Scene::GetPrimaryCameraEntity()
+	{
+		auto view = m_Registry.view<CameraComponent>();
+		for (auto&& [entity,camera] : view.each()) {
+			if (camera.Primary) {
+				return Entity { entity , this};
+			}
+		}
+		return Entity::Empty;
+	}
+
 	Entity Scene::CreateEntity(const std::string& name)
 	{
 		Entity entity = { m_Registry.create() ,this };

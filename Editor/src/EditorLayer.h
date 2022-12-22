@@ -30,6 +30,7 @@ namespace Spark
 		glm::vec2 m_ViewportSize = {0,0};
 		bool m_ViewportFocused = false;
 		bool m_ViewportHoverd = false;
+		int m_GizmoType = 0;
 		Ref<Scene> m_ActiveScene;
 
 		// Panels

@@ -1,10 +1,12 @@
 #include "EditorLayer.h"
 #include "Spark/Scene/SceneSerializer.h"
 #include "Spark/Utils/PlatformUtils.h"
+#include "Spark/Math/Math.h"
 
 #include <imgui.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <ImGuizmo.h>
 
 namespace Spark
 {
@@ -203,7 +205,7 @@ namespace Spark
 
 		m_SceneHierarchyPanel.OnImGuiRender();
 
-		ImGui::Begin("Settings");
+		ImGui::Begin("Stats");
 		{
 			auto stats = Spark::Renderer2D::GetStats();
 			ImGui::Text("Draw Calls %d", stats.DrawCalls);
@@ -213,15 +215,13 @@ namespace Spark
 		}
 		ImGui::End();
 
-
-
-
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0,0 });
 		ImGui::Begin("Viewport");
 		{
 			m_ViewportFocused = ImGui::IsWindowFocused();
 			m_ViewportHoverd = ImGui::IsWindowHovered();
-			Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused || !m_ViewportHoverd);
+			Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused && !m_ViewportHoverd);
+
 			ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
 			if ((viewportPanelSize.x >0 && viewportPanelSize.y > 0) && 
 				((uint32_t)viewportPanelSize.x != (uint32_t)m_ViewportSize.x || (uint32_t)viewportPanelSize.y != (uint32_t)m_ViewportSize.y))
@@ -231,6 +231,55 @@ namespace Spark
 
 			uint64_t rendererID = (uint64_t)m_Framebuffer->GetColorAttachmentRendererID();
 			ImGui::Image((void*)rendererID, viewportPanelSize, ImVec2{ 0,1 }, ImVec2{ 1,0 });
+
+			// Gizoms
+			Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
+			if (selectedEntity && m_GizmoType != 0)
+			{
+				ImGuizmo::SetDrawlist();
+				float windowWidth = (float)ImGui::GetWindowWidth();
+				float windowHeight = (float)ImGui::GetWindowHeight();
+				ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
+
+				// Camera
+				auto cameraEntity = m_ActiveScene->GetPrimaryCameraEntity();
+				if (cameraEntity)
+				{
+					const auto& camera = cameraEntity.GetComponent<CameraComponent>();
+					const auto& cameraTransform = cameraEntity.GetComponent<TransformComponent>();
+					const auto& cameraProjection = camera.Camera.GetProjection();
+					glm::mat4 cameraView = glm::inverse(cameraTransform.GetTransform());
+
+					// Entity Transform
+					auto& tc = selectedEntity.GetComponent<TransformComponent>();
+					glm::mat4 transform = tc.GetTransform();
+
+					// Snapping
+					bool snap = Input::IsKeyPressed(SK_KEY_LEFT_CONTROL);
+					float snapValue = 0.5f;
+					if (m_GizmoType == ImGuizmo::OPERATION::ROTATE)
+					{
+						snapValue = 45.0f;
+					}
+					float snapValues[3] = { snapValue,snapValue ,snapValue };
+
+					ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
+						(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(transform),
+						nullptr,snap? snapValues : nullptr);
+
+					if (ImGuizmo::IsUsing())
+					{
+						glm::vec3 translation, rotation, scale;
+						Math::DecomposeTransform(transform, translation, rotation, scale);
+						tc.Translation = translation;
+
+						glm::vec3 deltaRotation = rotation - tc.Rotation;
+						tc.Rotation += deltaRotation;
+						tc.Scale = scale;
+					}
+				}
+			
+			}
 
 		}
 		ImGui::End();
@@ -280,6 +329,19 @@ namespace Spark
 			}
 			break;
 		}
+		// Gizmos
+		case SK_KEY_Q:
+			m_GizmoType = 0;
+			break;
+		case SK_KEY_W:
+			m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
+			break;
+		case SK_KEY_E:
+			m_GizmoType = ImGuizmo::OPERATION::SCALE;
+			break;
+		case SK_KEY_R:
+			m_GizmoType = ImGuizmo::OPERATION::ROTATE;
+			break;
 		}
 		return false;
 	}
