@@ -33,47 +33,7 @@ namespace Spark
 		m_CameraController.OnResize(fbSpec.Width, fbSpec.Height);
 		m_ActiveScene = CreateRef<Scene>();
 
-		//m_SquareEntity = m_ActiveScene->CreateEntity("Square");
-		//m_SquareEntity.AddComponent<SpriteRendererComponent>(Color4f{ 0.0f,1.0f,0.0f,1.0f });
-
-		//m_CameraEntity = m_ActiveScene->CreateEntity("Camera Entity");
-		//m_CameraEntity.AddComponent<CameraComponent>();
-
-		class CameraController : public ScriptableEntity
-		{
-		public:
-			void OnCreate() override
-			{
-				
-			}
-			void OnDestory() override
-			{
-				
-			}
-			void OnUpdate(Timestep ts) override
-			{
-				auto& transform = GetComponent<TransformComponent>();
-				float speed = 5.0f;
-				if (Input::IsKeyPressed(SK_KEY_A))
-				{
-					transform.Translation.x -= speed * ts;
-				}
-				if (Input::IsKeyPressed(SK_KEY_D))
-				{
-					transform.Translation.x += speed * ts;
-				}
-				if (Input::IsKeyPressed(SK_KEY_W))
-				{
-					transform.Translation.y += speed * ts;
-				}
-				if (Input::IsKeyPressed(SK_KEY_S))
-				{
-					transform.Translation.y -= speed * ts;
-				}
-			}
-		};
-
-		//m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraController>();
+		m_EditorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
 
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
@@ -94,21 +54,24 @@ namespace Spark
 		{
 			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_CameraController.OnResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
 			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
 
 		// Update
-		if(m_ViewportFocused)
-			m_CameraController.OnUpdate(ts);
-
-
+		if (m_ViewportFocused)
+		{
+			m_CameraController.OnUpdate(ts);	
+		}
+		m_EditorCamera.OnUpdate(ts);
+			
 		// Render
 		Spark::Renderer2D::ResetStats();
 		m_Framebuffer->Bind();
 		Spark::RenderCommand::SetClearColor(glm::vec4(0.1f, 0.1f, 0.1f, 1));
 		Spark::RenderCommand::Clear();
 		// Update scene
-		m_ActiveScene->OnUpdate(ts);
+		m_ActiveScene->OnUpdateEditor(ts,m_EditorCamera);
 
 		m_Framebuffer->Unbind();
 
@@ -245,17 +208,15 @@ namespace Spark
 				auto cameraEntity = m_ActiveScene->GetPrimaryCameraEntity();
 				if (cameraEntity)
 				{
-					const auto& camera = cameraEntity.GetComponent<CameraComponent>();
-					const auto& cameraTransform = cameraEntity.GetComponent<TransformComponent>();
-					const auto& cameraProjection = camera.Camera.GetProjection();
-					glm::mat4 cameraView = glm::inverse(cameraTransform.GetTransform());
+					const auto& cameraProjection = m_EditorCamera.GetProjection();
+					glm::mat4 cameraView = m_EditorCamera.GetViewMatrix();
 
 					// Entity Transform
 					auto& tc = selectedEntity.GetComponent<TransformComponent>();
 					glm::mat4 transform = tc.GetTransform();
 
 					// Snapping
-					bool snap = Input::IsKeyPressed(SK_KEY_LEFT_CONTROL);
+					bool snap = Input::IsKeyPressed(Key::LeftControl);
 					float snapValue = 0.5f;
 					if (m_GizmoType == ImGuizmo::OPERATION::ROTATE)
 					{
@@ -293,6 +254,7 @@ namespace Spark
 	void EditorLayer::OnEvent(Spark::Event& e)
 	{
 		m_CameraController.OnEvent(e);
+		m_EditorCamera.OnEvent(e);
 
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<KeyPressedEvent>(SK_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
@@ -301,11 +263,11 @@ namespace Spark
 	bool EditorLayer::OnKeyPressed(KeyPressedEvent& e)
 	{
 		if (e.GetRepeatcount() > 0) return 0;
-		bool control = Input::IsKeyPressed(SK_KEY_LEFT_CONTROL) || Input::IsKeyPressed(SK_KEY_RIGHT_CONTROL);
-		bool shift = Input::IsKeyPressed(SK_KEY_LEFT_SHIFT) || Input::IsKeyPressed(SK_KEY_RIGHT_SHIFT);
+		bool control = Input::IsKeyPressed(Key::LeftControl) || Input::IsKeyPressed(Key::RightControl);
+		bool shift = Input::IsKeyPressed(Key::LeftShift) || Input::IsKeyPressed(Key::RightShift);
 		switch (e.GetKeyCode())
 		{
-		case SK_KEY_O:
+		case Key::O:
 		{
 			if (control)
 			{
@@ -313,7 +275,7 @@ namespace Spark
 			}
 			break;
 		}
-		case SK_KEY_S:
+		case Key::S:
 		{
 			if (control && shift)
 			{
@@ -321,7 +283,7 @@ namespace Spark
 			}
 			break;
 		}
-		case SK_KEY_N:
+		case Key::N:
 		{
 			if (control)
 			{
@@ -330,16 +292,16 @@ namespace Spark
 			break;
 		}
 		// Gizmos
-		case SK_KEY_Q:
+		case Key::Q:
 			m_GizmoType = 0;
 			break;
-		case SK_KEY_W:
+		case Key::W:
 			m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
 			break;
-		case SK_KEY_E:
+		case Key::E:
 			m_GizmoType = ImGuizmo::OPERATION::SCALE;
 			break;
-		case SK_KEY_R:
+		case Key::R:
 			m_GizmoType = ImGuizmo::OPERATION::ROTATE;
 			break;
 		}

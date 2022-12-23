@@ -11,8 +11,7 @@ namespace Spark
 
 		static void Init();
 		static void Shutdown();
-		static void BeginScene(const OrthographicCamera& camera);
-		static void BeginScene(const Camera& camera,const glm::mat4& transform);
+		static void BeginScene(const glm::mat4& viewProjection);
 		static void EndScene();
 		static void Flush();
 
@@ -53,7 +52,6 @@ namespace Spark
 
 	private:
 		static void FlushAndReset();
-		static void BeginSceneImpl(const glm::mat4& viewProjection);
 		static void DrawQuadImpl(const glm::mat4& transform, const glm::vec4& color);
 		static void DrawQuadImpl(const glm::mat4& transform, const Ref<Texture2D>& texture, const glm::vec2* texCoords, float tilingFactor, const glm::vec4& tintColor);
 	};

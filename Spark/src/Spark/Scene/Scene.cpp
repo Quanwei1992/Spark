@@ -24,7 +24,7 @@ namespace Spark
 	{
 
 	}
-	void Scene::OnUpdate(Timestep ts)
+	void Scene::OnUpdateRuntime(Timestep ts)
 	{
 		// Update scripts
 		{
@@ -58,10 +58,26 @@ namespace Spark
 			return;
 		}
 
-		Renderer2D::BeginScene(*mainCamera, mainCameraTransform);
+		glm::mat4 viewProjection = mainCamera->GetProjection() * glm::inverse(mainCameraTransform);
+		Renderer2D::BeginScene(viewProjection);
 
 		auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
 		for (auto entity : group )
+		{
+			auto& [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+
+			Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color);
+		}
+
+		Renderer2D::EndScene();
+	}
+
+	void Scene::OnUpdateEditor(Timestep ts, EditorCamera& camera)
+	{
+		Renderer2D::BeginScene(camera.GetViewProjection());
+
+		auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
+		for (auto entity : group)
 		{
 			auto& [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
 

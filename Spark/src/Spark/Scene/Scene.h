@@ -3,6 +3,7 @@
 #include "entt.hpp"
 
 #include "Spark/Core/Timestep.h"
+#include "Spark/Renderer/EditorCamera.h"
 
 namespace Spark
 {
@@ -18,7 +19,8 @@ namespace Spark
 		Entity CreateEntity(const std::string& name = std::string());
 		void DestoryEntity(Entity entity);
 
-		void OnUpdate(Timestep ts);
+		void OnUpdateRuntime(Timestep ts);
+		void OnUpdateEditor(Timestep ts, EditorCamera& camera);
 		void OnViewportResize(uint32_t width, uint32_t height);
 
 		Entity GetPrimaryCameraEntity();
