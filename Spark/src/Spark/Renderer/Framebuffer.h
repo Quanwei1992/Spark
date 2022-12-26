@@ -8,6 +8,7 @@ namespace Spark
 
 		// Color
 		RGBA8 = 1,
+		RED_INTEGER,
 
 		// Depth/stencil
 		DEPTH24STENCIL8,
@@ -59,6 +60,9 @@ namespace Spark
 		virtual  uint32_t GetColorAttachmentRendererID(uint32_t index = 0) const = 0;
 
 		virtual void Resize(uint32_t width, uint32_t height) = 0;
+		virtual int ReadPixel(uint32_t attachmentIndex, int x, int y) = 0;
+
+		virtual void ClearAttachment(uint32_t attachmentIndex, int value) = 0;
 
 		static Ref<Framebuffer> Create(const FramebufferSpecification& spec);
 		virtual ~Framebuffer() = default;

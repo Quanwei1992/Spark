@@ -17,6 +17,9 @@ namespace Spark
 		glm::vec2 TexCoord;
 		float TexIndex;
 		float TilingFactor;
+
+		// Editor-only
+		int EntityID = -1;
 	};
 
 	struct Renderer2DData
@@ -60,7 +63,8 @@ namespace Spark
 				{ShaderDataType::Float4,"a_Color"},
 				{ShaderDataType::Float2,"a_TexCoord"},
 				{ShaderDataType::Float,"a_TexIndex"},
-				{ShaderDataType::Float,"a_TilingFactor"}
+				{ShaderDataType::Float,"a_TilingFactor"},
+				{ShaderDataType::Int,"a_EntityID"}
 			});
 
 		s_Data->VertexArray->AddVertexBuffer(s_Data->VertexBuffer);
@@ -144,7 +148,7 @@ namespace Spark
 	}
 
 
-	inline void Renderer2D::DrawQuadImpl(const glm::mat4& transform, const glm::vec4& color)
+	inline void Renderer2D::DrawQuadImpl(const glm::mat4& transform, const glm::vec4& color,int entityID)
 	{
 
 		if (s_Data->QuadIndexCount >= Renderer2DData::MaxIndices)
@@ -158,6 +162,7 @@ namespace Spark
 			s_Data->QuadVertexBufferPtr->TexCoord = s_Data->QuadVertexTexCoords[i];
 			s_Data->QuadVertexBufferPtr->TexIndex = 0.0f;
 			s_Data->QuadVertexBufferPtr->TilingFactor = 1.0f;
+			s_Data->QuadVertexBufferPtr->EntityID = entityID;
 			s_Data->QuadVertexBufferPtr++;
 		}
 		s_Data->QuadIndexCount += 6;
@@ -165,7 +170,7 @@ namespace Spark
 		s_Data->Stats.QuadCount++;
 	}
 
-	inline void Renderer2D::DrawQuadImpl(const glm::mat4& transform, const Ref<Texture2D>& texture, const glm::vec2* texCoords, float tilingFactor, const glm::vec4& tintColor)
+	inline void Renderer2D::DrawQuadImpl(const glm::mat4& transform, const Ref<Texture2D>& texture, const glm::vec2* texCoords, float tilingFactor, const glm::vec4& tintColor,int entityID)
 	{
 
 		if (s_Data->QuadIndexCount >= Renderer2DData::MaxIndices)
@@ -199,6 +204,7 @@ namespace Spark
 			s_Data->QuadVertexBufferPtr->TexCoord = texCoords[i];
 			s_Data->QuadVertexBufferPtr->TexIndex = (float)textureIndex;
 			s_Data->QuadVertexBufferPtr->TilingFactor = tilingFactor;
+			s_Data->QuadVertexBufferPtr->EntityID = entityID;
 			s_Data->QuadVertexBufferPtr++;
 		}
 		s_Data->QuadIndexCount += 6;
@@ -276,6 +282,10 @@ namespace Spark
 		DrawQuadImpl(transform, texture->GetTexture(), texture->GetTexCoords(), tilingFactor, tintColor);
 	}
 
+	void Renderer2D::DrawSprite(const glm::mat4& transform, SpriteRendererComponent& src, int entityID)
+	{
+		DrawQuadImpl(transform, src.Color, entityID);
+	}
 
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)
 	{

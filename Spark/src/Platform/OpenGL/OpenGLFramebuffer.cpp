@@ -35,15 +35,15 @@ namespace Spark
 			return false;
 		}
 
-		static void AttachColorTexture(uint32_t id, int samples, GLenum format, uint32_t width, uint32_t height, int index)
+		static void AttachColorTexture(uint32_t id, int samples, GLenum internalFormat, GLenum format, uint32_t width, uint32_t height, int index)
 		{
 			bool multisampled = samples > 1;
 			if (multisampled)
 			{
-				glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, format, width, height, GL_FALSE);
+				glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, internalFormat, width, height, GL_FALSE);
 			}
 			else {
-				glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+				glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, nullptr);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -69,6 +69,26 @@ namespace Spark
 			glFramebufferTexture2D(GL_FRAMEBUFFER, attachmentType, TextureTarget(multisampled), id, 0);
 		}
 
+		static GLenum FBFormatToGLFormat(FramebufferTextureFormat format)
+		{
+			switch (format)
+			{
+			case FramebufferTextureFormat::RGBA8:return GL_RGBA8;
+			case FramebufferTextureFormat::RED_INTEGER:return GL_RED_INTEGER;
+			}
+			SK_CORE_ASSERT(false, "Unkonw framebuffer format");
+			return 0;
+		}
+		static GLenum FBFormatToGLDataType(FramebufferTextureFormat format)
+		{
+			switch (format)
+			{
+			case FramebufferTextureFormat::RGBA8:return GL_UNSIGNED_BYTE;
+			case FramebufferTextureFormat::RED_INTEGER:return GL_INT;
+			}
+			SK_CORE_ASSERT(false, "Unkonw framebuffer format");
+			return 0;
+		}
 	}
 
 
@@ -128,7 +148,10 @@ namespace Spark
 				switch (m_ColorAttachmentSpecs[i].TextureFormat)
 				{
 				case FramebufferTextureFormat::RGBA8:
-					Utils::AttachColorTexture(m_ColorAttachments[i], m_Specification.Samples, GL_RGBA8, m_Specification.Width, m_Specification.Height,i);
+					Utils::AttachColorTexture(m_ColorAttachments[i], m_Specification.Samples, GL_RGBA8,GL_RGBA, m_Specification.Width, m_Specification.Height,i);
+					break;
+				case FramebufferTextureFormat::RED_INTEGER:
+					Utils::AttachColorTexture(m_ColorAttachments[i], m_Specification.Samples, GL_R32I, GL_RED_INTEGER, m_Specification.Width, m_Specification.Height, i);
 					break;
 				}
 			}
@@ -191,6 +214,23 @@ namespace Spark
 
 		Invalidate();
 	}
+	int OpenGLFramebuffer::ReadPixel(uint32_t attachmentIndex, int x, int y)
+	{
+		SK_CORE_ASSERT(attachmentIndex < m_ColorAttachments.size(), "");
+		glReadBuffer(GL_COLOR_ATTACHMENT0 + attachmentIndex);
+		int pixelData = 0;
+		glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_INT, &pixelData);
+		return pixelData;
+	}
+	void OpenGLFramebuffer::ClearAttachment(uint32_t attachmentIndex, int value)
+	{
+		SK_CORE_ASSERT(attachmentIndex < m_ColorAttachments.size(), "");
+
+		auto& spec = m_ColorAttachmentSpecs[attachmentIndex];
+		glClearTexImage(m_ColorAttachments[attachmentIndex], 0,
+			Utils::FBFormatToGLFormat(spec.TextureFormat), Utils::FBFormatToGLDataType(spec.TextureFormat), &value);
+	}
+
 	uint32_t OpenGLFramebuffer::GetColorAttachmentRendererID(uint32_t index) const
 	{
 		SK_CORE_ASSERT(index < m_ColorAttachments.size(), "");

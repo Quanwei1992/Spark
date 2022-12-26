@@ -21,6 +21,7 @@ namespace Spark
 
 	private:
 		bool OnKeyPressed(KeyPressedEvent& e);
+		bool OnMousePressed(MouseButtonPressedEvent& e);
 		void NewScene();
 		void OpenScene();
 		void SaveSceneAs();
@@ -29,9 +30,11 @@ namespace Spark
 		Ref<Framebuffer> m_Framebuffer;
 		float m_blueQuadRotation = 0.0f;
 		glm::vec2 m_ViewportSize = {1920,1080};
+		glm::vec2 m_ViewportBounds[2];
 		bool m_ViewportFocused = false;
 		bool m_ViewportHoverd = false;
 		int m_GizmoType = 0;
+		Entity m_HoveredEntity = Entity::Empty;
 		EditorCamera m_EditorCamera;
 		Ref<Scene> m_ActiveScene;
 		// Panels

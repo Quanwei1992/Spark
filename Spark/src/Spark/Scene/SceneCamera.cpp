@@ -33,12 +33,9 @@ namespace Spark
 	}
 	void SceneCamera::RecalculateProjection()
 	{
-
 		if (m_ProjectionType == ProjectionType::Perspective)
 		{
-
 			m_Projection = glm::perspective(m_PerspectiveFOV, m_AspectRatio, m_PerspectiveNear, m_PerspectiveFar);
-
 		}
 		else if (m_ProjectionType == ProjectionType::Otrhographic)
 		{
@@ -49,7 +46,5 @@ namespace Spark
 
 			m_Projection = glm::ortho(orthoLeft, orthoRight, orthoBottom, orthoTop, m_OrthographicNear, m_OrthographicFar);
 		}
-
-
 	}
 }

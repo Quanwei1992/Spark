@@ -59,17 +59,59 @@ namespace Spark
 		uint32_t index = 0;
 		for (const auto& element : vertexBuffer->GetLayout())
 		{
+			switch (element.Type)
+			{
+			case ShaderDataType::Float:
+			case ShaderDataType::Float2:
+			case ShaderDataType::Float3:
+			case ShaderDataType::Float4:
+			{
+				glEnableVertexAttribArray(index);
+				glVertexAttribPointer(index,
+					element.GetComponentCount(),
+					ShaderDateTypeToOpenGLBaseType(element.Type),
+					element.Normalized ? GL_TRUE : GL_FALSE,
+					vertexBuffer->GetLayout().GetStride(),
+					(const uint8_t*)(0) + element.Offset);
+				index++;
+			}break;
 
-			glEnableVertexAttribArray(index);
-			glVertexAttribPointer(index,
-				element.GetComponentCount(),
-				ShaderDateTypeToOpenGLBaseType(element.Type),
-				element.Normalized ? GL_TRUE : GL_FALSE,
-				vertexBuffer->GetLayout().GetStride(),
-				(const uint8_t*)(0) + element.Offset);
-			index++;
+			case ShaderDataType::Int:
+			case ShaderDataType::Int2:
+			case ShaderDataType::Int3:
+			case ShaderDataType::Int4:
+			case ShaderDataType::Bool:
+			{
+				glEnableVertexAttribArray(index);
+				glVertexAttribIPointer(index,
+					element.GetComponentCount(),
+					ShaderDateTypeToOpenGLBaseType(element.Type),
+					vertexBuffer->GetLayout().GetStride(),
+					(const uint8_t*)(0) + element.Offset);
+				index++;
+			}break;
+
+			case ShaderDataType::Mat3:
+			case ShaderDataType::Mat4:
+			{
+				uint8_t count = element.GetComponentCount();
+				for (uint8_t i = 0; i < count; i++)
+				{
+					glEnableVertexAttribArray(index);
+					glVertexAttribPointer(index,
+						count,
+						ShaderDateTypeToOpenGLBaseType(element.Type),
+						element.Normalized ? GL_TRUE : GL_FALSE,
+						vertexBuffer->GetLayout().GetStride(),
+						(const uint8_t*)(element.Offset + (sizeof(float)) * count * i));
+
+					glVertexAttribDivisor(index, 1);
+					index++;
+				}
+				
+			}break;
+			}		
 		}
-
 
 		m_VertexBuffers.push_back(vertexBuffer);
 	}

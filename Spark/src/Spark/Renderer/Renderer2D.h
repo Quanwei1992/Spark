@@ -3,6 +3,7 @@
 #include "OrthographicCamera.h"
 #include "Texture.h"
 #include "SubTexture2D.h"
+#include "Spark/Scene/Components.h"
 namespace Spark
 {
 	class Renderer2D
@@ -37,6 +38,9 @@ namespace Spark
 		static void DrawQuad(const glm::mat4& transform,const Ref<Texture2D>& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
 		static void DrawQuad(const glm::mat4& transform,const Ref<SubTexture2D>& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
 
+
+		static void DrawSprite(const glm::mat4& transform, SpriteRendererComponent& src,int entityID);
+
 		// Stats
 
 		struct Statistics
@@ -52,7 +56,7 @@ namespace Spark
 
 	private:
 		static void FlushAndReset();
-		static void DrawQuadImpl(const glm::mat4& transform, const glm::vec4& color);
-		static void DrawQuadImpl(const glm::mat4& transform, const Ref<Texture2D>& texture, const glm::vec2* texCoords, float tilingFactor, const glm::vec4& tintColor);
+		static void DrawQuadImpl(const glm::mat4& transform, const glm::vec4& color, int entityID = -1);
+		static void DrawQuadImpl(const glm::mat4& transform, const Ref<Texture2D>& texture, const glm::vec2* texCoords, float tilingFactor, const glm::vec4& tintColor,int entityID = -1);
 	};
 }

@@ -2,6 +2,7 @@
 #include "Spark/Scene/SceneSerializer.h"
 #include "Spark/Utils/PlatformUtils.h"
 #include "Spark/Math/Math.h"
+#include "Spark/Core/MouseCodes.h"
 
 #include <imgui.h>
 #include <glm/gtc/matrix_transform.hpp>
@@ -27,7 +28,7 @@ namespace Spark
 		FramebufferSpecification fbSpec;
 		fbSpec.Width = 1920;
 		fbSpec.Height = 1080;
-		fbSpec.Attachments = { FramebufferTextureFormat::RGBA8,FramebufferTextureFormat::RGBA8,FramebufferTextureFormat::Depth };
+		fbSpec.Attachments = { FramebufferTextureFormat::RGBA8,FramebufferTextureFormat::RED_INTEGER,FramebufferTextureFormat::Depth };
 		m_Framebuffer = Framebuffer::Create(fbSpec);
 
 		m_CameraController.SetZoomLevel(5.0f);
@@ -71,9 +72,34 @@ namespace Spark
 		m_Framebuffer->Bind();
 		Spark::RenderCommand::SetClearColor(glm::vec4(0.1f, 0.1f, 0.1f, 1));
 		Spark::RenderCommand::Clear();
+
+		// Clear our entity ID attachment to -1
+
+		m_Framebuffer->ClearAttachment(1, -1);
+
 		// Update scene
 		m_ActiveScene->OnUpdateEditor(ts,m_EditorCamera);
 
+		auto[mx,my] = ImGui::GetMousePos();
+		mx -= m_ViewportBounds[0].x;
+		my -= m_ViewportBounds[0].y;
+		glm::vec2 viewportSize = m_ViewportBounds[1] - m_ViewportBounds[0];
+		my = viewportSize.y - my;
+
+		int mouseX = (int)mx;
+		int mouseY = (int)my;
+
+		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
+		{
+			int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY);
+			if (pixelData == -1)
+			{
+				m_HoveredEntity = Entity::Empty;
+			}
+			else {
+				m_HoveredEntity = {(entt::entity)pixelData,m_ActiveScene.get() };
+			}
+		}
 		m_Framebuffer->Unbind();
 
 	}
@@ -176,6 +202,13 @@ namespace Spark
 			ImGui::Text("Quads %d", stats.QuadCount);
 			ImGui::Text("Vertices %d", stats.GetTotalVertexCount());
 			ImGui::Text("Indices %d", stats.GetTotalIndexCount());
+
+			std::string name = "None";
+			if (m_HoveredEntity)
+			{
+				name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
+			}
+			ImGui::Text("Hovered Entity: %s", name.c_str());
 		}
 		ImGui::End();
 
@@ -193,9 +226,15 @@ namespace Spark
 				m_ViewportSize = { viewportPanelSize.x,viewportPanelSize.y };
 			}
 
-			uint64_t rendererID = (uint64_t)m_Framebuffer->GetColorAttachmentRendererID(1);
+			uint64_t rendererID = (uint64_t)m_Framebuffer->GetColorAttachmentRendererID();
 			ImGui::Image((void*)rendererID, viewportPanelSize, ImVec2{ 0,1 }, ImVec2{ 1,0 });
 
+			auto windowSize = ImGui::GetWindowSize();
+			auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
+			auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
+			auto viewportOffset = ImGui::GetWindowPos();
+			m_ViewportBounds[0] = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
+			m_ViewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
 			// Gizoms
 			Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
 			if (selectedEntity && m_GizmoType != 0)
@@ -259,6 +298,7 @@ namespace Spark
 
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<KeyPressedEvent>(SK_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
+		dispatcher.Dispatch<MouseButtonPressedEvent>(SK_BIND_EVENT_FN(EditorLayer::OnMousePressed));
 	}
 
 	bool EditorLayer::OnKeyPressed(KeyPressedEvent& e)
@@ -305,6 +345,18 @@ namespace Spark
 		case Key::R:
 			m_GizmoType = ImGuizmo::OPERATION::ROTATE;
 			break;
+		}
+		return false;
+	}
+
+	bool EditorLayer::OnMousePressed(MouseButtonPressedEvent& e)
+	{
+		if (e.GetMouseButton() == Mouse::ButtonLeft)
+		{
+			if (m_ViewportHoverd && !ImGuizmo::IsOver() && !Input::IsKeyPressed(Key::LeftAlt))
+			{
+				m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
+			}		
 		}
 		return false;
 	}
