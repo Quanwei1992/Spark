@@ -27,6 +27,7 @@ namespace Spark
 		FramebufferSpecification fbSpec;
 		fbSpec.Width = 1920;
 		fbSpec.Height = 1080;
+		fbSpec.Attachments = { FramebufferTextureFormat::RGBA8,FramebufferTextureFormat::RGBA8,FramebufferTextureFormat::Depth };
 		m_Framebuffer = Framebuffer::Create(fbSpec);
 
 		m_CameraController.SetZoomLevel(5.0f);
@@ -192,7 +193,7 @@ namespace Spark
 				m_ViewportSize = { viewportPanelSize.x,viewportPanelSize.y };
 			}
 
-			uint64_t rendererID = (uint64_t)m_Framebuffer->GetColorAttachmentRendererID();
+			uint64_t rendererID = (uint64_t)m_Framebuffer->GetColorAttachmentRendererID(1);
 			ImGui::Image((void*)rendererID, viewportPanelSize, ImVec2{ 0,1 }, ImVec2{ 1,0 });
 
 			// Gizoms

@@ -10,15 +10,18 @@ namespace Spark
 		void Invalidate();
 		virtual void Bind() override;
 		virtual void Unbind() override;
-		virtual uint32_t GetColorAttachmentRendererID() const override;
+		virtual uint32_t GetColorAttachmentRendererID(uint32_t index) const override;
 		virtual void Resize(uint32_t width, uint32_t height) override;
 	private:
 		uint32_t m_RendererID = 0;
-		uint32_t m_ColorAttachment = 0, m_DeptchAttachment = 0;
+		std::vector<uint32_t> m_ColorAttachments;
+		uint32_t m_DeptchAttachment = 0;
+
 		FramebufferSpecification m_Specification;
 		virtual const FramebufferSpecification& GetSpecification() const override;
 
-
+		std::vector<FramebufferTextureSpecification> m_ColorAttachmentSpecs;
+		FramebufferTextureSpecification m_DepthAttachmentSpec;
 
 
 	};
