@@ -33,7 +33,7 @@ namespace Spark
 		float xScale, yScale;
 		GLFWwindow* window = glfwGetCurrentContext();
 		glfwGetWindowContentScale(window, &xScale, &yScale);
-		const float baseFontSize = 18.0f;
+		const float baseFontSize = 22.0f;
 		io.Fonts->AddFontFromFileTTF("assets/fonts/OpenSans/OpenSans-Bold.ttf", baseFontSize * xScale);
 		io.FontDefault = io.Fonts->AddFontFromFileTTF("assets/fonts/OpenSans/OpenSans-Regular.ttf", baseFontSize * xScale);
 

@@ -243,8 +243,6 @@ namespace Spark
 	}
 
 
-
-
 	void OpenGLShader::CreateProgram()
 	{
 		GLuint program = glCreateProgram();

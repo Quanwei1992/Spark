@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Panels/SceneHierarchyPanel.h"
+#include "Panels/ContentBrowserPanel.h"
+
 #include "Spark/Events/KeyEvent.h"
 #include "Spark/Renderer/EditorCamera.h"
 
@@ -39,6 +41,8 @@ namespace Spark
 		Ref<Scene> m_ActiveScene;
 		// Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;
+		ContentBrowserPanel m_ContentBrowserPanel;
+
 	};
 }
 
