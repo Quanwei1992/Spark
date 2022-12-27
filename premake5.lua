@@ -1,212 +1,37 @@
-workspace "Spark" 
-    architecture "x64"
-    startproject "Editor"
-    configurations
-    {
-        "Debug",
-        "Release",
-        "Dist"
-    }
-    location "build"
+include "./vendor/premake/premake_customization/solution_items.lua"
+include "Dependencies.lua"
 
+workspace "Spark"
+	architecture "x86_64"
+	startproject "Editor"
+
+	configurations
+	{
+		"Debug",
+		"Release",
+		"Dist"
+	}
+
+	solution_items
+	{
+		".editorconfig"
+	}
+
+	flags
+	{
+		"MultiProcessorCompile"
+	}
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
-InlcudeDir = {}
-InlcudeDir["GLFW"] = "Spark/vendor/GLFW/include"
-InlcudeDir["Glad"] = "Spark/vendor/Glad/include"
-InlcudeDir["ImGui"] = "Spark/vendor/imgui"
-InlcudeDir["glm"] = "Spark/vendor/glm"
-InlcudeDir["EnTT"] = "Spark/vendor/EnTT/include"
-InlcudeDir["stb_image"] = "Spark/vendor/stb_image"
-InlcudeDir["spdlog"] = "Spark/vendor/spdlog/include"
-InlcudeDir["yaml_cpp"] = "Spark/vendor/yaml-cpp/include"
-InlcudeDir["ImGuizmo"] = "Spark/vendor/ImGuizmo"
-
-group "Dependcies"
-    include "Spark/vendor/GLFW"
-    include "Spark/vendor/Glad"
-    include "Spark/vendor/imgui"
-    include "Spark/vendor/yaml-cpp"
+group "Dependencies"
+    include "vendor/premake"
+	include "Spark/vendor/GLFW"
+	include "Spark/vendor/Glad"
+	include "Spark/vendor/imgui"
+	include "Spark/vendor/yaml-cpp"
 group ""
 
-
-project "Spark"
-    location "build/Spark"
-    kind "StaticLib"
-    language "C++"
-    staticruntime "on"
-    flags { "FatalCompileWarnings" }
-    cppdialect "C++17"
-    targetdir("build/bin/" .. outputdir .. "/%{prj.name}")
-    objdir("build/intermediate/" .. outputdir .. "/%{prj.name}")
-    
-    pchheader "skpch.h"
-    pchsource "%{prj.name}/src/skpch.cpp"
-    files
-    {
-        "%{prj.name}/src/**.h",
-        "%{prj.name}/src/**.cpp",
-        "%{prj.name}/vendor/glm/glm/**.hpp",
-        "%{prj.name}/vendor/glm/glm/**.inl",
-        "%{prj.name}/vendor/glm/util/glm.natvis",
-        "%{prj.name}/vendor/stb_image/**.h",
-        "%{prj.name}/vendor/stb_image/**.cpp",
-        "%{prj.name}/vendor/EnTT/include/**.hpp",
-        "%{prj.name}/vendor/ImGuizmo/ImGuizmo.h",
-        "%{prj.name}/vendor/ImGuizmo/ImGuizmo.cpp"
-    }
-    
-    includedirs
-    {
-        "%{InlcudeDir.stb_image}",
-        "%{InlcudeDir.spdlog}",
-        "%{InlcudeDir.GLFW}",
-        "%{InlcudeDir.Glad}",
-        "%{InlcudeDir.ImGui}",
-        "%{InlcudeDir.glm}",
-        "%{InlcudeDir.EnTT}",
-        "%{InlcudeDir.yaml_cpp}",
-        "%{InlcudeDir.ImGuizmo}",
-        "%{prj.name}/src"
-    }
-
-    links
-    {
-        "GLFW",
-        "Glad",
-        "ImGui",
-        "opengl32.lib",
-        "yaml-cpp"
-    }
-
-    filter "system:windows"    
-        systemversion "latest"
-        defines
-        {
-            "SK_PLATFORM_WINDOWS",
-            "GLFW_INCLUDE_NONE"
-        }
-
-    filter "configurations:Debug"
-        defines {"SK_DEBUG","SK_ENABLE_ASSERTS"}
-        symbols "on"
-
-    filter "configurations:Release"
-        defines "SK_RELEASE"
-        optimize "on"
-
-    filter "files:Spark/vendor/ImGuizmo/**.cpp"
-        flags {"NoPCH"}
-
-
-
---------------------------------------------------------------------------------
-
-project "Sandbox"
-    location "build/Sandbox"
-    kind "ConsoleApp"
-    language "C++"
-    cppdialect "C++17"
-    staticruntime "on"
-    flags { "FatalCompileWarnings" }
-    targetdir("build/bin/" .. outputdir .. "/%{prj.name}")
-    objdir("build/intermediate/" .. outputdir .. "/%{prj.name}")
-   
-    files
-    {
-        "%{prj.name}/src/**.h",
-        "%{prj.name}/src/**.cpp",
-        "%{prj.name}/assets/**.*",
-    }
-
-    includedirs
-    {
-        "Spark/vendor/spdlog/include",
-        "%{InlcudeDir.glm}",
-        "%{InlcudeDir.EnTT}",
-        "%{InlcudeDir.ImGui}",
-        "Spark/src/",
-    }
-
-    links
-    {
-        "Spark"
-    }
-    postbuildcommands
-    { 
-        "{COPYDIR} %{_MAIN_SCRIPT_DIR}/%{prj.name}/assets  ./assets"
-    }
-
-    filter "system:windows"
-        systemversion "latest"
-        defines
-        {
-            "SK_PLATFORM_WINDOWS"
-        }
- 
-    filter "configurations:Debug"
-        defines {"SK_DEBUG","SK_ENABLE_ASSERTS"}
-        symbols "on"
-
-    
-    filter "configurations:Release"
-        defines "SK_RELEASE"
-        optimize "on" 
-
-
-
-
---------------------------------------------------------------------------------
-
-project "Editor"
-    location "build/Editor"
-    kind "ConsoleApp"
-    language "C++"
-    cppdialect "C++17"
-    staticruntime "on"
-    flags { "FatalCompileWarnings" }
-    targetdir("build/bin/" .. outputdir .. "/%{prj.name}")
-    objdir("build/intermediate/" .. outputdir .. "/%{prj.name}")
-   
-    files
-    {
-        "%{prj.name}/src/**.h",
-        "%{prj.name}/src/**.cpp",
-        "%{prj.name}/assets/**.*",
-    }
-
-    includedirs
-    {
-        "Spark/vendor/spdlog/include",
-        "%{InlcudeDir.glm}",
-        "%{InlcudeDir.ImGui}",
-        "%{InlcudeDir.EnTT}",
-        "%{InlcudeDir.ImGuizmo}",
-        "Spark/src/",
-    }
-
-    links
-    {
-        "Spark"
-    }
-    postbuildcommands
-    { 
-        "{COPYDIR} %{_MAIN_SCRIPT_DIR}/%{prj.name}/assets  ./assets"
-    }
-
-    filter "system:windows"
-        systemversion "latest"
-        defines
-        {
-            "SK_PLATFORM_WINDOWS"
-        }
- 
-    filter "configurations:Debug"
-        defines {"SK_DEBUG","SK_ENABLE_ASSERTS"}
-        symbols "on"
-
-    
-    filter "configurations:Release"
-        defines "SK_RELEASE"
-        optimize "on"         
+include "Spark"
+include "Sandbox"
+include "Editor"

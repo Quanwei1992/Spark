@@ -4,6 +4,7 @@
 #include "VertexArray.h"
 #include "Shader.h"
 #include "RenderCommand.h"
+#include "UniformBuffer.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -46,6 +47,13 @@ namespace Spark
 		glm::vec2 QuadVertexTexCoords[4];
 
 		Renderer2D::Statistics Stats;
+
+		struct CameraData
+		{
+			glm::mat4 ViewProjection;
+		};
+		CameraData CameraBuffer;
+		Ref<UniformBuffer> CameraUniformBuffer;
 	};
 
 	static Renderer2DData* s_Data = nullptr;
@@ -98,7 +106,6 @@ namespace Spark
 		{
 			samplers[i] = i;
 		}
-		s_Data->TextureShader->SetIntArray("u_Textures", samplers, s_Data->MaxTextureSlots);
 
 
 		s_Data->WhiteTexture = Texture2D::Create(1, 1);
@@ -117,6 +124,7 @@ namespace Spark
 		s_Data->QuadVertexTexCoords[2] = { 1.0f, 1.0f };
 		s_Data->QuadVertexTexCoords[3] = { 0.0f, 1.0f };
 
+		s_Data->CameraUniformBuffer = UniformBuffer::Create(sizeof(Renderer2DData::CameraData), 0);
 	
 
 	}
@@ -129,8 +137,9 @@ namespace Spark
 
 	void Renderer2D::BeginScene(const glm::mat4& viewProjection)
 	{
-		s_Data->TextureShader->Bind();
-		s_Data->TextureShader->SetMat4("u_ViewProjection", viewProjection);
+
+		s_Data->CameraBuffer.ViewProjection = viewProjection;
+		s_Data->CameraUniformBuffer->SetData(&s_Data->CameraBuffer, sizeof(Renderer2DData::CameraBuffer));
 
 		s_Data->QuadVertexBufferPtr = s_Data->QuadVertexBufferBase;
 		s_Data->QuadIndexCount = 0;
@@ -356,6 +365,7 @@ namespace Spark
 		{
 			s_Data->TextureSlots[i]->Bind(i);
 		}
+		s_Data->TextureShader->Bind();
 		RenderCommand::DrawIndexed(s_Data->VertexArray, s_Data->QuadIndexCount);
 
 		s_Data->Stats.DrawCalls++;

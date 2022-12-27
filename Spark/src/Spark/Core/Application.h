@@ -12,11 +12,25 @@
 
 namespace Spark
 {
+
+	struct ApplicationCommandLineArgs
+	{
+		int Count = 0;
+		char** Args = nullptr;
+
+		const char* operator[](int index) const
+		{
+			SK_CORE_ASSERT(index < count, "Out of range!");
+			return Args[index];
+		}
+	};
+
+
 	class ImGuiLayer;
 	class Application
 	{
 	public:
-		Application(const std::string& name = "Spark");
+		Application(const std::string& name = "Spark",ApplicationCommandLineArgs args = ApplicationCommandLineArgs());
 		~Application();
 		void Run();
 		void Exit();
@@ -26,10 +40,12 @@ namespace Spark
 		static inline Application& Get() { return *s_Instance; }
 		void OnEvent(Event& e);
 		ImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
+		ApplicationCommandLineArgs GetCommandLineArgs() const { return m_CommandLineArgs; }
 	private:
 		bool OnWindowClosed(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);
 	private:
+		ApplicationCommandLineArgs m_CommandLineArgs;
 		Timestep m_Timestep;
 		bool m_Minimized = false;
 		float m_LastFrameTime = 0;
@@ -41,5 +57,5 @@ namespace Spark
 		std::string m_Name;
 	};
 
-	Application* CreateApplication();
+	Application* CreateApplication(ApplicationCommandLineArgs args);
 }

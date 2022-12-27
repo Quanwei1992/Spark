@@ -44,9 +44,21 @@ namespace Spark
 	private:
 		std::string ReadFile(const std::string filePath);
 		std::unordered_map<GLenum, std::string> PreProcess(const std::string source);
-		void Compile(const std::unordered_map<GLenum, std::string>& shaderSouces);
+		void CompileOrGetOpenGLBinaries();
+		void CompileOrGetVulkanBinaries(const std::unordered_map<GLenum,std::string>& shaderSouces);
+		void CreateProgram();
+		void Reflect(GLenum stage, const std::vector<uint32_t>& shaderData);
+
+
 	private:
 		uint32_t m_RendererID;
+		std::string m_FilePath;
 		std::string m_Name;
+
+		std::unordered_map<GLenum, std::vector<uint32_t>> m_VukanSPIRV;
+		std::unordered_map<GLenum, std::vector<uint32_t>> m_OpenGLSPIRV;
+
+		std::unordered_map<GLenum, std::string> m_OpenGLSourceCode;
+
 	};
 }

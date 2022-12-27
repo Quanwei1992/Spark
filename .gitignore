@@ -1,7 +1,15 @@
-.vs
-/intermediate
-/bin
-/build
-*.vcxproj
-*.vcxproj.filters
-*.sln
+# Binaries
+**/bin/
+!vendor/premake/bin/
+bin-int/
+
+# Visual Studio files and folder
+.vs/
+**.sln
+**.vcxproj
+**.vcxproj.filters
+**.vcxproj.user
+__pycache__
+Spark/vendor/VulkanSDK
+Editor/assets/cache
+Editor/Editor.exe

@@ -54,7 +54,7 @@ void SandBox2D::OnUpdate(Spark::Timestep ts)
 	{
 		SK_PROFILE_SCOPE("Renderer Draw");
 		{
-			Spark::Renderer2D::BeginScene(m_CameraController.GetCamera());
+			Spark::Renderer2D::BeginScene(m_CameraController.GetCamera().GetViewProjectionMatrix());
 			Spark::Renderer2D::DrawQuad({ -1.0f,0 }, { 0.8f,0.8f }, { 0.8f,0.2f,0.3f,1.0f });
 			Spark::Renderer2D::DrawQuad({ 0.5f,0.5f }, { 0.5f,0.75f }, { 0.2f,0.8f,0.3f,1.0f });
 			m_blueQuadRotation += ts * 180.0f;
@@ -64,7 +64,7 @@ void SandBox2D::OnUpdate(Spark::Timestep ts)
 		}
 
 		{
-			Spark::Renderer2D::BeginScene(m_CameraController.GetCamera());
+			Spark::Renderer2D::BeginScene(m_CameraController.GetCamera().GetViewProjectionMatrix());
 			float quadSize = 0.5f;
 			for (float y = -5.0f; y < 5.0f; y += quadSize)
 			{

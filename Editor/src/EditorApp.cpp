@@ -9,16 +9,16 @@ namespace Spark
 	class EditorApplication : public Application
 	{
 	public:
-		EditorApplication()
-			:Application("Spark Editor")
+		EditorApplication(ApplicationCommandLineArgs args)
+			:Application("Spark Editor",args)
 		{
 			PushLayer(new EditorLayer());
 		}
 	};
 
-	Application* CreateApplication()
+	Application* CreateApplication(ApplicationCommandLineArgs args)
 	{
-		return new EditorApplication();
+		return new EditorApplication(args);
 	}
 }
 

@@ -13,8 +13,9 @@ namespace Spark
 
 	Application* Application::s_Instance = nullptr;
 
-	Application::Application(const std::string& name)	
+	Application::Application(const std::string& name, ApplicationCommandLineArgs args)
 		:m_Name(name)
+		,m_CommandLineArgs(args)
 	{
 		SK_PROFILE_FUNCTION();
 		SK_CORE_ASSERT(!s_Instance, "Application already exsits!");

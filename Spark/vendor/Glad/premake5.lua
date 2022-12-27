@@ -1,10 +1,8 @@
 project "Glad"
     kind "StaticLib"
     language "C"   
-    staticruntime "on"
-    targetdir("%{wks.location}/bin/" .. outputdir .. "/Spark/vendor/%{prj.name}")
-    objdir("%{wks.location}/intermediate/" .. outputdir .. "/Spark/vendor/%{prj.name}")
-    location "%{wks.location}/Spark/vendor"
+    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
     files
 	{
