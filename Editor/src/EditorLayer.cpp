@@ -246,8 +246,6 @@ namespace Spark
 					const wchar_t* path = (wchar_t*)payload->Data;
 					OpenScene(path);
 				}
-
-
 				ImGui::EndDragDropTarget();
 			}
 

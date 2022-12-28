@@ -16,7 +16,7 @@ namespace Spark
 		glm::vec3 Position;
 		glm::vec4 Color;
 		glm::vec2 TexCoord;
-		float TexIndex;
+		int TexIndex;
 		float TilingFactor;
 
 		// Editor-only
@@ -70,7 +70,7 @@ namespace Spark
 				{ShaderDataType::Float3,"a_Position"},
 				{ShaderDataType::Float4,"a_Color"},
 				{ShaderDataType::Float2,"a_TexCoord"},
-				{ShaderDataType::Float,"a_TexIndex"},
+				{ShaderDataType::Int,"a_TexIndex"},
 				{ShaderDataType::Float,"a_TilingFactor"},
 				{ShaderDataType::Int,"a_EntityID"}
 			});
@@ -169,7 +169,7 @@ namespace Spark
 			s_Data->QuadVertexBufferPtr->Position = transform * s_Data->QuadVertexPositions[i];
 			s_Data->QuadVertexBufferPtr->Color = color;
 			s_Data->QuadVertexBufferPtr->TexCoord = s_Data->QuadVertexTexCoords[i];
-			s_Data->QuadVertexBufferPtr->TexIndex = 0.0f;
+			s_Data->QuadVertexBufferPtr->TexIndex = 0;
 			s_Data->QuadVertexBufferPtr->TilingFactor = 1.0f;
 			s_Data->QuadVertexBufferPtr->EntityID = entityID;
 			s_Data->QuadVertexBufferPtr++;
@@ -186,8 +186,6 @@ namespace Spark
 		{
 			FlushAndReset();
 		}
-
-		constexpr glm::vec4 color = { 1.0f,1.0f,1.0f,1.0f };
 
 		int32_t textureIndex = 0;
 		for (uint32_t i = 1; i < s_Data->TextureSlotIndex; i++)
@@ -209,9 +207,9 @@ namespace Spark
 		for (size_t i = 0; i < 4; i++)
 		{
 			s_Data->QuadVertexBufferPtr->Position = transform * s_Data->QuadVertexPositions[i];
-			s_Data->QuadVertexBufferPtr->Color = color;
+			s_Data->QuadVertexBufferPtr->Color = tintColor;
 			s_Data->QuadVertexBufferPtr->TexCoord = texCoords[i];
-			s_Data->QuadVertexBufferPtr->TexIndex = (float)textureIndex;
+			s_Data->QuadVertexBufferPtr->TexIndex = textureIndex;
 			s_Data->QuadVertexBufferPtr->TilingFactor = tilingFactor;
 			s_Data->QuadVertexBufferPtr->EntityID = entityID;
 			s_Data->QuadVertexBufferPtr++;
@@ -293,7 +291,13 @@ namespace Spark
 
 	void Renderer2D::DrawSprite(const glm::mat4& transform, SpriteRendererComponent& src, int entityID)
 	{
-		DrawQuadImpl(transform, src.Color, entityID);
+		if (src.Texture)
+		{
+			DrawQuadImpl(transform, src.Texture, s_Data->QuadVertexTexCoords, src.TilingFactor, src.Color, entityID);
+		}
+		else {
+			DrawQuadImpl(transform, src.Color, entityID);
+		}	
 	}
 
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)

@@ -12,6 +12,8 @@
 #include <unordered_set>
 #include <sstream>
 #include <cstdint>
+#include <filesystem>
+#include <cwchar>
 
 #include "Spark/Core/Base.h"
 #include "Spark/Core/Log.h"

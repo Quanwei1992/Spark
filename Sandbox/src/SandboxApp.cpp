@@ -206,7 +206,7 @@ public:
 };
 
 
-Spark::Application* Spark::CreateApplication()
+Spark::Application* Spark::CreateApplication(Spark::ApplicationCommandLineArgs args)
 {
 	return new Sandbox();
 }

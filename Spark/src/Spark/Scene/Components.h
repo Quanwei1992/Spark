@@ -5,6 +5,7 @@
 #include "Spark/Renderer/Camera.h"
 #include "Spark/Core/Timestep.h"
 #include "Spark/Scene/ScriptableEntity.h"
+#include "Spark/Renderer/Texture.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
@@ -54,6 +55,8 @@ namespace Spark
 	struct SpriteRendererComponent
 	{
 		Color4f Color{ 1.0f, 1.0f, 1.0f, 1.0f };
+		Ref<Texture2D> Texture;
+		float TilingFactor = 1.0f;
 
 		SpriteRendererComponent() = default;
 		SpriteRendererComponent(const SpriteRendererComponent&) = default;

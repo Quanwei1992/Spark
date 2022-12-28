@@ -263,8 +263,24 @@ namespace Spark
 			DrawVec3Control("Scale", component.Scale, 1.0f, 180.0f);
 		});
 
-		DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [](auto& component) {
+		DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [](auto& component){
+
 			ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
+
+			// Texture
+			ImGui::Button("Texture", ImVec2(100.0,0.0f));
+			if (ImGui::BeginDragDropTarget())
+			{
+				const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM");
+				if (payload)
+				{
+					std::filesystem::path path((wchar_t*)payload->Data);
+					component.Texture = Texture2D::Create(path.string());
+				}
+				ImGui::EndDragDropTarget();
+			}
+
+			ImGui::DragFloat("Titling Factor", &component.TilingFactor, 0.1f, 0.0f, 100.0f, "%.2f");
 		});
 
 		DrawComponent<CameraComponent>("Camera", entity, [](auto& component) {
