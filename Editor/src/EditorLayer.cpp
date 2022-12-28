@@ -238,6 +238,19 @@ namespace Spark
 			uint64_t rendererID = (uint64_t)m_Framebuffer->GetColorAttachmentRendererID();
 			ImGui::Image((void*)rendererID, viewportPanelSize, ImVec2{ 0,1 }, ImVec2{ 1,0 });
 
+			if (ImGui::BeginDragDropTarget())
+			{
+				const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM");
+				if (payload)
+				{
+					const wchar_t* path = (wchar_t*)payload->Data;
+					OpenScene(path);
+				}
+
+
+				ImGui::EndDragDropTarget();
+			}
+
 			auto windowSize = ImGui::GetWindowSize();
 			auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
 			auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
@@ -389,6 +402,16 @@ namespace Spark
 			SceneSerializer serializer(m_ActiveScene);
 			serializer.Deserialize(filepath);
 		}
+	}
+
+	void EditorLayer::OpenScene(const std::filesystem::path& path)
+	{
+		m_ActiveScene = CreateRef<Scene>();
+		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+
+		SceneSerializer serializer(m_ActiveScene);
+		serializer.Deserialize(path.string());
 	}
 
 	void EditorLayer::SaveSceneAs()
