@@ -28,9 +28,16 @@ namespace Spark
 		void OpenScene();
 		void OpenScene(const std::filesystem::path& path);
 		void SaveSceneAs();
+
+		void OnScenePlay();
+		void OnSceneStop();
+
+	private:
+		void UI_Toolbar();
 	private:
 		OrthographicCameraController m_CameraController;
 		Ref<Framebuffer> m_Framebuffer;
+		Ref<Texture2D> m_IconPlay, m_IconStop;
 		float m_blueQuadRotation = 0.0f;
 		glm::vec2 m_ViewportSize = {1920,1080};
 		glm::vec2 m_ViewportBounds[2];
@@ -44,6 +51,12 @@ namespace Spark
 		SceneHierarchyPanel m_SceneHierarchyPanel;
 		ContentBrowserPanel m_ContentBrowserPanel;
 
+
+		enum class SceneState
+		{
+			Edit = 0,Play = 1
+		};
+		SceneState m_SceneState = SceneState::Edit;
 	};
 }
 

@@ -46,6 +46,9 @@ namespace Spark
 		m_EditorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
 
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+
+		m_IconPlay = Texture2D::Create("resources/icons/PlayButton.png");
+		m_IconStop = Texture2D::Create("resources/icons/StopButton.png");
 	}
 
 	void EditorLayer::OnDetach()
@@ -68,12 +71,8 @@ namespace Spark
 			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
 
-		// Update
-		if (m_ViewportFocused)
-		{
-			m_CameraController.OnUpdate(ts);	
-		}
-		m_EditorCamera.OnUpdate(ts);
+
+		
 			
 		// Render
 		Spark::Renderer2D::ResetStats();
@@ -86,7 +85,23 @@ namespace Spark
 		m_Framebuffer->ClearAttachment(1, -1);
 
 		// Update scene
-		m_ActiveScene->OnUpdateEditor(ts,m_EditorCamera);
+
+		switch (m_SceneState)
+		{
+		case SceneState::Edit:
+		{
+			// Update
+			if (m_ViewportFocused)
+			{
+				m_CameraController.OnUpdate(ts);
+			}
+			m_EditorCamera.OnUpdate(ts);
+			m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
+		}break;
+		case SceneState::Play:
+			m_ActiveScene->OnUpdateRuntime(ts);
+			break;
+		}
 
 		auto[mx,my] = ImGui::GetMousePos();
 		mx -= m_ViewportBounds[0].x;
@@ -140,16 +155,9 @@ namespace Spark
 			dockspace_flags &= ~ImGuiDockNodeFlags_PassthruCentralNode;
 		}
 
-		// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background
-		// and handle the pass-thru hole, so we ask Begin() to not render a background.
 		if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
 			window_flags |= ImGuiWindowFlags_NoBackground;
 
-		// Important: note that we proceed even if Begin() returns false (aka window is collapsed).
-		// This is because we want to keep our DockSpace() active. If a DockSpace() is inactive,
-		// all active windows docked into it will lose their parent and become undocked.
-		// We cannot preserve the docking relationship between an active window and an inactive docking, otherwise
-		// any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
 		if (!opt_padding)
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		ImGui::Begin("DockSpace Demo", &dockingEnabled, window_flags);
@@ -306,7 +314,45 @@ namespace Spark
 		ImGui::End();
 		ImGui::PopStyleVar();
 
-		
+		UI_Toolbar();
+
+		ImGui::End();
+	}
+
+
+	void EditorLayer::UI_Toolbar()
+	{
+		auto& colors = ImGui::GetStyle().Colors;
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 2));
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(0, 0));
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4());
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, colors[ImGuiCol_ButtonHovered]);
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, colors[ImGuiCol_ButtonActive]);
+
+		ImGui::Begin("##toolbar",nullptr,ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse| ImGuiWindowFlags_NoTitleBar);
+
+		float size = ImGui::GetWindowHeight() - 4.0f;
+
+		Ref<Texture2D> icon = m_SceneState == SceneState::Edit ? m_IconPlay : m_IconStop;
+		ImVec4 tintColor = m_SceneState == SceneState::Edit ? ImVec4(0.54f, 0.88f, 0.54f, 1.0f) : ImVec4(0.75f, 0.25f, 0.28f, 1.0f);
+
+		ImGui::SetCursorPosX((ImGui::GetWindowContentRegionMax().x * 0.5f) - (size * 0.5f));
+
+		if (ImGui::ImageButton(icon->GetImGuiTextureID(), ImVec2(size, size),ImVec2(0,0),ImVec2(1,1),0,ImVec4(0,0,0,0), tintColor))
+		{
+			if (m_SceneState == SceneState::Edit)
+			{
+				OnScenePlay();
+			}
+			else if (m_SceneState == SceneState::Play)
+			{
+				OnSceneStop();
+			}
+		}
+
+		ImGui::PopStyleColor(3);
+		ImGui::PopStyleVar(2);
 
 		ImGui::End();
 	}
@@ -421,6 +467,17 @@ namespace Spark
 			serializer.Serialize(filepath);
 		}
 	}
+
+	void EditorLayer::OnScenePlay()
+	{
+		m_SceneState = SceneState::Play;
+	}
+
+	void EditorLayer::OnSceneStop()
+	{
+		m_SceneState = SceneState::Edit;
+	}
+
 
 }
 
