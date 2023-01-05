@@ -30,6 +30,7 @@ group "Dependencies"
 	include "Spark/vendor/Glad"
 	include "Spark/vendor/imgui"
 	include "Spark/vendor/yaml-cpp"
+	include "Spark/vendor/box2d"
 group ""
 
 include "Spark"

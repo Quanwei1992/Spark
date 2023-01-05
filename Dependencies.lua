@@ -12,6 +12,7 @@ IncludeDir["entt"] = "%{wks.location}/Spark/vendor/entt/include"
 IncludeDir["shaderc"] = "%{wks.location}/Spark/vendor/shaderc/include"
 IncludeDir["SPIRV_Cross"] = "%{wks.location}/Spark/vendor/SPIRV-Cross"
 IncludeDir["VulkanSDK"] = "%{VULKAN_SDK}/Include"
+IncludeDir["box2d"] = "%{wks.location}/Spark/vendor/box2d/include"
 
 LibraryDir = {}
 

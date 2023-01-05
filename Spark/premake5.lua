@@ -42,6 +42,7 @@ project "Spark"
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.ImGuizmo}",
+		"%{IncludeDir.box2d}",
 		"%{IncludeDir.VulkanSDK}"
 	}
 
@@ -51,6 +52,7 @@ project "Spark"
 		"Glad",
 		"ImGui",
 		"yaml-cpp",
+		"box2d",
 		"opengl32.lib"
 	}
 
