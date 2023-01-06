@@ -21,6 +21,7 @@ project "Editor"
 		"%{wks.location}/Spark/vendor",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.entt}",
+		"%{IncludeDir.magic_enum}",
 		"%{IncludeDir.ImGuizmo}",
         "%{IncludeDir.ImGui}"
 	}
