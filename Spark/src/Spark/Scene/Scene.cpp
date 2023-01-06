@@ -5,15 +5,29 @@
 
 #include "Spark/Renderer/Renderer2D.h"
 #include <glm/glm.hpp>
-
+#include <box2d/box2d.h>
 
 namespace Spark
 {
 
-	static void DoMaths(const glm::mat4& transform)
+	namespace Utils
 	{
-
+		static b2BodyType ToBox2DBodyType(Rigidbody2DComponent::BodyType bodyType)
+		{
+			switch (bodyType)
+			{
+			case Spark::Rigidbody2DComponent::BodyType::Static:
+				return b2_staticBody;
+			case Spark::Rigidbody2DComponent::BodyType::Dynamic:
+				return b2_dynamicBody;
+			case Spark::Rigidbody2DComponent::BodyType::Kinematic:
+				return b2_kinematicBody;
+			}
+			SK_CORE_ASSERT(false, "Unkonw body type");
+			return b2_staticBody;
+		}
 	}
+
 
 	Scene::Scene()
 	{
@@ -40,6 +54,24 @@ namespace Spark
 			}
 		}
 
+		// Physics
+		{
+			const int32_t velocityIterations = 6;
+			const int32_t positionIterations = 2;
+			m_PhysicsWorld->Step(ts, velocityIterations, positionIterations);
+
+			auto view = m_Registry.view<TransformComponent,Rigidbody2DComponent>();
+			for (auto&& [e,transform, rb2d] : view.each())
+			{
+				Entity entity = { e,this };
+
+				b2Body* body = (b2Body*)rb2d.RuntimeBody;
+				const auto& position = body->GetPosition();
+				transform.Translation.x = position.x;
+				transform.Translation.y = position.y;
+				transform.Rotation.z = body->GetAngle();
+			}
+		}
 
 		// Render 2D
 		Camera* mainCamera = nullptr;
@@ -100,6 +132,42 @@ namespace Spark
 		}
 	}
 
+	void Scene::OnRuntimeStart()
+	{
+		m_PhysicsWorld = new b2World({ 0.0f,-9.807f });
+		m_Registry.view<TransformComponent, Rigidbody2DComponent>().each([=](auto e, TransformComponent& transform, Rigidbody2DComponent& rb2d)
+		{
+			b2BodyDef bodyDef;
+			bodyDef.type = Utils::ToBox2DBodyType(rb2d.Type);
+			bodyDef.position.Set(transform.Translation.x, transform.Translation.y);
+			bodyDef.angle = transform.Rotation.z;
+			b2Body* body = m_PhysicsWorld->CreateBody(&bodyDef);
+			body->SetFixedRotation(rb2d.FixedRotation);
+			rb2d.RuntimeBody = body;
+
+			Entity entity = { e,this };
+			if (auto* bc2d = entity.TryGetComponent<BoxCollider2DComponent>())
+			{
+				b2PolygonShape boxShape;
+				boxShape.SetAsBox(transform.Scale.x * bc2d->Size.x, transform.Scale.y * bc2d->Size.y);
+
+				b2FixtureDef fixtureDef;
+				fixtureDef.shape = &boxShape;
+				fixtureDef.density = bc2d->Density;
+				fixtureDef.friction = bc2d->Friction;
+				fixtureDef.restitution = bc2d->Restitution;
+				fixtureDef.restitutionThreshold = bc2d->RestitutionThreshold;
+				bc2d->RuntimeFixture = body->CreateFixture(&fixtureDef);
+			}
+		});
+	}
+
+	void Scene::OnRuntimeStop()
+	{
+		delete m_PhysicsWorld;
+		m_PhysicsWorld = nullptr;
+	}
+
 	Entity Scene::GetPrimaryCameraEntity()
 	{
 		auto view = m_Registry.view<CameraComponent>();
@@ -153,6 +221,16 @@ namespace Spark
 	}
 	template<>
 	void Scene::OnComponentAdded<NativeScriptComponent>(Entity entity, NativeScriptComponent& component)
+	{
+
+	}
+	template<>
+	void Scene::OnComponentAdded<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& component)
+	{
+
+	}
+	template<>
+	void Scene::OnComponentAdded<Rigidbody2DComponent>(Entity entity, Rigidbody2DComponent& component)
 	{
 
 	}

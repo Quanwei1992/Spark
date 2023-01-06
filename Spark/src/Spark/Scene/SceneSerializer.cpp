@@ -4,72 +4,50 @@
 #include "Components.h"
 
 #include <yaml-cpp/yaml.h>
-
+#include <magic_enum.hpp>
 
 
 namespace YAML
 {
-	YAML::Emitter& operator << (YAML::Emitter& out, const glm::vec3& v) {
+	template<int N>
+	YAML::Emitter& operator << (YAML::Emitter& out, glm::vec<N, float, glm::defaultp>& v) {
 		out << YAML::Flow;
-		out << YAML::BeginSeq << v.x << v.y << v.z << YAML::EndSeq;
+		out << YAML::BeginSeq;
+		
+		for (int i = 0; i < N; i++)
+		{
+			out << v[i];
+		}
+		out << YAML::EndSeq;
 		return out;
 	}
 
-	YAML::Emitter& operator << (YAML::Emitter& out, const Spark::Color4f& v) {
-		out << YAML::Flow;
-		out << YAML::BeginSeq << v.x << v.y << v.z << v.w << YAML::EndSeq;
-		return out;
-	}
-
-	template<>
-	struct convert<glm::vec3> {
-		static Node encode(const glm::vec3& rhs) {
+	template<int N>
+	struct convert<glm::vec<N,float, glm::defaultp>> {
+		static Node encode(const glm::vec<N, float, glm::defaultp>& rhs) {
 			Node node;
-			node.push_back(rhs.x);
-			node.push_back(rhs.y);
-			node.push_back(rhs.z);
+			for (auto value : rhs)
+			{
+				node.push_back(value);
+			}
 			return node;
 		}
 
-		static bool decode(const Node& node, glm::vec3& rhs) {
-			if (!node.IsSequence() || node.size() != 3) {
+
+		static bool decode(const Node& node, glm::vec<N, float, glm::defaultp>& rhs) {
+			if (!node.IsSequence() || node.size() != N) {
 				return false;
 			}
 
-			rhs.x = node[0].as<float>();
-			rhs.y = node[1].as<float>();
-			rhs.z = node[2].as<float>();
-			return true;
-		}
-	};
-
-	template<>
-	struct convert<Spark::Color4f> {
-		static Node encode(const Spark::Color4f& rhs) {
-			Node node;
-			node.push_back(rhs.x);
-			node.push_back(rhs.y);
-			node.push_back(rhs.z);
-			node.push_back(rhs.w);
-			return node;
-		}
-
-		static bool decode(const Node& node, Spark::Color4f& rhs) {
-			if (!node.IsSequence() || node.size() != 4) {
-				return false;
+			for (int i= 0;i<N;i++)
+			{
+				rhs[i] = node[i].as<float>();
 			}
-
-			rhs.x = node[0].as<float>();
-			rhs.y = node[1].as<float>();
-			rhs.z = node[2].as<float>();
-			rhs.w = node[3].as<float>();
 			return true;
 		}
 	};
-
 
 }
-
 
 namespace Spark
 {
@@ -134,6 +112,25 @@ namespace Spark
 
 			auto& component = entity.GetComponent<SpriteRendererComponent>();
 			out << YAML::Key << "Color" << YAML::Value << component.Color;
+			out << YAML::EndMap;
+		}
+
+		if (Rigidbody2DComponent* component = entity.TryGetComponent<Rigidbody2DComponent>())
+		{
+			out << YAML::Key << "Rigidbody2DComponent" << YAML::Value << YAML::BeginMap;
+			out << YAML::Key << "Type" << YAML::Value << std::string(magic_enum::enum_name(component->Type));
+			out << YAML::Key << "FixedRotation" << YAML::Value << component->FixedRotation;
+			out << YAML::EndMap;
+		}
+		if (BoxCollider2DComponent* component = entity.TryGetComponent<BoxCollider2DComponent>())
+		{
+			out << YAML::Key << "BoxCollider2DComponent" << YAML::Value << YAML::BeginMap;
+			out << YAML::Key << "Offset" << YAML::Value << component->Offset;
+			out << YAML::Key << "Size" << YAML::Value << component->Size;
+			out << YAML::Key << "Density" << YAML::Value << component->Density;
+			out << YAML::Key << "Friction" << YAML::Value << component->Restitution;
+			out << YAML::Key << "Restitution" << YAML::Value << component->Restitution;
+			out << YAML::Key << "RestitutionThreshold" << YAML::Value << component->RestitutionThreshold;
 			out << YAML::EndMap;
 		}
 
@@ -236,6 +233,34 @@ namespace Spark
 			{
 				auto& c = deserializedEntity.AddComponent<SpriteRendererComponent>();
 				c.Color = componentData["Color"].as<Color4f>();
+			}
+
+			componentData = entity["Rigidbody2DComponent"];
+			if (componentData)
+			{
+				auto& c = deserializedEntity.AddComponent<Rigidbody2DComponent>();
+				std::string bodyTypeName = componentData["Type"].as<std::string>();
+				auto bodyType = magic_enum::enum_cast<Rigidbody2DComponent::BodyType>(bodyTypeName);
+				if (bodyType.has_value()) {
+					c.Type = bodyType.value();
+				}
+				else {
+					SK_CORE_WARN("Unkonw Rigidbody2DComponent::Type {0}", bodyTypeName);
+				}
+
+				c.FixedRotation = componentData["FixedRotation"].as<bool>();		
+			}
+
+			componentData = entity["BoxCollider2DComponent"];
+			if (componentData)
+			{
+				auto& c = deserializedEntity.AddComponent<BoxCollider2DComponent>();
+				c.Offset = componentData["Offset"].as<glm::vec2>();
+				c.Size = componentData["Size"].as<glm::vec2>();
+				c.Density = componentData["Density"].as<float>();
+				c.Friction = componentData["Friction"].as<float>();
+				c.Restitution = componentData["Restitution"].as<float>();
+				c.RestitutionThreshold = componentData["RestitutionThreshold"].as<float>();
 			}
 		}
 

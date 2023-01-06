@@ -4,6 +4,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <magic_enum.hpp>
 
 namespace Spark
 {
@@ -210,6 +211,47 @@ namespace Spark
 
 	}
 
+	template<typename T>
+	static void DrawAddComponentMenuItem(Entity entity,const char* name)
+	{
+		if (!entity.HasComponent<T>() && ImGui::MenuItem(name))
+		{
+			entity.AddComponent<T>();
+			ImGui::CloseCurrentPopup();
+		}
+	}
+
+	template<typename T>
+	static bool DrawEnumComp(const char* label,T* value)
+	{
+
+		constexpr auto entries = magic_enum::enum_entries<T>();
+		auto valueName = std::string(magic_enum::enum_name(*value));
+
+		bool valueChaned = false;
+		if (ImGui::BeginCombo(label, valueName.c_str()))
+		{
+			for (auto entrie : entries)
+			{
+				bool isSelected = *value == entrie.first;
+				if (ImGui::Selectable(std::string(entrie.second).c_str(), isSelected))
+				{
+					if (*value != entrie.first)
+					{
+						*value = entrie.first;
+						valueChaned = true;
+					}
+				}
+				if (isSelected)
+				{
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+		return valueChaned;
+	}
+
 
 	void SceneHierarchyPanel::DrawComponents(Entity& entity)
 	{
@@ -238,16 +280,11 @@ namespace Spark
 
 		if (ImGui::BeginPopup("AddComponent"))
 		{
-			if (ImGui::MenuItem("Camera"))
-			{
-				m_SelectionContext.AddComponent<CameraComponent>();
-				ImGui::CloseCurrentPopup();
-			}
-			if (ImGui::MenuItem("Sprite Renderer"))
-			{
-				m_SelectionContext.AddComponent<SpriteRendererComponent>();
-				ImGui::CloseCurrentPopup();
-			}
+			DrawAddComponentMenuItem<CameraComponent>(m_SelectionContext, "Camera");
+			DrawAddComponentMenuItem<SpriteRendererComponent>(m_SelectionContext, "SpriteRenderer");
+			DrawAddComponentMenuItem<BoxCollider2DComponent>(m_SelectionContext, "BoxCollider2D");
+			DrawAddComponentMenuItem<Rigidbody2DComponent>(m_SelectionContext, "Rigidbody2D");
+
 			ImGui::EndPopup();
 		}
 
@@ -263,7 +300,7 @@ namespace Spark
 			DrawVec3Control("Scale", component.Scale, 1.0f, 180.0f);
 		});
 
-		DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [](auto& component){
+		DrawComponent<SpriteRendererComponent>("SpriteRenderer", entity, [](auto& component){
 
 			ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
 
@@ -283,36 +320,38 @@ namespace Spark
 			ImGui::DragFloat("Titling Factor", &component.TilingFactor, 0.1f, 0.0f, 100.0f, "%.2f");
 		});
 
-		DrawComponent<CameraComponent>("Camera", entity, [](auto& component) {
+
+		DrawComponent<Rigidbody2DComponent>("Rigidbody2D", entity, [](Rigidbody2DComponent& component) {
+
+			DrawEnumComp<Rigidbody2DComponent::BodyType>("Type", &component.Type);
+			ImGui::Checkbox("FixedRotation", &component.FixedRotation);
+			
+		});
+
+		DrawComponent<BoxCollider2DComponent>("Rigidbody2D", entity, [](BoxCollider2DComponent& component) {
+
+			ImGui::DragFloat2("Offset", glm::value_ptr(component.Offset));
+			ImGui::DragFloat2("Size", glm::value_ptr(component.Size));
+			ImGui::DragFloat("Density", &component.Density);
+			ImGui::DragFloat("Friction", &component.Friction);
+			ImGui::DragFloat("Restitution", &component.Restitution);
+			ImGui::DragFloat("RestitutionThreshold", &component.RestitutionThreshold);
+
+		});
+
+		DrawComponent<CameraComponent>("Camera", entity, [](CameraComponent& component) {
 			auto& camera = component.Camera;
 
 			ImGui::Checkbox("Primary", &component.Primary);
 			ImGui::Checkbox("Fixed Aspect Ratio", &component.FixedAspectRatio);
 
+			auto projectionType = camera.GetProjectionType();
 
-			const char* projectionTypeStrings[] = { "Perspective","Orthograpic" };
-			const char* currentProjectionTypeString = projectionTypeStrings[(int)camera.GetProjectionType()];
-
-			if (ImGui::BeginCombo("Projection", currentProjectionTypeString))
+			if (DrawEnumComp<SceneCamera::ProjectionType>("Projection", &projectionType))
 			{
-				for (size_t i = 0; i < 2; i++)
-				{
-					bool isSelected = currentProjectionTypeString == projectionTypeStrings[i];
-					if (ImGui::Selectable(projectionTypeStrings[i], isSelected))
-					{
-						currentProjectionTypeString = projectionTypeStrings[i];
-						camera.SetProjectionType((SceneCamera::ProjectionType)i);
-					}
-
-					if (isSelected)
-					{
-						ImGui::SetItemDefaultFocus();
-					}
-				}
-				ImGui::EndCombo();
+				camera.SetProjectionType(projectionType);
 			}
 
-			auto projectionType = camera.GetProjectionType();
 			if (projectionType == SceneCamera::ProjectionType::Perspective)
 			{
 				float fov = glm::degrees(camera.GetPerspectiveVerticalFOV());

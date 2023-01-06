@@ -5,6 +5,8 @@
 #include "Spark/Core/Timestep.h"
 #include "Spark/Renderer/EditorCamera.h"
 
+class b2World;
+
 namespace Spark
 {
 	class Entity;
@@ -22,7 +24,8 @@ namespace Spark
 		void OnUpdateRuntime(Timestep ts);
 		void OnUpdateEditor(Timestep ts, EditorCamera& camera);
 		void OnViewportResize(uint32_t width, uint32_t height);
-
+		void OnRuntimeStart();
+		void OnRuntimeStop();
 		Entity GetPrimaryCameraEntity();
 
 	private:
@@ -32,6 +35,8 @@ namespace Spark
 		entt::registry m_Registry;
 		uint32_t m_ViewportWidth;
 		uint32_t m_ViewportHeight;
+
+		b2World* m_PhysicsWorld = nullptr;
 
 		friend class Entity;
 		friend class SceneHierarchyPanel;
