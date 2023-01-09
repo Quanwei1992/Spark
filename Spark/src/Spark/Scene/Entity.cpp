@@ -10,6 +10,11 @@ namespace Spark
 		return GetComponent<IDComponent>().ID;
 	}
 
+	const std::string& Entity::GetName()
+	{
+		return GetComponent<TagComponent>().Tag;
+	}
+
 	Entity Entity::Empty = {};
 
 	Entity::Entity(entt::entity handle, Scene* scene)

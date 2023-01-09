@@ -38,6 +38,55 @@ namespace Spark
 	{
 
 	}
+
+	template<typename T>
+	static void CopyComponent(entt::registry& dst, entt::registry& src, std::unordered_map<UUID, entt::entity>& enttMap)
+	{
+		auto view = src.view<IDComponent,T>();
+		for (auto&& [entity,id,component] : view.each())
+		{
+			UUID uuid = id.ID;
+			dst.emplace_or_replace<T>(enttMap[uuid], component);
+		}
+	}
+
+	template<typename T>
+	static void CopyComponent(entt::entity dst, entt::entity src, entt::registry& registry)
+	{
+		T* component = registry.try_get<T>(src);
+		if (component)
+		{
+			registry.emplace_or_replace<T>(dst, *component);
+		}		
+	}
+
+	Ref<Scene> Scene::Copy(Ref<Scene> other)
+	{
+		Ref<Scene> newScene = CreateRef<Scene>();
+		newScene->m_ViewportWidth = other->m_ViewportWidth;
+		newScene->m_ViewportHeight = other->m_ViewportHeight;
+
+		std::unordered_map<UUID, entt::entity> enttMap;
+
+		auto& srcSceneRegistry = other->m_Registry;
+		auto& dstSceneRegistry = newScene->m_Registry;
+		auto idView = srcSceneRegistry.view<IDComponent,TagComponent>();
+		for (auto&& [entity,id,tag] : idView.each())
+		{
+			Entity entity = newScene->CreateEntityImpl(id.ID, tag.Tag);
+			enttMap[id.ID] = entity;
+		}
+
+		CopyComponent<TransformComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<TransformComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<SpriteRendererComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<CameraComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<NativeScriptComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<Rigidbody2DComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent<BoxCollider2DComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		return newScene;
+	}
+
 	void Scene::OnUpdateRuntime(Timestep ts)
 	{
 		// Update scripts
@@ -164,6 +213,28 @@ namespace Spark
 
 	void Scene::OnRuntimeStop()
 	{
+
+		m_Registry.view<Rigidbody2DComponent>().each([=](auto e, Rigidbody2DComponent& rb2d)
+		{
+
+			Entity entity = { e,this };
+			b2Body* body = (b2Body*)rb2d.RuntimeBody;
+			if (body)
+			{
+				if (auto* bc2d = entity.TryGetComponent<BoxCollider2DComponent>())
+				{
+					b2Fixture* fixture = (b2Fixture*)bc2d->RuntimeFixture;
+					if (fixture)
+					{
+						body->DestroyFixture(fixture);
+						bc2d->RuntimeFixture = false;
+					}
+				}
+				m_PhysicsWorld->DestroyBody((b2Body*)rb2d.RuntimeBody);
+				rb2d.RuntimeBody = nullptr;
+			}		
+		});
+
 		delete m_PhysicsWorld;
 		m_PhysicsWorld = nullptr;
 	}
@@ -181,10 +252,14 @@ namespace Spark
 
 	Entity Scene::CreateEntityImpl(UUID uuid, const std::string& name)
 	{
+
+		std::string entityName = name.empty() ? "Empty" : name;
+
+
 		Entity entity = { m_Registry.create() ,this };
 		entity.AddComponent<IDComponent>(uuid);
 		auto& tag = entity.AddComponent<TagComponent>();
-		tag.Tag = name;
+		tag.Tag = entityName;
 		entity.AddComponent<TransformComponent>();
 
 		return entity;
@@ -192,21 +267,32 @@ namespace Spark
 
 	Entity Scene::CreateEntity(const std::string& name)
 	{
-		std::string entityName = name.empty() ? "Empty" : name;
-
-		return CreateEntityImpl(UUID(), entityName);
+		return CreateEntityImpl(UUID(), name);
 	}
 
 	Spark::Entity Scene::CreateEntity(UUID uuid, const std::string& name /*= std::string()*/)
 	{
-		std::string entityName = name.empty() ? "Empty" : name;
 
-		return CreateEntityImpl(uuid, entityName);
+		return CreateEntityImpl(uuid, name);
 	}
 
 	void Scene::DestoryEntity(Entity entity)
 	{
 		m_Registry.destroy(entity);
+	}
+
+	Spark::Entity Scene::DuplicateEntity(Entity entity)
+	{
+		Entity newEntity = CreateEntity(entity.GetName() + "_Clone");
+
+		CopyComponent<TransformComponent>(newEntity, entity, m_Registry);
+		CopyComponent<SpriteRendererComponent>(newEntity, entity, m_Registry);
+		CopyComponent<CameraComponent>(newEntity, entity, m_Registry);
+		CopyComponent<NativeScriptComponent>(newEntity, entity, m_Registry);
+		CopyComponent<Rigidbody2DComponent>(newEntity, entity, m_Registry);
+		CopyComponent<BoxCollider2DComponent>(newEntity, entity, m_Registry);
+
+		return entity;
 	}
 
 	template<typename T>

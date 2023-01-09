@@ -28,12 +28,16 @@ namespace Spark
 		void OpenScene();
 		void OpenScene(const std::filesystem::path& path);
 		void SaveSceneAs();
+		void SaveScene();
 
 		void OnScenePlay();
 		void OnSceneStop();
 
+		void OnDuplicateEntity();
+
 	private:
 		void UI_Toolbar();
+		void DrawGizoms();
 	private:
 		OrthographicCameraController m_CameraController;
 		Ref<Framebuffer> m_Framebuffer;
@@ -46,7 +50,9 @@ namespace Spark
 		int m_GizmoType = 0;
 		Entity m_HoveredEntity = Entity::Empty;
 		EditorCamera m_EditorCamera;
+		std::filesystem::path m_EditorScenePath;
 		Ref<Scene> m_ActiveScene;
+		Ref<Scene> m_EditorScene,m_RuntimeScene;
 		// Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;
 		ContentBrowserPanel m_ContentBrowserPanel;

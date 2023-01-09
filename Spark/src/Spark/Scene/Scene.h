@@ -19,9 +19,13 @@ namespace Spark
 		Scene();
 		~Scene();
 
+		static Ref<Scene> Copy(Ref<Scene> other);
+
 		Entity CreateEntity(const std::string& name = std::string());
 		Entity CreateEntity(UUID uuid,const std::string& name = std::string());
 		void DestoryEntity(Entity entity);
+
+		Entity DuplicateEntity(Entity entity);
 
 		void OnUpdateRuntime(Timestep ts);
 		void OnUpdateEditor(Timestep ts, EditorCamera& camera);

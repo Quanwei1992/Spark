@@ -33,22 +33,23 @@ namespace Spark
 
 		m_CameraController.SetZoomLevel(5.0f);
 		m_CameraController.OnResize(fbSpec.Width, fbSpec.Height);
-		m_ActiveScene = CreateRef<Scene>();
+		m_EditorScene = CreateRef<Scene>();
 
 		auto commandLineArgs = Application::Get().GetCommandLineArgs();
 		if (commandLineArgs.Count > 1)
 		{
 			auto sceneFilePath = commandLineArgs[1];
-			SceneSerializer serializer(m_ActiveScene);
-			serializer.Deserialize(sceneFilePath);
+			OpenScene(sceneFilePath);
 		}
 
 		m_EditorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
 
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		m_SceneHierarchyPanel.SetContext(m_EditorScene);
 
 		m_IconPlay = Texture2D::Create("resources/icons/PlayButton.png");
 		m_IconStop = Texture2D::Create("resources/icons/StopButton.png");
+
+		m_ActiveScene = m_EditorScene;
 	}
 
 	void EditorLayer::OnDetach()
@@ -192,7 +193,15 @@ namespace Spark
 					OpenScene();
 				}
 
-				if (ImGui::MenuItem("Save As...","Ctrl+Shift+S"))
+				bool inEditMode = m_SceneState == SceneState::Edit;
+
+
+				if (ImGui::MenuItem("Save", "Ctrl+S",false, inEditMode && !m_EditorScenePath.empty()))
+				{
+					SaveScene();
+				}
+
+				if (ImGui::MenuItem("Save As...","Ctrl+Shift+S",false,inEditMode))
 				{
 					SaveSceneAs();
 				}
@@ -260,52 +269,8 @@ namespace Spark
 			auto viewportOffset = ImGui::GetWindowPos();
 			m_ViewportBounds[0] = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
 			m_ViewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
-			// Gizoms
-			Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
-			if (selectedEntity && m_GizmoType != 0)
-			{
-				ImGuizmo::SetDrawlist();
-				float windowWidth = (float)ImGui::GetWindowWidth();
-				float windowHeight = (float)ImGui::GetWindowHeight();
-				ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
 
-				// Camera
-				auto cameraEntity = m_ActiveScene->GetPrimaryCameraEntity();
-				if (cameraEntity)
-				{
-					const auto& cameraProjection = m_EditorCamera.GetProjection();
-					glm::mat4 cameraView = m_EditorCamera.GetViewMatrix();
-
-					// Entity Transform
-					auto& tc = selectedEntity.GetComponent<TransformComponent>();
-					glm::mat4 transform = tc.GetTransform();
-
-					// Snapping
-					bool snap = Input::IsKeyPressed(Key::LeftControl);
-					float snapValue = 0.5f;
-					if (m_GizmoType == ImGuizmo::OPERATION::ROTATE)
-					{
-						snapValue = 45.0f;
-					}
-					float snapValues[3] = { snapValue,snapValue ,snapValue };
-
-					ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
-						(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(transform),
-						nullptr,snap? snapValues : nullptr);
-
-					if (ImGuizmo::IsUsing())
-					{
-						glm::vec3 translation, rotation, scale;
-						Math::DecomposeTransform(transform, translation, rotation, scale);
-						tc.Translation = translation;
-
-						glm::vec3 deltaRotation = rotation - tc.Rotation;
-						tc.Rotation += deltaRotation;
-						tc.Scale = scale;
-					}
-				}
-			
-			}
+			DrawGizoms();
 
 		}
 		ImGui::End();
@@ -315,6 +280,49 @@ namespace Spark
 
 		ImGui::End();
 	}
+
+	void EditorLayer::DrawGizoms()
+	{
+		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
+		if (!selectedEntity || m_GizmoType == 0 || m_SceneState == SceneState::Play) return;
+		ImGuizmo::SetDrawlist();
+		float windowWidth = (float)ImGui::GetWindowWidth();
+		float windowHeight = (float)ImGui::GetWindowHeight();
+		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
+
+
+		const auto& cameraProjection = m_EditorCamera.GetProjection();
+		glm::mat4 cameraView = m_EditorCamera.GetViewMatrix();
+
+		// Entity Transform
+		auto& tc = selectedEntity.GetComponent<TransformComponent>();
+		glm::mat4 transform = tc.GetTransform();
+
+		// Snapping
+		bool snap = Input::IsKeyPressed(Key::LeftControl);
+		float snapValue = 0.5f;
+		if (m_GizmoType == ImGuizmo::OPERATION::ROTATE)
+		{
+			snapValue = 45.0f;
+		}
+		float snapValues[3] = { snapValue,snapValue ,snapValue };
+
+		ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
+			(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(transform),
+			nullptr, snap ? snapValues : nullptr);
+
+		if (ImGuizmo::IsUsing())
+		{
+			glm::vec3 translation, rotation, scale;
+			Math::DecomposeTransform(transform, translation, rotation, scale);
+			tc.Translation = translation;
+
+			glm::vec3 deltaRotation = rotation - tc.Rotation;
+			tc.Rotation += deltaRotation;
+			tc.Scale = scale;
+		}
+	}
+
 
 
 	void EditorLayer::UI_Toolbar()
@@ -354,6 +362,7 @@ namespace Spark
 		ImGui::End();
 	}
 
+
 	void EditorLayer::OnEvent(Spark::Event& e)
 	{
 		m_CameraController.OnEvent(e);
@@ -385,6 +394,10 @@ namespace Spark
 			{
 				SaveSceneAs();
 			}
+			else if (control)
+			{
+				SaveScene();
+			}
 			break;
 		}
 		case Key::N:
@@ -395,6 +408,14 @@ namespace Spark
 			}
 			break;
 		}
+
+		case Key::D:
+		{
+			if (control) OnDuplicateEntity();
+			break;
+		}
+
+
 		// Gizmos
 		case Key::Q:
 			m_GizmoType = 0;
@@ -433,31 +454,39 @@ namespace Spark
 
 	void EditorLayer::OpenScene()
 	{
-		auto filepath = FileDialogs::OpenFile("Spark Scene (*.spark)\0*.spark\0");
+		auto filepath = FileDialogs::OpenFile("Scene (*.scene)\0*.scene\0");
 		if (!filepath.empty())
 		{
-			m_ActiveScene = CreateRef<Scene>();
-			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-			m_SceneHierarchyPanel.SetContext(m_ActiveScene);
-
-			SceneSerializer serializer(m_ActiveScene);
-			serializer.Deserialize(filepath);
+			OpenScene(filepath);
 		}
 	}
 
 	void EditorLayer::OpenScene(const std::filesystem::path& path)
 	{
-		m_ActiveScene = CreateRef<Scene>();
-		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		if (m_SceneState != SceneState::Edit) OnSceneStop();
 
-		SceneSerializer serializer(m_ActiveScene);
+		if (path.extension().string() != ".scene")
+		{
+			SK_WARN("Could not load {0} - not a scene file", path.filename().string());
+			return;
+		}
+
+		m_EditorScene = CreateRef<Scene>();
+		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		m_SceneHierarchyPanel.SetContext(m_EditorScene);
+
+		SceneSerializer serializer(m_EditorScene);
 		serializer.Deserialize(path.string());
+
+		m_ActiveScene = m_EditorScene;
+
+		m_EditorScenePath = path;
 	}
 
 	void EditorLayer::SaveSceneAs()
 	{
-		auto filepath = FileDialogs::SaveFile("Spark Scene (*.spark)\0*.spark\0");
+		if (m_SceneState != SceneState::Edit) return;
+		auto filepath = FileDialogs::SaveFile("Scene (*.scene)\0*.scene\0");
 		if (!filepath.empty())
 		{
 			SceneSerializer serializer(m_ActiveScene);
@@ -465,18 +494,48 @@ namespace Spark
 		}
 	}
 
+	void EditorLayer::SaveScene()
+	{
+		if (m_SceneState != SceneState::Edit) return;
+		if (m_EditorScenePath.empty()) return;
+		SceneSerializer serializer(m_ActiveScene);
+		serializer.Serialize(m_EditorScenePath.string());
+	}
+
 	void EditorLayer::OnScenePlay()
 	{
-		m_ActiveScene->OnRuntimeStart();
 		m_SceneState = SceneState::Play;
+
+		m_RuntimeScene = Scene::Copy(m_EditorScene);
+		m_RuntimeScene->OnRuntimeStart();
+
+		m_ActiveScene = m_RuntimeScene;
+
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
 
 	void EditorLayer::OnSceneStop()
 	{
-		m_ActiveScene->OnRuntimeStop();
 		m_SceneState = SceneState::Edit;
+
+		m_RuntimeScene->OnRuntimeStop();
+		m_RuntimeScene = nullptr;
+
+		m_ActiveScene = m_EditorScene;
+
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+
 	}
 
+	void EditorLayer::OnDuplicateEntity()
+	{
+		if (m_SceneState != SceneState::Edit) return;
+
+		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
+		if (!selectedEntity) return;
+
+		m_ActiveScene->DuplicateEntity(selectedEntity);
+	}
 
 }
 
