@@ -179,15 +179,31 @@ namespace Spark
 		return Entity::Empty;
 	}
 
-	Entity Scene::CreateEntity(const std::string& name)
+	Entity Scene::CreateEntityImpl(UUID uuid, const std::string& name)
 	{
 		Entity entity = { m_Registry.create() ,this };
+		entity.AddComponent<IDComponent>(uuid);
 		auto& tag = entity.AddComponent<TagComponent>();
-		tag.Tag = name.empty() ? "Entity" : name;
+		tag.Tag = name;
 		entity.AddComponent<TransformComponent>();
 
 		return entity;
 	}
+
+	Entity Scene::CreateEntity(const std::string& name)
+	{
+		std::string entityName = name.empty() ? "Empty" : name;
+
+		return CreateEntityImpl(UUID(), entityName);
+	}
+
+	Spark::Entity Scene::CreateEntity(UUID uuid, const std::string& name /*= std::string()*/)
+	{
+		std::string entityName = name.empty() ? "Empty" : name;
+
+		return CreateEntityImpl(uuid, entityName);
+	}
+
 	void Scene::DestoryEntity(Entity entity)
 	{
 		m_Registry.destroy(entity);
@@ -196,14 +212,9 @@ namespace Spark
 	template<typename T>
 	void Scene::OnComponentAdded(Entity entity, T& component)
 	{
-		static_assert(false);
+		//static_assert(false);
 	}
 
-	template<>
-	void Scene::OnComponentAdded<TransformComponent>(Entity entity, TransformComponent& component)
-	{
-		
-	}
 	template<>
 	void Scene::OnComponentAdded<CameraComponent>(Entity entity, CameraComponent& component)
 	{

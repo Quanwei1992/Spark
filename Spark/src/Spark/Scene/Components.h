@@ -4,8 +4,10 @@
 #include "SceneCamera.h"
 #include "Spark/Renderer/Camera.h"
 #include "Spark/Core/Timestep.h"
+#include "Spark/Core/UUID.h"
 #include "Spark/Scene/ScriptableEntity.h"
 #include "Spark/Renderer/Texture.h"
+
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
@@ -15,6 +17,16 @@
 
 namespace Spark
 {
+
+	struct IDComponent
+	{
+		UUID ID;
+
+		IDComponent() = default;
+		IDComponent(const IDComponent&) = default;
+		IDComponent(const UUID& id)
+			: ID(id) {}
+	};
 
 	struct TagComponent
 	{

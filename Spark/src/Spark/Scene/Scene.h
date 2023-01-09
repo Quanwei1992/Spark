@@ -3,6 +3,7 @@
 #include "entt.hpp"
 
 #include "Spark/Core/Timestep.h"
+#include "Spark/Core/UUID.h"
 #include "Spark/Renderer/EditorCamera.h"
 
 class b2World;
@@ -19,6 +20,7 @@ namespace Spark
 		~Scene();
 
 		Entity CreateEntity(const std::string& name = std::string());
+		Entity CreateEntity(UUID uuid,const std::string& name = std::string());
 		void DestoryEntity(Entity entity);
 
 		void OnUpdateRuntime(Timestep ts);
@@ -31,6 +33,8 @@ namespace Spark
 	private:
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);
+
+		Entity CreateEntityImpl(UUID uuid, const std::string& name);
 	private:
 		entt::registry m_Registry;
 		uint32_t m_ViewportWidth;

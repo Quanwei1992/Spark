@@ -1,16 +1,16 @@
 Scene: Untitled
 Entities:
-  - Entity: 123456789
+  - Entity: 16348154500934387658
     TagComponent:
-      Tag: Quad
+      Tag: Empty Entity
     TransformComponent:
-      Translation: [-0.113933466, 0.940325439, 0]
-      Rotation: [0, 0, 1.57274616]
-      Scale: [0.999997854, 0.999997854, 1]
+      Translation: [0, -1.16980743, 0]
+      Rotation: [0, 0, 0]
+      Scale: [8.48054314, 0.294097602, 1]
     SpriteRendererComponent:
-      Color: [0.841698825, 0.246984974, 0.246984974, 1]
+      Color: [0.0830041021, 0.227353275, 0.895752907, 1]
     Rigidbody2DComponent:
-      Type: Dynamic
+      Type: Static
       FixedRotation: false
     BoxCollider2DComponent:
       Offset: [0, 0]
@@ -19,7 +19,7 @@ Entities:
       Friction: 0
       Restitution: 0
       RestitutionThreshold: 0.5
-  - Entity: 123456789
+  - Entity: 17245382503757665330
     TagComponent:
       Tag: Camera
     TransformComponent:
@@ -37,17 +37,17 @@ Entities:
         PerspectiveFar: 1000
       Primary: true
       FixedAspectRatio: false
-  - Entity: 123456789
+  - Entity: 10040933234224912943
     TagComponent:
-      Tag: Empty Entity
+      Tag: Quad
     TransformComponent:
-      Translation: [0, -1.16980743, 0]
-      Rotation: [0, 0, 0]
-      Scale: [8.48054314, 0.294097602, 1]
+      Translation: [-0.113933466, 0.940325439, 0]
+      Rotation: [0, 0, 1.57274616]
+      Scale: [0.999997854, 0.999997854, 1]
     SpriteRendererComponent:
-      Color: [0.0830041021, 0.227353275, 0.895752907, 1]
+      Color: [0.841698825, 0.246984974, 0.246984974, 1]
     Rigidbody2DComponent:
-      Type: Static
+      Type: Dynamic
       FixedRotation: false
     BoxCollider2DComponent:
       Offset: [0, 0]

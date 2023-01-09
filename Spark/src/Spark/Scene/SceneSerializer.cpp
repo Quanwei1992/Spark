@@ -59,7 +59,7 @@ namespace Spark
 	static void SeralizeEntity(YAML::Emitter& out, Entity entity)
 	{
 		out << YAML::BeginMap;
-		out << YAML::Key << "Entity" << YAML::Value << "123456789"; // TODO: UUID
+		out << YAML::Key << "Entity" << YAML::Value << (uint64_t)entity.GetUUID(); // TODO: UUID
 
 
 		if (entity.HasComponent<TagComponent>())
@@ -194,7 +194,7 @@ namespace Spark
 
 			SK_CORE_TRACE("Deserialized entity with ID = {0}, name = {1}", uuid, name);
 
-			Entity deserializedEntity = m_Scene->CreateEntity(name);
+			Entity deserializedEntity = m_Scene->CreateEntity(uuid,name);
 
 			auto componentData = entity["TransformComponent"];
 			if (componentData)
