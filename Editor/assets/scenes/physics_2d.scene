@@ -275,3 +275,25 @@ Entities:
       Friction: 0.5
       Restitution: 0.5
       RestitutionThreshold: 0.5
+  - Entity: 3412009937416777501
+    TagComponent:
+      Tag: Circle
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CircleRendererComponent:
+      Color: [1, 0, 0, 1]
+      Radius: 0.5
+      Thickness: 0.129999995
+      Fade: 0.00499999989
+    Rigidbody2DComponent:
+      Type: Dynamic
+      FixedRotation: false
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.100000001
+      Restitution: 0.100000001
+      RestitutionThreshold: 0.5

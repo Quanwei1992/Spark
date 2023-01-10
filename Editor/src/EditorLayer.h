@@ -51,7 +51,6 @@ namespace Spark
 		Entity m_HoveredEntity = Entity::Empty;
 		EditorCamera m_EditorCamera;
 		std::filesystem::path m_EditorScenePath;
-		Ref<Scene> m_ActiveScene;
 		Ref<Scene> m_EditorScene,m_RuntimeScene;
 		// Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;

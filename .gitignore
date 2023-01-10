@@ -13,3 +13,4 @@ __pycache__
 Spark/vendor/VulkanSDK
 Editor/assets/cache
 Editor/Editor.exe
+Json/

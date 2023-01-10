@@ -44,7 +44,8 @@ project "Spark"
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.box2d}",
 		"%{IncludeDir.VulkanSDK}",
-		"%{IncludeDir.magic_enum}"
+		"%{IncludeDir.magic_enum}",
+		"%{IncludeDir.typelist}"
 	}
 
 	links

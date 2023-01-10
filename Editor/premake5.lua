@@ -23,7 +23,8 @@ project "Editor"
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.magic_enum}",
 		"%{IncludeDir.ImGuizmo}",
-        "%{IncludeDir.ImGui}"
+        "%{IncludeDir.ImGui}",
+		"%{IncludeDir.typelist}"
 	}
 
 	links

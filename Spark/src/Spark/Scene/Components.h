@@ -14,12 +14,16 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <typelist.hpp>
+#include <typeindex>
 
 namespace Spark
 {
 
 	struct IDComponent
 	{
+		constexpr static const char* PrettyName = "ID";
+
 		UUID ID;
 
 		IDComponent() = default;
@@ -30,6 +34,8 @@ namespace Spark
 
 	struct TagComponent
 	{
+		constexpr static const char* PrettyName = "Tag";
+
 		std::string Tag;
 
 		TagComponent() = default;
@@ -40,6 +46,9 @@ namespace Spark
 
 	struct TransformComponent
 	{
+		constexpr static const char* PrettyName = "Transform";
+
+
 		glm::vec3 Translation = { 0.0f,0.0f,0.0f };
 		glm::vec3 Rotation = { 0.0f,0.0f,0.0f };
 		glm::vec3 Scale = { 1.0f,1.0f,1.0f };
@@ -66,6 +75,9 @@ namespace Spark
 
 	struct SpriteRendererComponent
 	{
+
+		constexpr static const char* PrettyName = "SpriteRenderer";
+
 		Color4f Color{ 1.0f, 1.0f, 1.0f, 1.0f };
 		Ref<Texture2D> Texture;
 		float TilingFactor = 1.0f;
@@ -75,10 +87,25 @@ namespace Spark
 		SpriteRendererComponent(const Color4f& color)
 			: Color(color) {}
 	};
-	
 
+
+	struct CircleRendererComponent
+	{
+		constexpr static const char* PrettyName = "CircleRenderer";
+
+		Color4f Color{ 1.0f, 1.0f, 1.0f, 1.0f };
+		float Radius = 0.5f;
+		float Thickness = 1.0f;
+		float Fade = 0.005f;
+
+		CircleRendererComponent() = default;
+		CircleRendererComponent(const CircleRendererComponent&) = default;
+	};
+	
 	struct CameraComponent
 	{
+		constexpr static const char* PrettyName = "Camera";
+
 		Spark::SceneCamera Camera;
 		bool Primary = true;
 		bool FixedAspectRatio = false;
@@ -89,6 +116,8 @@ namespace Spark
 
 	struct NativeScriptComponent
 	{
+		constexpr static const char* PrettyName = "NativeScript";
+
 		ScriptableEntity* Instance = nullptr;
 		ScriptableEntity*(*InstantiateScript)();
 		void (*DestoryScript)(NativeScriptComponent*);
@@ -104,6 +133,8 @@ namespace Spark
 	// Physics
 	struct Rigidbody2DComponent
 	{
+		constexpr static const char* PrettyName = "Rigidbody2D";
+
 		enum class BodyType { Static = 0,Dynamic,Kinematic};
 		BodyType Type = BodyType::Static;
 		bool FixedRotation = false;
@@ -117,6 +148,8 @@ namespace Spark
 
 	struct BoxCollider2DComponent
 	{
+		constexpr static const char* PrettyName = "BoxCollider2D";
+
 		glm::vec2 Offset = { 0.0f,0.0f };
 		glm::vec2 Size = { 0.5f,0.5f };
 
@@ -132,4 +165,17 @@ namespace Spark
 		BoxCollider2DComponent() = default;
 		BoxCollider2DComponent(const BoxCollider2DComponent&) = default;
 	};
+
+
+	using CopyableComponentTypes = tl::type_list<TransformComponent
+		, SpriteRendererComponent
+		, CameraComponent
+		, NativeScriptComponent
+		, Rigidbody2DComponent
+		, BoxCollider2DComponent
+		, CircleRendererComponent
+	>;
+
+
+
 }

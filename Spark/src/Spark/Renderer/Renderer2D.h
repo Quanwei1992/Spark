@@ -39,7 +39,11 @@ namespace Spark
 		static void DrawQuad(const glm::mat4& transform,const Ref<SubTexture2D>& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
 
 
+		static void DrawCircle(const glm::mat4& transform, const glm::vec4& color, float thickness = 1.0f, float fade = 0.005f, int entityID = -1);
+
+
 		static void DrawSprite(const glm::mat4& transform, SpriteRendererComponent& src,int entityID);
+		static void DrawCircle(const glm::mat4& transform, CircleRendererComponent& src, int entityID);
 
 		// Stats
 

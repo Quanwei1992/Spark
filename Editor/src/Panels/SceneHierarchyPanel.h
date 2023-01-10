@@ -22,8 +22,17 @@ namespace Spark
 	private:
 		void DrawEntityNode(Entity& entity);
 		void DrawComponents(Entity& entity);
+
+
+		template<typename T>
+		void DrawComponent(Entity entity);
+
+		template<typename T>
+		void OnDrawComponentInspectorGUI(Entity entity, T& component);
 	private:
 		Ref<Scene> m_Context;
 		Entity m_SelectionContext;
 	};
+
+
 }

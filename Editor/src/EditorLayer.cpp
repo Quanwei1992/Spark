@@ -14,6 +14,7 @@ namespace Spark
 	EditorLayer::EditorLayer()
 		:Layer("EditorLayer")
 		, m_CameraController(16.0f/9.0f,true)
+		,m_GizmoType(ImGuizmo::OPERATION::TRANSLATE)
 	{
 	}
 
@@ -48,8 +49,6 @@ namespace Spark
 
 		m_IconPlay = Texture2D::Create("resources/icons/PlayButton.png");
 		m_IconStop = Texture2D::Create("resources/icons/StopButton.png");
-
-		m_ActiveScene = m_EditorScene;
 	}
 
 	void EditorLayer::OnDetach()
@@ -58,9 +57,13 @@ namespace Spark
 	}
 
 
-	void EditorLayer::OnUpdate(Spark::Timestep ts)
+	void EditorLayer::OnUpdate(Timestep ts)
 	{
 		SK_PROFILE_FUNCTION();	
+
+
+		Ref<Scene> activeScene = m_SceneState == SceneState::Edit ? m_EditorScene : m_RuntimeScene;
+
 
 		// Resize
 		const FramebufferSpecification& fbSpec = m_Framebuffer->GetSpecification();
@@ -69,14 +72,14 @@ namespace Spark
 			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_CameraController.OnResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
-			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			activeScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
 		
 		// Render
-		Spark::Renderer2D::ResetStats();
+		Renderer2D::ResetStats();
 		m_Framebuffer->Bind();
-		Spark::RenderCommand::SetClearColor(glm::vec4(0.1f, 0.1f, 0.1f, 1));
-		Spark::RenderCommand::Clear();
+		RenderCommand::SetClearColor(glm::vec4(0.1f, 0.1f, 0.1f, 1));
+		RenderCommand::Clear();
 
 		// Clear our entity ID attachment to -1
 
@@ -94,12 +97,13 @@ namespace Spark
 				m_CameraController.OnUpdate(ts);
 			}
 			m_EditorCamera.OnUpdate(ts);
-			m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
+			m_EditorScene->OnUpdateEditor(ts, m_EditorCamera);
 		}break;
 		case SceneState::Play:
-			m_ActiveScene->OnUpdateRuntime(ts);
+			m_RuntimeScene->OnUpdateRuntime(ts);
 			break;
 		}
+
 
 		auto[mx,my] = ImGui::GetMousePos();
 		mx -= m_ViewportBounds[0].x;
@@ -118,7 +122,7 @@ namespace Spark
 				m_HoveredEntity = Entity::Empty;
 			}
 			else {
-				m_HoveredEntity = {(entt::entity)pixelData,m_ActiveScene.get() };
+				m_HoveredEntity = {(entt::entity)pixelData,activeScene.get() };
 			}
 		}
 		m_Framebuffer->Unbind();
@@ -208,19 +212,16 @@ namespace Spark
 
 				if (ImGui::MenuItem("Exit"))
 				{
-					Spark::Application::Get().Exit();
+					Application::Get().Exit();
 				}
 				ImGui::EndMenu();
 			}
 			ImGui::EndMenuBar();
 		}
 
-		m_SceneHierarchyPanel.OnImGuiRender();
-		m_ContentBrowserPanel.OnImGuiRender();
-
 		ImGui::Begin("Stats");
 		{
-			auto stats = Spark::Renderer2D::GetStats();
+			auto stats = Renderer2D::GetStats();
 			ImGui::Text("Draw Calls %d", stats.DrawCalls);
 			ImGui::Text("Quads %d", stats.QuadCount);
 			ImGui::Text("Vertices %d", stats.GetTotalVertexCount());
@@ -234,6 +235,12 @@ namespace Spark
 			ImGui::Text("Hovered Entity: %s", name.c_str());
 		}
 		ImGui::End();
+
+
+		m_SceneHierarchyPanel.OnImGuiRender();
+		m_ContentBrowserPanel.OnImGuiRender();
+
+
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0,0 });
 		ImGui::Begin("Viewport");
@@ -363,7 +370,7 @@ namespace Spark
 	}
 
 
-	void EditorLayer::OnEvent(Spark::Event& e)
+	void EditorLayer::OnEvent(Event& e)
 	{
 		m_CameraController.OnEvent(e);
 		m_EditorCamera.OnEvent(e);
@@ -447,9 +454,11 @@ namespace Spark
 
 	void EditorLayer::NewScene()
 	{
-		m_ActiveScene = CreateRef<Scene>();
-		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		if (m_SceneState != SceneState::Edit) OnSceneStop();
+
+		m_EditorScene = CreateRef<Scene>();
+		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		m_SceneHierarchyPanel.SetContext(m_EditorScene);
 	}
 
 	void EditorLayer::OpenScene()
@@ -478,8 +487,6 @@ namespace Spark
 		SceneSerializer serializer(m_EditorScene);
 		serializer.Deserialize(path.string());
 
-		m_ActiveScene = m_EditorScene;
-
 		m_EditorScenePath = path;
 	}
 
@@ -489,7 +496,7 @@ namespace Spark
 		auto filepath = FileDialogs::SaveFile("Scene (*.scene)\0*.scene\0");
 		if (!filepath.empty())
 		{
-			SceneSerializer serializer(m_ActiveScene);
+			SceneSerializer serializer(m_EditorScene);
 			serializer.Serialize(filepath);
 		}
 	}
@@ -498,7 +505,7 @@ namespace Spark
 	{
 		if (m_SceneState != SceneState::Edit) return;
 		if (m_EditorScenePath.empty()) return;
-		SceneSerializer serializer(m_ActiveScene);
+		SceneSerializer serializer(m_EditorScene);
 		serializer.Serialize(m_EditorScenePath.string());
 	}
 
@@ -509,9 +516,7 @@ namespace Spark
 		m_RuntimeScene = Scene::Copy(m_EditorScene);
 		m_RuntimeScene->OnRuntimeStart();
 
-		m_ActiveScene = m_RuntimeScene;
-
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		m_SceneHierarchyPanel.SetContext(m_RuntimeScene);
 	}
 
 	void EditorLayer::OnSceneStop()
@@ -521,9 +526,7 @@ namespace Spark
 		m_RuntimeScene->OnRuntimeStop();
 		m_RuntimeScene = nullptr;
 
-		m_ActiveScene = m_EditorScene;
-
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		m_SceneHierarchyPanel.SetContext(m_EditorScene);
 
 	}
 
@@ -534,7 +537,7 @@ namespace Spark
 		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
 		if (!selectedEntity) return;
 
-		m_ActiveScene->DuplicateEntity(selectedEntity);
+		m_EditorScene->DuplicateEntity(selectedEntity);
 	}
 
 }

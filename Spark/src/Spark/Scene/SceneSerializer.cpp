@@ -115,6 +115,18 @@ namespace Spark
 			out << YAML::EndMap;
 		}
 
+		if (entity.HasComponent<CircleRendererComponent>())
+		{
+			out << YAML::Key << "CircleRendererComponent" << YAML::Value << YAML::BeginMap;
+
+			auto& component = entity.GetComponent<CircleRendererComponent>();
+			out << YAML::Key << "Color" << YAML::Value << component.Color;
+			out << YAML::Key << "Radius" << YAML::Value << component.Radius;
+			out << YAML::Key << "Thickness" << YAML::Value << component.Thickness;
+			out << YAML::Key << "Fade" << YAML::Value << component.Fade;
+			out << YAML::EndMap;
+		}
+
 		if (Rigidbody2DComponent* component = entity.TryGetComponent<Rigidbody2DComponent>())
 		{
 			out << YAML::Key << "Rigidbody2DComponent" << YAML::Value << YAML::BeginMap;
@@ -233,6 +245,16 @@ namespace Spark
 			{
 				auto& c = deserializedEntity.AddComponent<SpriteRendererComponent>();
 				c.Color = componentData["Color"].as<Color4f>();
+			}
+
+			componentData = entity["CircleRendererComponent"];
+			if (componentData)
+			{
+				auto& c = deserializedEntity.AddComponent<CircleRendererComponent>();
+				c.Color = componentData["Color"].as<Color4f>();
+				c.Radius = componentData["Radius"].as<float>();
+				c.Thickness = componentData["Thickness"].as<float>();
+				c.Fade = componentData["Fade"].as<float>();
 			}
 
 			componentData = entity["Rigidbody2DComponent"];

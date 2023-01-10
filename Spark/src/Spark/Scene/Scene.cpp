@@ -77,13 +77,11 @@ namespace Spark
 			enttMap[id.ID] = entity;
 		}
 
-		CopyComponent<TransformComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
-		CopyComponent<TransformComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
-		CopyComponent<SpriteRendererComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
-		CopyComponent<CameraComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
-		CopyComponent<NativeScriptComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
-		CopyComponent<Rigidbody2DComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
-		CopyComponent<BoxCollider2DComponent>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyableComponentTypes::for_each([&](auto t) {
+			using T = decltype(t)::type;
+			CopyComponent<T>(dstSceneRegistry, srcSceneRegistry, enttMap);
+		
+		});
 		return newScene;
 	}
 
@@ -141,15 +139,22 @@ namespace Spark
 
 		glm::mat4 viewProjection = mainCamera->GetProjection() * glm::inverse(mainCameraTransform);
 		Renderer2D::BeginScene(viewProjection);
-
-		auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
-		for (auto entity : group )
+		// Quads
 		{
-			auto& [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
-
-			Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color);
+			auto view = m_Registry.view<TransformComponent, SpriteRendererComponent>();
+			for (auto&& [entity, transform, src] : view.each())
+			{
+				Renderer2D::DrawSprite(transform.GetTransform(), src, (int)entity);
+			}
 		}
-
+		// Circles
+		{
+			auto view = m_Registry.view<TransformComponent, CircleRendererComponent>();
+			for (auto&& [entity, transform, src] : view.each())
+			{
+				Renderer2D::DrawCircle(transform.GetTransform(), src, (int)entity);
+			}
+		}
 		Renderer2D::EndScene();
 	}
 
@@ -157,13 +162,22 @@ namespace Spark
 	{
 		Renderer2D::BeginScene(camera.GetViewProjection());
 
-		auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
-		for (auto entity : group)
+		// Quads
 		{
-			auto& [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
-			Renderer2D::DrawSprite(transform.GetTransform(), sprite, (int)entity);
+			auto view = m_Registry.view<TransformComponent, SpriteRendererComponent>();
+			for (auto&& [entity, transform, src] : view.each())
+			{
+				Renderer2D::DrawSprite(transform.GetTransform(), src, (int)entity);
+			}
 		}
-
+		// Circles
+		{
+			auto view = m_Registry.view<TransformComponent, CircleRendererComponent>();
+			for (auto&& [entity, transform, src] : view.each())
+			{
+				Renderer2D::DrawCircle(transform.GetTransform(), src, (int)entity);
+			}
+		}
 		Renderer2D::EndScene();
 	}
 
@@ -285,12 +299,11 @@ namespace Spark
 	{
 		Entity newEntity = CreateEntity(entity.GetName() + "_Clone");
 
-		CopyComponent<TransformComponent>(newEntity, entity, m_Registry);
-		CopyComponent<SpriteRendererComponent>(newEntity, entity, m_Registry);
-		CopyComponent<CameraComponent>(newEntity, entity, m_Registry);
-		CopyComponent<NativeScriptComponent>(newEntity, entity, m_Registry);
-		CopyComponent<Rigidbody2DComponent>(newEntity, entity, m_Registry);
-		CopyComponent<BoxCollider2DComponent>(newEntity, entity, m_Registry);
+		CopyableComponentTypes::for_each([&](auto t) {
+			using T = decltype(t)::type;
+			CopyComponent<T>(newEntity, entity, m_Registry);
+
+		});
 
 		return entity;
 	}
@@ -331,6 +344,10 @@ namespace Spark
 	{
 
 	}
+	template<>
+	void Scene::OnComponentAdded<CircleRendererComponent>(Entity entity, CircleRendererComponent& component)
+	{
 
+	}
 }
 
