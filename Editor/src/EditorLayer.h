@@ -35,6 +35,10 @@ namespace Spark
 
 		void OnDuplicateEntity();
 
+		void OnOverlayRender();
+
+		Ref<Scene> GetActiveScene();
+
 	private:
 		void UI_Toolbar();
 		void DrawGizoms();
@@ -48,6 +52,7 @@ namespace Spark
 		bool m_ViewportFocused = false;
 		bool m_ViewportHoverd = false;
 		int m_GizmoType = 0;
+		bool m_ShowPhysicsColliders = false;
 		Entity m_HoveredEntity = Entity::Empty;
 		EditorCamera m_EditorCamera;
 		std::filesystem::path m_EditorScenePath;
