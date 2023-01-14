@@ -21,7 +21,8 @@ project "Sandbox"
 		"%{wks.location}/Spark/vendor",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.entt}",
-        "%{IncludeDir.ImGui}"
+        "%{IncludeDir.ImGui}",
+		"%{IncludeDir.typelist}"
 	}
 
 	links

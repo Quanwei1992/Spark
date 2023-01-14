@@ -30,6 +30,17 @@ namespace Spark
 		{
 			s_RendererAPI->DrawIndexed(vertexArray, indexCount);
 		}
+
+		static inline void DrawLines(const Ref<VertexArray>& vertexArray, uint32_t vertexCount)
+		{
+			s_RendererAPI->DrawLines(vertexArray, vertexCount);
+		}
+
+		static inline void SetLineWidth(float width)
+		{
+			s_RendererAPI->SetLineWidth(width);
+		}
+
 	private:
 		static RendererAPI* s_RendererAPI;
 	};

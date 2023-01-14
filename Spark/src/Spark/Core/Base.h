@@ -1,22 +1,30 @@
 #pragma once
 
-#include "Log.h"
 
 #include <memory>
 #include <glm/glm.hpp>
 
-#ifdef SK_ENABLE_ASSERTS
-	#define SK_ASSERT(x, ...) {if(!(x)){SK_ERROR("Assertion Failed: {0}",__VA_ARGS__);__debugbreak();}}
-	#define SK_CORE_ASSERT(x, ...) {if(!(x)){SK_CORE_ERROR("Assertion Failed: {0}",__VA_ARGS__);__debugbreak();}}
+#ifdef SK_DEBUG
+#if defined(SK_PLATFORM_WINDOWS)
+#define SK_DEBUGBREAK() __debugbreak()
+#elif defined(SK_PLATFORM_LINUX)
+#include <signal.h>
+#define SK_DEBUGBREAK() raise(SIGTRAP)
 #else
-	#define SK_ASSERT(x, ...)
-	#define SK_CORE_ASSERT(x, ...)
+#error "Platform doesn't support debugbreak yet!"
 #endif
+#define SK_ENABLE_ASSERTS
+#else
+#define SK_DEBUGBREAK()
+#endif
+
+#define SK_EXPAND_MACRO(x) x
+#define SK_STRINGIFY_MACRO(x) #x
 
 
 #define BIT(x) (1 << x)
 
-#define SK_BIND_EVENT_FN(x) std::bind(&x,this,std::placeholders::_1)
+#define SK_BIND_EVENT_FN(fn) [this](auto&&... args) -> decltype(auto) { return this->fn(std::forward<decltype(args)>(args)...); }
 
 namespace Spark
 {
@@ -44,3 +52,7 @@ namespace Spark
 	typedef glm::vec4 Color4f;
 	typedef glm::vec3 Color3f;
 }
+
+
+#include "Spark/Core/Log.h"
+#include "Spark/Core/Assert.h"

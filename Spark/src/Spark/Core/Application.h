@@ -20,7 +20,7 @@ namespace Spark
 
 		const char* operator[](int index) const
 		{
-			SK_CORE_ASSERT(index < count, "Out of range!");
+			SK_CORE_ASSERT(index < Count, "Out of range!");
 			return Args[index];
 		}
 	};

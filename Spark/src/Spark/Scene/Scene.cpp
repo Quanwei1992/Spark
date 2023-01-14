@@ -144,7 +144,7 @@ namespace Spark
 			auto view = m_Registry.view<TransformComponent, SpriteRendererComponent>();
 			for (auto&& [entity, transform, src] : view.each())
 			{
-				Renderer2D::DrawSprite(transform.GetTransform(), src, (int)entity);
+				Renderer2D::DrawRect(transform.GetTransform(), glm::vec4(1.0f), (int)entity);
 			}
 		}
 		// Circles
@@ -167,7 +167,7 @@ namespace Spark
 			auto view = m_Registry.view<TransformComponent, SpriteRendererComponent>();
 			for (auto&& [entity, transform, src] : view.each())
 			{
-				Renderer2D::DrawSprite(transform.GetTransform(), src, (int)entity);
+				Renderer2D::DrawRect(transform.GetTransform(), glm::vec4(1.0f), (int)entity);
 			}
 		}
 		// Circles
@@ -178,6 +178,7 @@ namespace Spark
 				Renderer2D::DrawCircle(transform.GetTransform(), src, (int)entity);
 			}
 		}
+
 		Renderer2D::EndScene();
 	}
 

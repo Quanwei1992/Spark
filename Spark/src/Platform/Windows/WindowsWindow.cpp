@@ -13,10 +13,6 @@ namespace Spark
 {
 	static bool s_GLFWInitialized = false;
 
-	void GLFWErrorCallback(int error_code, const char* description)
-	{
-		SK_CORE_ERROR("GLFW Error ({0}): {1}", error_code, description);
-	}
 
 	Window* Window::Create(const WindowProps& props)
 	{
@@ -74,7 +70,6 @@ namespace Spark
 			int success = glfwInit();
 			SK_CORE_ASSERT(success, "Could not initialize GLFW!");
 			s_GLFWInitialized = true;
-			glfwSetErrorCallback(GLFWErrorCallback);
 		}
 		{
 			SK_PROFILE_SCOPE("glfwCreateWindow");
