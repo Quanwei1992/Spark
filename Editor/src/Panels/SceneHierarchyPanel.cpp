@@ -339,7 +339,6 @@ namespace Spark
 	void SceneHierarchyPanel::OnDrawComponentInspectorGUI(Entity entity, CircleRendererComponent& component)
 	{
 		ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
-		ImGui::DragFloat("Radius", &component.Radius);
 		ImGui::DragFloat("Thickness", &component.Thickness,0.01f,0.0f,1.0f);
 		ImGui::DragFloat("Fade", &component.Fade,0.0025f,0.0f,1.0f);
 	}
@@ -355,10 +354,20 @@ namespace Spark
 	{
 		ImGui::DragFloat2("Offset", glm::value_ptr(component.Offset));
 		ImGui::DragFloat2("Size", glm::value_ptr(component.Size));
-		ImGui::DragFloat("Density", &component.Density);
-		ImGui::DragFloat("Friction", &component.Friction);
-		ImGui::DragFloat("Restitution", &component.Restitution);
-		ImGui::DragFloat("RestitutionThreshold", &component.RestitutionThreshold);
+		ImGui::DragFloat("Density", &component.Density, 0.01f, 0.0f, 1.0f);
+		ImGui::DragFloat("Friction", &component.Friction, 0.01f, 0.0f, 1.0f);
+		ImGui::DragFloat("Restitution", &component.Restitution, 0.01f, 0.0f, 1.0f);
+		ImGui::DragFloat("RestitutionThreshold", &component.RestitutionThreshold, 0.01f, 0.0f);
+	}
+	template<>
+	void SceneHierarchyPanel::OnDrawComponentInspectorGUI(Entity entity, CircleCollider2DComponent& component)
+	{
+		ImGui::DragFloat2("Offset", glm::value_ptr(component.Offset));
+		ImGui::DragFloat("Radius",&component.Radius);
+		ImGui::DragFloat("Density", &component.Density,0.01f,0.0f,1.0f);
+		ImGui::DragFloat("Friction", &component.Friction,0.01f,0.0f,1.0f);
+		ImGui::DragFloat("Restitution", &component.Restitution, 0.01f, 0.0f, 1.0f);
+		ImGui::DragFloat("RestitutionThreshold", &component.RestitutionThreshold,0.01f,0.0f);
 	}
 
 	template<>

@@ -144,7 +144,7 @@ namespace Spark
 			auto view = m_Registry.view<TransformComponent, SpriteRendererComponent>();
 			for (auto&& [entity, transform, src] : view.each())
 			{
-				Renderer2D::DrawRect(transform.GetTransform(), glm::vec4(1.0f), (int)entity);
+				Renderer2D::DrawSprite(transform.GetTransform(), src, (int)entity);
 			}
 		}
 		// Circles
@@ -167,7 +167,7 @@ namespace Spark
 			auto view = m_Registry.view<TransformComponent, SpriteRendererComponent>();
 			for (auto&& [entity, transform, src] : view.each())
 			{
-				Renderer2D::DrawRect(transform.GetTransform(), glm::vec4(1.0f), (int)entity);
+				Renderer2D::DrawSprite(transform.GetTransform(), src, (int)entity);
 			}
 		}
 		// Circles
@@ -223,6 +223,21 @@ namespace Spark
 				fixtureDef.restitutionThreshold = bc2d->RestitutionThreshold;
 				bc2d->RuntimeFixture = body->CreateFixture(&fixtureDef);
 			}
+
+			if (auto* cc2d = entity.TryGetComponent<CircleCollider2DComponent>())
+			{
+				b2CircleShape circleShape;
+				circleShape.m_p.Set(cc2d->Offset.x, cc2d->Offset.y);
+				circleShape.m_radius = cc2d->Radius;
+
+				b2FixtureDef fixtureDef;
+				fixtureDef.shape = &circleShape;
+				fixtureDef.density = cc2d->Density;
+				fixtureDef.friction = cc2d->Friction;
+				fixtureDef.restitution = cc2d->Restitution;
+				fixtureDef.restitutionThreshold = cc2d->RestitutionThreshold;
+				cc2d->RuntimeFixture = body->CreateFixture(&fixtureDef);
+			}
 		});
 	}
 
@@ -243,6 +258,15 @@ namespace Spark
 					{
 						body->DestroyFixture(fixture);
 						bc2d->RuntimeFixture = false;
+					}
+				}
+				if (auto* cc2d = entity.TryGetComponent<CircleCollider2DComponent>())
+				{
+					b2Fixture* fixture = (b2Fixture*)cc2d->RuntimeFixture;
+					if (fixture)
+					{
+						body->DestroyFixture(fixture);
+						cc2d->RuntimeFixture = false;
 					}
 				}
 				m_PhysicsWorld->DestroyBody((b2Body*)rb2d.RuntimeBody);
@@ -347,6 +371,11 @@ namespace Spark
 	}
 	template<>
 	void Scene::OnComponentAdded<CircleRendererComponent>(Entity entity, CircleRendererComponent& component)
+	{
+
+	}
+	template<>
+	void Scene::OnComponentAdded<CircleCollider2DComponent>(Entity entity, CircleCollider2DComponent& component)
 	{
 
 	}

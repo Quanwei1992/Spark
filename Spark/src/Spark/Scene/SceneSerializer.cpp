@@ -121,7 +121,6 @@ namespace Spark
 
 			auto& component = entity.GetComponent<CircleRendererComponent>();
 			out << YAML::Key << "Color" << YAML::Value << component.Color;
-			out << YAML::Key << "Radius" << YAML::Value << component.Radius;
 			out << YAML::Key << "Thickness" << YAML::Value << component.Thickness;
 			out << YAML::Key << "Fade" << YAML::Value << component.Fade;
 			out << YAML::EndMap;
@@ -139,6 +138,17 @@ namespace Spark
 			out << YAML::Key << "BoxCollider2DComponent" << YAML::Value << YAML::BeginMap;
 			out << YAML::Key << "Offset" << YAML::Value << component->Offset;
 			out << YAML::Key << "Size" << YAML::Value << component->Size;
+			out << YAML::Key << "Density" << YAML::Value << component->Density;
+			out << YAML::Key << "Friction" << YAML::Value << component->Restitution;
+			out << YAML::Key << "Restitution" << YAML::Value << component->Restitution;
+			out << YAML::Key << "RestitutionThreshold" << YAML::Value << component->RestitutionThreshold;
+			out << YAML::EndMap;
+		}
+		if (CircleCollider2DComponent* component = entity.TryGetComponent<CircleCollider2DComponent>())
+		{
+			out << YAML::Key << "CircleCollider2DComponent" << YAML::Value << YAML::BeginMap;
+			out << YAML::Key << "Offset" << YAML::Value << component->Offset;
+			out << YAML::Key << "Radius" << YAML::Value << component->Radius;
 			out << YAML::Key << "Density" << YAML::Value << component->Density;
 			out << YAML::Key << "Friction" << YAML::Value << component->Restitution;
 			out << YAML::Key << "Restitution" << YAML::Value << component->Restitution;
@@ -252,7 +262,6 @@ namespace Spark
 			{
 				auto& c = deserializedEntity.AddComponent<CircleRendererComponent>();
 				c.Color = componentData["Color"].as<Color4f>();
-				c.Radius = componentData["Radius"].as<float>();
 				c.Thickness = componentData["Thickness"].as<float>();
 				c.Fade = componentData["Fade"].as<float>();
 			}
@@ -279,6 +288,18 @@ namespace Spark
 				auto& c = deserializedEntity.AddComponent<BoxCollider2DComponent>();
 				c.Offset = componentData["Offset"].as<glm::vec2>();
 				c.Size = componentData["Size"].as<glm::vec2>();
+				c.Density = componentData["Density"].as<float>();
+				c.Friction = componentData["Friction"].as<float>();
+				c.Restitution = componentData["Restitution"].as<float>();
+				c.RestitutionThreshold = componentData["RestitutionThreshold"].as<float>();
+			}
+
+			componentData = entity["CircleCollider2DComponent"];
+			if (componentData)
+			{
+				auto& c = deserializedEntity.AddComponent<CircleCollider2DComponent>();
+				c.Offset = componentData["Offset"].as<glm::vec2>();
+				c.Radius = componentData["Radius"].as<float>();
 				c.Density = componentData["Density"].as<float>();
 				c.Friction = componentData["Friction"].as<float>();
 				c.Restitution = componentData["Restitution"].as<float>();

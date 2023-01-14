@@ -39,7 +39,6 @@ namespace Spark
 		template<typename T>
 		T* TryGetComponent()
 		{
-			SK_CORE_ASSERT(HasComponent<T>(), "Entity does not have component!");
 			return m_Scene->m_Registry.try_get<T>(m_EntityHandle);
 		}
 
