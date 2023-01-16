@@ -1,0 +1,1 @@
+utils_add_lib(glad include src extern 0)

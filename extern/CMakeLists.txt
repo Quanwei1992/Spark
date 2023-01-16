@@ -1,0 +1,16 @@
+
+
+add_subdirectory(box2d)
+add_subdirectory(EnTT)
+add_subdirectory(Glad)
+add_subdirectory(GLFW)
+add_subdirectory(glm)
+add_subdirectory(imgui)
+add_subdirectory(ImGuizmo)
+add_subdirectory(magicenum)
+add_subdirectory(spdlog)
+add_subdirectory(stbimage)
+add_subdirectory(typelist)
+add_subdirectory(yamlcpp)
+add_subdirectory(spriv_cross)
+add_subdirectory(prebuild)

@@ -1,0 +1,6 @@
+set(this editor)
+ucm_add_dirs(src assets resources TO editor_sources RECURSIVE ADDITIONAL_EXT scene glsl png)
+add_executable(${this} ${editor_sources})
+target_link_libraries(${this} PRIVATE engine)
+set_target_properties(${this} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+set_target_properties(${this} PROPERTIES FOLDER apps)

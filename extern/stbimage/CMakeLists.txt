@@ -1,0 +1,1 @@
+utils_add_lib(stbimage include src extern 0)
