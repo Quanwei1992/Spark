@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.25)
 
 include(cmake/ucm/ucm.cmake)
 include(cmake/utils.cmake)
@@ -38,6 +38,7 @@ target_link_libraries(${this} PUBLIC
     yamlcpp
     spriv_cross
     shaderc
+    mono
 )
 
 target_include_directories(${this} PUBLIC include)
@@ -45,6 +46,8 @@ target_include_directories(${this} PRIVATE src)
 
 if(WIN32)
     target_compile_definitions(${this} PUBLIC SK_PLATFORM_WINDOWS)
+    # For mono rumtime
+    target_link_libraries(${this} PUBLIC bcrypt.lib Mswsock.lib ws2_32.lib psapi.lib version.lib winmm.lib)
 endif()
 
 set_target_properties(${this} PROPERTIES FOLDER engine) 
