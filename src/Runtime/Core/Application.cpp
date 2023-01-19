@@ -5,7 +5,7 @@
 #include "Spark/Core/KeyCodes.h"
 #include "Spark/ImGui/ImGuiLayer.h"
 #include "Spark/Renderer/Renderer.h"
-
+#include "runtime/Scripting/ScriptEngine.h"
 #include <GLFW/glfw3.h>
 
 namespace Spark
@@ -25,6 +25,7 @@ namespace Spark
 		m_Window = std::unique_ptr<Window>(Window::Create(windowProps));
 		m_Window->SetEventCallback(SK_BIND_EVENT_FN(Application::OnEvent));
 		Renderer::Init();
+		ScriptEngine::Init();
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);	
 	}
