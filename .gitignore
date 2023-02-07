@@ -3,3 +3,4 @@
 apps/editor/assets/cache
 extern/prebuild/archive_*
 extern/prebuild/*.7z
+apps/editor/resources/scripts/
