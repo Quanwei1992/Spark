@@ -78,6 +78,7 @@ namespace Spark
 	{
 		MonoDomain* RootDomain = nullptr;
 		MonoDomain* AppDomain = nullptr;
+		MonoAssembly* CoreAssembly = nullptr;
 
 	};
 
@@ -93,6 +94,8 @@ namespace Spark
 		s_Data->AppDomain = mono_domain_create_appdomain("SparkScriptRuntime", nullptr);
 		mono_domain_set(s_Data->AppDomain, true);
 
+		s_Data->CoreAssembly = Utils::LoadCSharpAssembly("resources/scripts/script-core.dll");
+		Utils::PrintAssemblyTypes(s_Data->CoreAssembly);
 	}
 
 
@@ -104,10 +107,7 @@ namespace Spark
 	void ScriptEngine::Init()
 	{
 		s_Data = new ScriptEngineData();
-
 		InitMono();
-		MonoAssembly* assembly = Utils::LoadCSharpAssembly("test.dll");
-		Utils::PrintAssemblyTypes(assembly);
 	}
 
 	void ScriptEngine::Shutdown()
