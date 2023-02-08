@@ -15,6 +15,13 @@ namespace Spark
 		Renderer2D::Init();
 	}
 
+	void Renderer::Shutdown()
+	{
+		Renderer2D::Shutdown();
+		delete m_SceneData;
+		m_SceneData = nullptr;
+	}
+
 	void Renderer::OnWindowResized(uint32_t width, uint32_t height)
 	{
 		RenderCommand::SetViewport(0,0,width, height);

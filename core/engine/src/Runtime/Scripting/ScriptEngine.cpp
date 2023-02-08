@@ -86,22 +86,58 @@ namespace Spark
 
 	void ScriptEngine::InitMono()
 	{
+		mono_set_assemblies_path("C:\\Program Files\\Mono\\lib");
 
-		mono_set_dirs("C:\\Program Files\\Mono\\lib",nullptr);
+		// Create Root Domain
+
 		s_Data->RootDomain = mono_jit_init("SparkJITRumtime");
 		SK_CORE_ASSERT(s_Data->RootDomain);
 
+		// Create Application Domain
 		s_Data->AppDomain = mono_domain_create_appdomain("SparkScriptRuntime", nullptr);
 		mono_domain_set(s_Data->AppDomain, true);
 
+		// Load Core Assembly
+
 		s_Data->CoreAssembly = Utils::LoadCSharpAssembly("resources/scripts/script-core.dll");
 		Utils::PrintAssemblyTypes(s_Data->CoreAssembly);
+
+		MonoImage* assemblyImage = mono_assembly_get_image(s_Data->CoreAssembly);
+		MonoClass* monoClass = mono_class_from_name(assemblyImage, "Spark", "Main");
+
+
+		// 1. create an Object
+
+		MonoObject* instance = mono_object_new(s_Data->AppDomain, monoClass);
+		mono_runtime_object_init(instance);
+
+		// 2. call function
+		MonoMethod* printMessageFunc = mono_class_get_method_from_name(monoClass, "PrintMessage", 0);
+		mono_runtime_invoke(printMessageFunc, instance, nullptr, nullptr);
+
+		// 3. call function with param
+		MonoMethod* printIntFunc = mono_class_get_method_from_name(monoClass, "PrintInt", 1);
+		int value = 5;
+		void* params[1] =
+		{
+			&value
+		};
+		mono_runtime_invoke(printIntFunc, instance, params, nullptr);
+
+		MonoMethod* printCustomMessageFunc = mono_class_get_method_from_name(monoClass, "PrintCustomMessage", 1);
+		MonoString* monoString = mono_string_new(s_Data->AppDomain, "Hello World from C++!");
+		void* stringParams = monoString;
+		mono_runtime_invoke(printCustomMessageFunc, instance, &stringParams, nullptr);
 	}
 
 
 	void ScriptEngine::ShutdownMono()
 	{
+		//mono_domain_unload(s_Data->AppDomain);
+		s_Data->AppDomain = nullptr;
 
+		//mono_jit_cleanup(s_Data->RootDomain);
+		s_Data->RootDomain = nullptr;
 	}
 
 	void ScriptEngine::Init()
