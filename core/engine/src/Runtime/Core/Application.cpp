@@ -65,6 +65,8 @@ namespace Spark
 
 	Application::~Application()
 	{
+		ScriptEngine::Shutdown();
+		Renderer::Shutdown();
 	}
 
 	void Application::Run()
