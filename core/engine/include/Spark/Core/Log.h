@@ -7,6 +7,8 @@
 #include <spdlog/fmt/ostr.h>
 #pragma warning(pop)
 
+#include <gtx/string_cast.hpp>
+
 namespace Spark
 {
 	class Log

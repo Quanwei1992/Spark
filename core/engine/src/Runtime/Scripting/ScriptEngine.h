@@ -1,4 +1,6 @@
 #pragma once
+#include <filesystem>
+#include <mono/metadata/object-forward.h>
 
 namespace Spark
 {
@@ -7,7 +9,7 @@ namespace Spark
 	public:
 		static void Init();
 		static void Shutdown();
-
+		static void LoadAssembly(const std::filesystem::path& filepath);
 	private:
 		static void InitMono();
 		static void ShutdownMono();
