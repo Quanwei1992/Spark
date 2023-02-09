@@ -1,6 +1,6 @@
 #include "skpch.h"
 #include "ScriptEngine.h"
-
+#include "ScriptGlue.h"
 #include <mono/jit/jit.h>
 #include <mono/metadata/assembly.h>
 
@@ -11,7 +11,7 @@ namespace Spark
 
 	namespace Utils
 	{
-		char* ReadBytes(const std::string& filepath, uint32_t* outSize)
+		char* ReadBytes(const std::filesystem::path filepath, uint32_t* outSize)
 		{
 			std::ifstream stream(filepath, std::ios::binary | std::ios::ate);
 			if (!stream)
@@ -34,7 +34,7 @@ namespace Spark
 			return buffer;
 		}
 
-		MonoAssembly* LoadCSharpAssembly(const std::string& path)
+		MonoAssembly* LoadMonoAssembly(const std::filesystem::path & path)
 		{
 			uint32_t fileSize = 0;
 			char* fileData = ReadBytes(path, &fileSize);
@@ -48,7 +48,7 @@ namespace Spark
 				return nullptr;
 			}
 
-			MonoAssembly* assembly = mono_assembly_load_from_full(image, path.c_str(), &status, 0);
+			MonoAssembly* assembly = mono_assembly_load_from_full(image, path.string().c_str(), &status, 0);
 			mono_image_close(image);
 			
 			delete[] fileData;
@@ -71,63 +71,78 @@ namespace Spark
 				SK_CORE_INFO("{0}.{1}", nameSpace, name);
 			}
 		}
+
 	}
 
 
+
+
+	class ScriptClass;
 	struct ScriptEngineData
 	{
 		MonoDomain* RootDomain = nullptr;
 		MonoDomain* AppDomain = nullptr;
 		MonoAssembly* CoreAssembly = nullptr;
+		MonoImage* CoreAssemblyImage = nullptr;
 
+		ScriptClass* EntityClass = nullptr;
 	};
 
 	static ScriptEngineData* s_Data = nullptr;
+
+
+	class ScriptClass
+	{
+	public:
+		ScriptClass(const std::string& classNamespace, const std::string& className)
+			:m_ClassNamespace(classNamespace)
+			, m_ClassName(className)
+		{
+			m_MonoClass = mono_class_from_name(s_Data->CoreAssemblyImage, classNamespace.c_str(), className.c_str());
+		}
+
+		MonoObject* Instantiate() const
+		{
+			MonoObject* instance = mono_object_new(s_Data->AppDomain, m_MonoClass);
+			mono_runtime_object_init(instance);
+			return instance;
+		}
+
+		MonoMethod* GetMethod(const std::string& name, int parameterCount) const
+		{
+			return mono_class_get_method_from_name(m_MonoClass, name.c_str(), parameterCount);
+		}
+
+		MonoObject* InvokeMethod(MonoObject* instance,MonoMethod* method, void** params) const
+		{
+			return mono_runtime_invoke(method, instance, params, nullptr);
+		}
+
+
+	private:
+		std::string m_ClassNamespace;
+		std::string m_ClassName;
+		MonoClass* m_MonoClass = nullptr;
+	};
+
+
+
+	void ScriptEngine::LoadAssembly(const std::filesystem::path& filepath)
+	{
+		s_Data->AppDomain = mono_domain_create_appdomain("SparkScriptRuntime", nullptr);
+		mono_domain_set(s_Data->AppDomain, true);
+
+		s_Data->CoreAssembly = Utils::LoadMonoAssembly(filepath);
+		s_Data->CoreAssemblyImage = mono_assembly_get_image(s_Data->CoreAssembly);
+		//Utils::PrintAssemblyTypes(s_Data->CoreAssembly);
+	}
 
 	void ScriptEngine::InitMono()
 	{
 		mono_set_assemblies_path("C:\\Program Files\\Mono\\lib");
 
-		// Create Root Domain
-
 		s_Data->RootDomain = mono_jit_init("SparkJITRumtime");
 		SK_CORE_ASSERT(s_Data->RootDomain);
-
-		// Create Application Domain
-		s_Data->AppDomain = mono_domain_create_appdomain("SparkScriptRuntime", nullptr);
-		mono_domain_set(s_Data->AppDomain, true);
-
-		// Load Core Assembly
-
-		s_Data->CoreAssembly = Utils::LoadCSharpAssembly("resources/scripts/script-core.dll");
-		Utils::PrintAssemblyTypes(s_Data->CoreAssembly);
-
-		MonoImage* assemblyImage = mono_assembly_get_image(s_Data->CoreAssembly);
-		MonoClass* monoClass = mono_class_from_name(assemblyImage, "Spark", "Main");
-
-
-		// 1. create an Object
-
-		MonoObject* instance = mono_object_new(s_Data->AppDomain, monoClass);
-		mono_runtime_object_init(instance);
-
-		// 2. call function
-		MonoMethod* printMessageFunc = mono_class_get_method_from_name(monoClass, "PrintMessage", 0);
-		mono_runtime_invoke(printMessageFunc, instance, nullptr, nullptr);
-
-		// 3. call function with param
-		MonoMethod* printIntFunc = mono_class_get_method_from_name(monoClass, "PrintInt", 1);
-		int value = 5;
-		void* params[1] =
-		{
-			&value
-		};
-		mono_runtime_invoke(printIntFunc, instance, params, nullptr);
-
-		MonoMethod* printCustomMessageFunc = mono_class_get_method_from_name(monoClass, "PrintCustomMessage", 1);
-		MonoString* monoString = mono_string_new(s_Data->AppDomain, "Hello World from C++!");
-		void* stringParams = monoString;
-		mono_runtime_invoke(printCustomMessageFunc, instance, &stringParams, nullptr);
 	}
 
 
@@ -144,6 +159,30 @@ namespace Spark
 	{
 		s_Data = new ScriptEngineData();
 		InitMono();
+		LoadAssembly("resources/scripts/script-core.dll");
+
+		ScriptGlue::RegisterFunctions();
+
+		s_Data->EntityClass = new ScriptClass("Spark", "Entity");
+
+
+		MonoObject* instance = s_Data->EntityClass->Instantiate();
+
+		// 2. call function
+		MonoMethod* printMessageFunc = s_Data->EntityClass->GetMethod("PrintMessage", 0);
+
+		s_Data->EntityClass->InvokeMethod(instance,printMessageFunc, nullptr);
+
+		// 3. call function with param
+		MonoMethod* printIntFunc = s_Data->EntityClass->GetMethod("PrintInt", 1);
+		int value = 5;
+		void* params = &value;
+		s_Data->EntityClass->InvokeMethod(instance,printIntFunc, &params);
+
+		MonoMethod* printCustomMessageFunc = s_Data->EntityClass->GetMethod("PrintCustomMessage", 1);
+		MonoString* monoString = mono_string_new(s_Data->AppDomain, "Hello World from C++!");
+		void* stringParams = monoString;
+		s_Data->EntityClass->InvokeMethod(instance, printCustomMessageFunc, &stringParams);
 	}
 
 	void ScriptEngine::Shutdown()
@@ -152,7 +191,5 @@ namespace Spark
 		delete s_Data;
 		s_Data = nullptr;
 	}
-
-
 
 }
