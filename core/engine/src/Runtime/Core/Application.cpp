@@ -1,11 +1,9 @@
 #include "skpch.h"
 #include "Spark/Core/Application.h"
 #include "Spark/Core/Log.h"
-#include "Spark/Events/Input.h"
-#include "Spark/Core/KeyCodes.h"
 #include "Spark/ImGui/ImGuiLayer.h"
 #include "Spark/Renderer/Renderer.h"
-#include "runtime/Scripting/ScriptEngine.h"
+#include "Spark/Scripting/ScriptEngine.h"
 #include <GLFW/glfw3.h>
 
 namespace Spark

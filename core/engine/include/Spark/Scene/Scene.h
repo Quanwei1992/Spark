@@ -41,9 +41,13 @@ namespace Spark
 		}
 
 	private:
+		void OnPhysics2DStart();
+		void OnPhysics2DStop();
+
+
+	private:
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);
-
 		Entity CreateEntityImpl(UUID uuid, const std::string& name);
 	private:
 		entt::registry m_Registry;

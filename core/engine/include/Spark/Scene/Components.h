@@ -113,6 +113,17 @@ namespace Spark
 		CameraComponent(const CameraComponent&) = default;
 	};
 
+
+	struct ScriptComponent
+	{
+		constexpr static const char* PrettyName = "Script";
+		std::string ClassName;
+
+		ScriptComponent() = default;
+		ScriptComponent(const ScriptComponent&) = default;
+	};
+
+
 	struct NativeScriptComponent
 	{
 		constexpr static const char* PrettyName = "NativeScript";
@@ -194,5 +205,6 @@ namespace Spark
 		, BoxCollider2DComponent
 		, CircleCollider2DComponent
 		, CircleRendererComponent
+		, ScriptComponent
 	>;
 }

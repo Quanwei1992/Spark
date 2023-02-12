@@ -42,3 +42,6 @@
 #include "Spark/Scene/ScriptableEntity.h"
 
 // ---------------------------------
+
+// ---Scripting -----------------------
+#include "Spark/Scripting/ScriptEngine.h"
