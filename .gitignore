@@ -1,6 +1,8 @@
 /build
 .vs
 Apps/Editor/assets/cache
+Apps/Sandbox/assets/cache/
 Extern/prebuild/archive_*
 Extern/prebuild/*.7z
 Apps/Editor/resources/scripts/
+Apps/Sandbox/resources/scripts/

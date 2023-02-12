@@ -51,6 +51,8 @@ namespace Spark
 
 	typedef glm::vec4 Color4f;
 	typedef glm::vec3 Color3f;
+
+	using byte = uint8_t;
 }
 
 

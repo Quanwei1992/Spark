@@ -17,15 +17,6 @@ namespace Spark
 			s_RendererAPI->SetViewport(x,y,width,height);
 		}
 
-		static inline void SetClearColor(const glm::vec4& color)
-		{
-			s_RendererAPI->SetClearColor(color);
-		}
-		static inline void Clear()
-		{
-			s_RendererAPI->Clear();
-		}
-
 		static inline void DrawIndexed(const Ref<VertexArray>& vertexArray,uint32_t indexCount = 0)
 		{
 			s_RendererAPI->DrawIndexed(vertexArray, indexCount);
@@ -40,6 +31,11 @@ namespace Spark
 		{
 			s_RendererAPI->SetLineWidth(width);
 		}
+
+
+
+		static void Clear(void* datablock);
+
 
 	private:
 		static RendererAPI* s_RendererAPI;

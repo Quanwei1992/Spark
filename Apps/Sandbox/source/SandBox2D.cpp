@@ -51,8 +51,8 @@ void SandBox2D::OnUpdate(Spark::Timestep ts)
 
 	{
 		SK_PROFILE_SCOPE("Renderer Prep");
-		Spark::RenderCommand::SetClearColor(glm::vec4(0.1f, 0.1f, 0.1f, 1));
-		Spark::RenderCommand::Clear();
+		//Spark::RenderCommand::SetClearColor(glm::vec4(0.1f, 0.1f, 0.1f, 1));
+		Spark::Renderer::Clear(0.1f, 0.1f, 0.1f, 1);
 	}
 	{
 		SK_PROFILE_SCOPE("Renderer Draw");

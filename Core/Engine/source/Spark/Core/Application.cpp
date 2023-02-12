@@ -96,6 +96,7 @@ namespace Spark
 				m_ImGuiLayer->End();
 			}
 
+			Renderer::WaitAndRender();
 			m_Window->OnUpdate();
 		};
 	}
