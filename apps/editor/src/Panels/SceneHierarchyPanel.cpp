@@ -1,5 +1,6 @@
 #include "SceneHierarchyPanel.h"
 #include "Spark/Scene/Components.h"
+#include "Spark/Scripting/ScriptEngine.h"
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <gtc/type_ptr.hpp>
@@ -433,4 +434,28 @@ namespace Spark
 		}
 	}
 
+
+
+	template<>
+	void SceneHierarchyPanel::OnDrawComponentInspectorGUI(Entity entity, ScriptComponent& component)
+	{
+		bool scriptClassExists = ScriptEngine::ClassExists(component.ClassName);
+
+		static char buffer[256];
+		strcpy_s(buffer, component.ClassName.c_str());
+
+		if(!scriptClassExists)
+		{
+			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.9f, 0.2f, 0.3f, 1.0f));
+		}
+
+		if(ImGui::InputText("Class",buffer,sizeof(buffer)))
+		{
+			component.ClassName = buffer;
+		}
+		if (!scriptClassExists)
+		{
+			ImGui::PopStyleColor();
+		}
+	}
 }

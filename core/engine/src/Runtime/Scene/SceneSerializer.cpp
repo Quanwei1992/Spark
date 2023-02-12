@@ -155,6 +155,12 @@ namespace Spark
 			out << YAML::Key << "RestitutionThreshold" << YAML::Value << component->RestitutionThreshold;
 			out << YAML::EndMap;
 		}
+		if (ScriptComponent* component = entity.TryGetComponent<ScriptComponent>())
+		{
+			out << YAML::Key << "ScriptComponent" << YAML::Value << YAML::BeginMap;
+			out << YAML::Key << "ClassName" << YAML::Value << component->ClassName;
+			out << YAML::EndMap;
+		}
 
 		out << YAML::EndMap;
 	}
@@ -304,6 +310,12 @@ namespace Spark
 				c.Friction = componentData["Friction"].as<float>();
 				c.Restitution = componentData["Restitution"].as<float>();
 				c.RestitutionThreshold = componentData["RestitutionThreshold"].as<float>();
+			}
+			componentData = entity["ScriptComponent"];
+			if (componentData)
+			{
+				auto& c = deserializedEntity.AddComponent<ScriptComponent>();
+				c.ClassName = componentData["ClassName"].as<std::string>();
 			}
 		}
 
