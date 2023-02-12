@@ -15,11 +15,11 @@ ucm_print_flags()
 
 project(Spark)
 
-add_subdirectory(extern)
-add_subdirectory(core/engine)
-add_subdirectory(core/script-core)
-add_subdirectory(apps/sandbox)
-add_subdirectory(apps/editor)
+add_subdirectory(Extern)
+add_subdirectory(Core/Engine)
+add_subdirectory(Core/ScriptCore)
+add_subdirectory(Apps/Sandbox)
+add_subdirectory(Apps/Editor)
 
 utils_get_all_targets(all_targets)
 

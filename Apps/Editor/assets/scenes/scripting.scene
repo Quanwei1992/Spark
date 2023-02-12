@@ -1,0 +1,31 @@
+Scene: Untitled
+Entities:
+  - Entity: 14477049134251486738
+    TagComponent:
+      Tag: Quad
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      Color: [1, 1, 1, 1]
+    ScriptComponent:
+      ClassName: Sandbox.Player
+  - Entity: 11400070312222593119
+    TagComponent:
+      Tag: Camera
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: 1
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+        PerspectiveFOV: 0.785398185
+        PerspectiveNear: 0.00999999978
+        PerspectiveFar: 1000
+      Primary: true
+      FixedAspectRatio: false

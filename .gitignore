@@ -1,6 +1,6 @@
 /build
 .vs
-apps/editor/assets/cache
-extern/prebuild/archive_*
-extern/prebuild/*.7z
-apps/editor/resources/scripts/
+Apps/Editor/assets/cache
+Extern/prebuild/archive_*
+Extern/prebuild/*.7z
+Apps/Editor/resources/scripts/
