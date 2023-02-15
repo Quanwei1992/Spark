@@ -2,6 +2,7 @@
 
 
 #include <memory>
+#include <filesystem>
 #include <glm.hpp>
 
 #ifdef SK_DEBUG
@@ -51,6 +52,8 @@ namespace Spark
 
 	typedef glm::vec4 Color4f;
 	typedef glm::vec3 Color3f;
+
+	using Path = std::filesystem::path;
 }
 
 

@@ -4,3 +4,5 @@ Apps/Editor/assets/cache
 Extern/prebuild/archive_*
 Extern/prebuild/*.7z
 Apps/Editor/resources/scripts/
+Apps/Sandbox/assets/cache
+Apps/Sandbox/resources/scripts/

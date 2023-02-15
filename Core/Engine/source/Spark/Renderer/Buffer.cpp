@@ -7,12 +7,12 @@
 
 namespace Spark
 {
-	Ref<VertexBuffer> VertexBuffer::Create(float* vertices, uint32_t size)
+	Ref<VertexBuffer> VertexBuffer::Create(const void* data, uint32_t size)
 	{
 		switch (Renderer::GetAPI())
 		{
 			case RendererAPI::API::None: SK_CORE_ASSERT(false, "RendererAPI::None is current not support!"); return nullptr;
-			case  RendererAPI::API::OpenGL: return CreateRef<OpenGLVertexBuffer>(vertices, size);
+			case  RendererAPI::API::OpenGL: return CreateRef<OpenGLVertexBuffer>(data, size);
 		}
 		SK_CORE_ASSERT(false, "Unknown RendererAPI!");
 		return nullptr;

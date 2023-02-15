@@ -19,6 +19,7 @@ target_link_libraries(${this} PUBLIC
     spriv_cross
     shaderc
     mono
+    assimp
 )
 
 target_include_directories(${this} PUBLIC source)
