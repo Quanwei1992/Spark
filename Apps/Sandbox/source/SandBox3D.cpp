@@ -25,10 +25,9 @@ void SandBox3D::OnAttach()
 	m_CheckerboradTexture = Texture2D::Create("assets/textures/Checkerboard.png");
 	m_CameraUniformBuffer = UniformBuffer::Create(sizeof(CameraData), 0);
 
-	m_UnlitShader = Shader::Create("assets/shaders/Unlit.glsl");
+
 	m_CubeMesh = CreateRef<Mesh>("assets/models/Cube.fbx");
 
-	m_UnlitShader->Bind();
 
 }
 

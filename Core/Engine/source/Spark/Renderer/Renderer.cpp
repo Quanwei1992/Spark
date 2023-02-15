@@ -4,6 +4,7 @@
 #include "Spark/Renderer/RenderCommand.h"
 #include "Spark/Renderer/Shader.h"
 #include "Spark/Renderer/Renderer2D.h"
+#include "Spark/Renderer/Framebuffer.h"
 namespace Spark
 {
 	Renderer::SceneData* Renderer::m_SceneData = new Renderer::SceneData();
@@ -12,12 +13,15 @@ namespace Spark
 	{
 		SK_PROFILE_FUNCTION();
 		RenderCommand::Init();
+		FramebufferPool::Init();
 		Renderer2D::Init();
 	}
 
 	void Renderer::Shutdown()
 	{
 		Renderer2D::Shutdown();
+		FramebufferPool::Shutdown();
+		RenderCommand::Shutdown();
 		delete m_SceneData;
 		m_SceneData = nullptr;
 	}

@@ -67,4 +67,15 @@ namespace Spark
 		static Ref<Framebuffer> Create(const FramebufferSpecification& spec);
 		virtual ~Framebuffer() = default;
 	};
+
+	class FramebufferPool final
+	{
+	public:
+
+		static void Init();
+		static void Shutdown();
+
+		static void Add(Ref<Framebuffer> framebuffer);
+		static const std::vector<Ref<Framebuffer>>& GetAll();
+	};
 }
