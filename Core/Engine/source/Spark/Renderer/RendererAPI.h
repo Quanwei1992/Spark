@@ -6,6 +6,16 @@
 
 namespace Spark
 {
+	struct RenderAPICapabilities
+	{
+		std::string Vendor;
+		std::string Renderer;
+		std::string Version;
+
+		int MaxSamples;
+		float MaxAnisotropy;
+	};
+
     class RendererAPI
     {
     public:
@@ -25,6 +35,12 @@ namespace Spark
 		virtual void SetLineWidth(float width) = 0;
 
         inline static API GetAPI()  { return s_API; }
+
+		static RenderAPICapabilities& GetCapablities()
+        {
+			static RenderAPICapabilities capabilities;
+			return capabilities;
+        }
 
     private:
         static API s_API;

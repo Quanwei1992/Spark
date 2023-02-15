@@ -6,3 +6,4 @@ Extern/prebuild/*.7z
 Apps/Editor/resources/scripts/
 Apps/Sandbox/assets/cache
 Apps/Sandbox/resources/scripts/
+Apps/Sandbox/imgui.ini
