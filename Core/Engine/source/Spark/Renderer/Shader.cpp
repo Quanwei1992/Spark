@@ -8,25 +8,21 @@
 
 namespace Spark
 {
-	Ref<Shader> Shader::Create(const std::string& name,const std::string& vertexSrc, const std::string& fragmentSrc)
-	{
-		switch (Renderer::GetAPI())
-		{
-		case RendererAPI::API::None: SK_CORE_ASSERT(false, "RendererAPI::None is current not support!"); return nullptr;
-		case RendererAPI::API::OpenGL: return CreateRef<OpenGLShader>(name,vertexSrc,fragmentSrc);
-		}
-		SK_CORE_ASSERT(false, "Unknown RendererAPI!");
-		return nullptr;
-	}
+	std::vector<Ref<Shader>> Shader::s_AllShaders;
+
 	Ref<Shader> Shader::Create(const std::string& filePath)
 	{
+		Ref<Shader> result = nullptr;
 		switch (Renderer::GetAPI())
 		{
-		case RendererAPI::API::None: SK_CORE_ASSERT(false, "RendererAPI::None is current not support!"); return nullptr;
-		case RendererAPI::API::OpenGL: return CreateRef<OpenGLShader>(filePath);
+		case RendererAPI::API::None: SK_CORE_ASSERT(false, "RendererAPI::None is current not support!"); break;
+		case RendererAPI::API::OpenGL: result = CreateRef<OpenGLShader>(filePath); break;
 		}
-		SK_CORE_ASSERT(false, "Unknown RendererAPI!");
-		return nullptr;
+		if(result)
+		{
+			s_AllShaders.push_back(result);
+		}
+		return result;
 	}
 	void ShaderLibrary::Add(const Ref<Shader>& shader)
 	{

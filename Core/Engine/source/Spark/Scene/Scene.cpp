@@ -146,7 +146,7 @@ namespace Spark
 			return;
 		}
 
-		glm::mat4 viewProjection = mainCamera->GetProjection() * glm::inverse(mainCameraTransform);
+		glm::mat4 viewProjection = mainCamera->GetProjectionMatrix() * glm::inverse(mainCameraTransform);
 		Renderer2D::BeginScene(viewProjection);
 		// Quads
 		{

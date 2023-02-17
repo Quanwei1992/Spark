@@ -8,6 +8,7 @@ namespace Spark
 
 		// Color
 		RGBA8 = 1,
+		RGBA16F,
 		RED_INTEGER,
 
 		// Depth/stencil
@@ -55,6 +56,8 @@ namespace Spark
 
 		virtual void Bind() = 0;
 		virtual void Unbind() = 0;
+
+		virtual void BindTexture(uint32_t attachmentIndex,uint32_t slot = 0) const =0;
 
 		virtual const FramebufferSpecification& GetSpecification() const = 0;
 		virtual  uint32_t GetColorAttachmentRendererID(uint32_t index = 0) const = 0;

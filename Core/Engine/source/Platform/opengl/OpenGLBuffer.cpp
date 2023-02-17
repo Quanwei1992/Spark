@@ -14,17 +14,19 @@ namespace Spark
 	OpenGLVertexBuffer::OpenGLVertexBuffer(const void* data, uint32_t size)
 	{
 		SK_PROFILE_FUNCTION();
-		glCreateBuffers(1, &m_RendererID);
+		glGenBuffers(1, &m_RendererID);
 		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
 		glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	}
 	OpenGLVertexBuffer::OpenGLVertexBuffer(uint32_t size)
 	{
 		SK_PROFILE_FUNCTION();
-		glCreateBuffers(1, &m_RendererID);
+		glGenBuffers(1, &m_RendererID);
 		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
 		glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
 	OpenGLVertexBuffer::~OpenGLVertexBuffer()
@@ -48,6 +50,7 @@ namespace Spark
 		SK_PROFILE_FUNCTION();
 		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
 	/////////////////////////////////////////////////////////////////////
@@ -58,9 +61,10 @@ namespace Spark
 		:m_Count(count)
 	{
 		SK_PROFILE_FUNCTION();
-		glCreateBuffers(1, &m_RendererID);
+		glGenBuffers(1, &m_RendererID);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(uint32_t), indices, GL_STATIC_DRAW);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 	OpenGLIndexBuffer::~OpenGLIndexBuffer()
 	{

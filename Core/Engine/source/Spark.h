@@ -24,6 +24,7 @@
 #include "Spark/Renderer/RenderCommand.h"
 
 #include "Spark/Renderer/Shader.h"
+#include "Spark/Renderer/Material.h"
 #include "Spark/Renderer/Buffer.h"
 #include "Spark/Renderer/Texture.h"
 #include "Spark/Renderer/Mesh.h"
@@ -32,7 +33,6 @@
 #include "Spark/Renderer/Framebuffer.h"
 #include "Spark/Renderer/UniformBuffer.h"
 #include "Spark/Renderer/Renderer2D.h"
-
 #include "Spark/Renderer/OrthographicCamera.h"
 // ---------------------------------
 
@@ -46,3 +46,6 @@
 
 // ---Scripting -----------------------
 #include "Spark/Scripting/ScriptEngine.h"
+
+// ---Utils -----------------------
+#include "Spark/Utils/PlatformUtils.h"

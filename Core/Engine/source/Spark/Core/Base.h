@@ -54,6 +54,7 @@ namespace Spark
 	typedef glm::vec3 Color3f;
 
 	using Path = std::filesystem::path;
+	using byte = unsigned char;
 }
 
 

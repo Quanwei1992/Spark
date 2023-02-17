@@ -14,6 +14,7 @@ namespace Spark
 		virtual void Resize(uint32_t width, uint32_t height) override;
 		virtual int ReadPixel(uint32_t attachmentIndex, int x, int y) override;
 		virtual void ClearAttachment(uint32_t attachmentIndex, int value) override;
+		virtual void BindTexture(uint32_t attachmentIndex,uint32_t slot = 0) const override;
 	private:
 		uint32_t m_RendererID = 0;
 		std::vector<uint32_t> m_ColorAttachments;

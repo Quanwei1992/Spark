@@ -14,12 +14,12 @@ namespace Spark
 		SK_PROFILE_FUNCTION();
 		RenderCommand::Init();
 		FramebufferPool::Init();
-		Renderer2D::Init();
+		//Renderer2D::Init();
 	}
 
 	void Renderer::Shutdown()
 	{
-		Renderer2D::Shutdown();
+		//Renderer2D::Shutdown();
 		FramebufferPool::Shutdown();
 		RenderCommand::Shutdown();
 		delete m_SceneData;

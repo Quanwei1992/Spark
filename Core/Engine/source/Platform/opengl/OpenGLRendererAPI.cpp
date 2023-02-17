@@ -44,7 +44,7 @@ namespace Spark
 		glEnable(GL_LINE_SMOOTH);
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
-		auto& caps = RendererAPI::GetCapablities();
+		auto& caps = RendererAPI::GetCapabilities();
 		caps.Vendor = (const char*)glGetString(GL_VENDOR);
 		caps.Renderer = (const char*)glGetString(GL_RENDERER);
 		caps.Version = (const char*)glGetString(GL_VERSION);
@@ -91,4 +91,16 @@ namespace Spark
 		glLineWidth(width);
 	}
 
+	void OpenGLRendererAPI::DrawIndexed(uint32_t indexCount)
+	{
+		glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
+	}
+
+	void OpenGLRendererAPI::EnableDepthTest(bool enable)
+	{
+		if (enable)
+			glEnable(GL_DEPTH_TEST);
+		else
+			glDisable(GL_DEPTH_TEST);
+	}
 }

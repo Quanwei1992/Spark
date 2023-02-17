@@ -151,9 +151,10 @@ namespace Spark
 
 		delete[] quadIndices;
 
-		s_Data->WhiteTexture = Texture2D::Create(1, 1);
-		uint32_t whiteTextureData = 0xffffffff;
-		s_Data->WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
+		s_Data->WhiteTexture = Texture2D::Create(TextureFormat::RGBA,1, 1);
+		s_Data->WhiteTexture->Lock();
+		s_Data->WhiteTexture->GetWrieableBuffer()[0] = 0xffffffff;
+		s_Data->WhiteTexture->Unlock();
 
 		s_Data->TextureSlots[0] = s_Data->WhiteTexture;
 

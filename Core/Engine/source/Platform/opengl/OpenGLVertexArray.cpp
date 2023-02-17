@@ -114,6 +114,10 @@ namespace Spark
 		}
 
 		m_VertexBuffers.push_back(vertexBuffer);
+
+		glBindVertexArray(0);
+		vertexBuffer->Unbind();
+
 	}
 
 	void OpenGLVertexArray::SetIndexBuffer(Ref<IndexBuffer> indexBuffer) 
@@ -121,6 +125,8 @@ namespace Spark
 		glBindVertexArray(m_RendererID);
 		indexBuffer->Bind();
 		m_IndexBuffers = indexBuffer;
+		glBindVertexArray(0);
+		indexBuffer->Unbind();
 	}
 
 	const std::vector<Ref<VertexBuffer>> OpenGLVertexArray::GetVertexBuffers() const

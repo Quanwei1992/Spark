@@ -36,6 +36,11 @@ namespace Spark
 			s_RendererAPI->DrawIndexed(vertexArray, indexCount);
 		}
 
+		static inline void DrawIndexed(uint32_t count)
+		{
+			s_RendererAPI->DrawIndexed(count);
+		}
+
 		static inline void DrawLines(const Ref<VertexArray>& vertexArray, uint32_t vertexCount)
 		{
 			s_RendererAPI->DrawLines(vertexArray, vertexCount);
@@ -44,6 +49,11 @@ namespace Spark
 		static inline void SetLineWidth(float width)
 		{
 			s_RendererAPI->SetLineWidth(width);
+		}
+
+		static inline void EnbaleDepthTest(bool enbale)
+		{
+			s_RendererAPI->EnableDepthTest(enbale);
 		}
 
 	private:

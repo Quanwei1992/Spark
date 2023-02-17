@@ -75,6 +75,7 @@ namespace Spark
 			{
 			case FramebufferTextureFormat::RGBA8:return GL_RGBA8;
 			case FramebufferTextureFormat::RED_INTEGER:return GL_RED_INTEGER;
+			case FramebufferTextureFormat::RGBA16F:return GL_RGBA16F;
 			}
 			SK_CORE_ASSERT(false, "Unkonw framebuffer format");
 			return 0;
@@ -85,6 +86,7 @@ namespace Spark
 			{
 			case FramebufferTextureFormat::RGBA8:return GL_UNSIGNED_BYTE;
 			case FramebufferTextureFormat::RED_INTEGER:return GL_INT;
+			case FramebufferTextureFormat::RGBA16F:return GL_FLOAT;
 			}
 			SK_CORE_ASSERT(false, "Unkonw framebuffer format");
 			return 0;
@@ -150,8 +152,14 @@ namespace Spark
 				case FramebufferTextureFormat::RGBA8:
 					Utils::AttachColorTexture(m_ColorAttachments[i], m_Specification.Samples, GL_RGBA8,GL_RGBA, m_Specification.Width, m_Specification.Height,i);
 					break;
+				case FramebufferTextureFormat::RGBA16F:
+					Utils::AttachColorTexture(m_ColorAttachments[i], m_Specification.Samples, GL_RGBA16F, GL_RGBA, m_Specification.Width, m_Specification.Height, i);
+					break;
 				case FramebufferTextureFormat::RED_INTEGER:
 					Utils::AttachColorTexture(m_ColorAttachments[i], m_Specification.Samples, GL_R32I, GL_RED_INTEGER, m_Specification.Width, m_Specification.Height, i);
+					break;
+				default:
+					SK_ASSERT(false, "Unkonw FramebufferTextureFormat.");
 					break;
 				}
 			}
@@ -209,6 +217,8 @@ namespace Spark
 			SK_CORE_WARN("Attempted to resize framebuffer to {0}, {1}",width,height);
 			return;
 		}
+		if (width == m_Specification.Width && height == m_Specification.Height) return;
+
 		m_Specification.Width = width;
 		m_Specification.Height = height;
 
@@ -229,6 +239,12 @@ namespace Spark
 		auto& spec = m_ColorAttachmentSpecs[attachmentIndex];
 		glClearTexImage(m_ColorAttachments[attachmentIndex], 0,
 			Utils::FBFormatToGLFormat(spec.TextureFormat), Utils::FBFormatToGLDataType(spec.TextureFormat), &value);
+	}
+
+	void OpenGLFramebuffer::BindTexture(uint32_t attachmentIndex,uint32_t slot) const
+	{
+		glActiveTexture(GL_TEXTURE0 + slot);
+		glBindTexture(GL_TEXTURE_2D, m_ColorAttachments[attachmentIndex]);
 	}
 
 	uint32_t OpenGLFramebuffer::GetColorAttachmentRendererID(uint32_t index) const
