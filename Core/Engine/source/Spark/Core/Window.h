@@ -27,6 +27,7 @@ namespace Spark
 		virtual void OnUpdate() = 0;
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
+		virtual glm::vec2 GetWindowPos() const = 0;
 
 		// Window attributes
 		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;

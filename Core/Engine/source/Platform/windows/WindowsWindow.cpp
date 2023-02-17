@@ -55,6 +55,13 @@ namespace Spark
 		return m_Data.VSync;
 	}
 
+	glm::vec2 WindowsWindow::GetWindowPos() const
+	{
+		int x, y;
+		glfwGetWindowPos(m_Window, &x, &y);
+		return { x,y };
+	}
+
 	void WindowsWindow::Init(const WindowProps& props)
 	{
 		SK_PROFILE_FUNCTION();

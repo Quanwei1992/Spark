@@ -19,10 +19,12 @@ namespace Spark
 		virtual void SetVsync(bool enabled) override;
 		virtual bool IsVsync() const override;
 		inline virtual void* GetNativeWindow() const override { return m_Window; }
+		glm::vec2 GetWindowPos() const override;
 
 	private:
 		virtual void Init(const WindowProps& props);
 		virtual void Shutdown();
+
 	private:
 		GLFWwindow* m_Window = nullptr;
 		GraphicsContext* m_Context = nullptr;
