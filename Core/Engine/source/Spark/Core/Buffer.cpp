@@ -37,4 +37,12 @@ namespace Spark
 		SK_CORE_ASSERT(offset + size <= Size, "Buffer overflow!");
 		memcpy(Data + offset, data, size);
 	}
+
+	Buffer Buffer::Copy(void* data, uint32_t size)
+	{
+		Buffer buffer;
+		buffer.Allocate(size);
+		memcpy(buffer.Data, data, size);
+		return buffer;
+	}
 }

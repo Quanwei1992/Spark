@@ -200,7 +200,7 @@ namespace Spark
 			{ShaderDataType::Int4,"a_IDs"},
 			{ShaderDataType::Float4,"a_Weights"},
 			});
-		m_IndexBuffer = IndexBuffer::Create((uint32_t*)indices.data(), indices.size() * 3);
+		m_IndexBuffer = IndexBuffer::Create((uint32_t*)indices.data(), indices.size() * sizeof(Index));
 
 		m_VertexArray = VertexArray::Create();
 		m_VertexArray->AddVertexBuffer(m_VertexBuffer);
@@ -272,7 +272,7 @@ namespace Spark
 			{ShaderDataType::Float3,"a_Binormal"},
 			{ShaderDataType::Float2,"a_Texcoord"}
 			});
-		m_IndexBuffer = IndexBuffer::Create((uint32_t*)indices.data(), indices.size() * 3);
+		m_IndexBuffer = IndexBuffer::Create((uint32_t*)indices.data(), indices.size() * sizeof(Index));
 
 		m_VertexArray = VertexArray::Create();
 		m_VertexArray->AddVertexBuffer(m_VertexBuffer);

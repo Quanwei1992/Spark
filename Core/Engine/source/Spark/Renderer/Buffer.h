@@ -91,6 +91,11 @@ namespace Spark
 		uint32_t m_Stride = 0;
 	};
 
+	enum class VertexBufferUsage
+	{
+		None = 0, Static = 1, Dynamic = 2
+	};
+
 	class VertexBuffer
 	{
 	public:
@@ -99,23 +104,26 @@ namespace Spark
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
 
-		virtual void SetData(const void* data, uint32_t size) = 0;
+		virtual void SetData(const void* data, uint32_t size,uint32_t offset = 0) = 0;
 
 		virtual void SetLayout(const BufferLayout& layout) = 0;
 		virtual const BufferLayout& GetLayout() const = 0;
 
-		static Ref<VertexBuffer> Create(const void* data,uint32_t size);
-		static Ref<VertexBuffer> Create(uint32_t size);
+		virtual uint32_t GetSize() const = 0;
+
+		static Ref<VertexBuffer> Create(const void* data,uint32_t size,VertexBufferUsage usage = VertexBufferUsage::Static);
+		static Ref<VertexBuffer> Create(uint32_t size, VertexBufferUsage usage = VertexBufferUsage::Static);
 	};
 
 	class IndexBuffer
 	{
 	public:
 		virtual ~IndexBuffer() {}
-
+		virtual void SetData(const void* data, uint32_t size, uint32_t offset = 0) = 0;
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
 		virtual uint32_t GetCount() const = 0;
-		static Ref<IndexBuffer> Create(uint32_t* indices, uint32_t count);
+		virtual uint32_t GetSize() const = 0;
+		static Ref<IndexBuffer> Create(uint32_t* indices, uint32_t size);
 	};
 }

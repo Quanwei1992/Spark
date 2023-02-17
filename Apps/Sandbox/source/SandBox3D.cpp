@@ -119,7 +119,7 @@ void SandBox3D::OnAttach()
 	});
 
 	uint32_t* indices = new uint32_t[6]{ 0, 1, 2, 2, 3, 0, };
-	auto quadIndexBuffer = IndexBuffer::Create(indices, 6);
+	auto quadIndexBuffer = IndexBuffer::Create(indices, 6 * sizeof(uint32_t));
 
 	m_QuadVertexArray = VertexArray::Create();
 	m_QuadVertexArray->AddVertexBuffer(quadVertexBuffer);
