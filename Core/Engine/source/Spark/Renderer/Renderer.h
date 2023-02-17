@@ -1,10 +1,11 @@
 #pragma once
 #include "RendererAPI.h"
 #include "OrthographicCamera.h"
-
 namespace Spark
 {
 	class Shader;
+	class ShaderLibrary;
+
 	class Renderer
 	{
 	public:
@@ -12,6 +13,8 @@ namespace Spark
 		static void Init();
 		static void Shutdown();
 		static void OnWindowResized(uint32_t width, uint32_t height);
+
+		static const Scope<ShaderLibrary>& GetShaderLibrary();
 
 		static void BeginScene(OrthographicCamera& camera);
 		static void EndScene();
@@ -22,13 +25,6 @@ namespace Spark
 
 
 		static inline RendererAPI::API GetAPI() { return RendererAPI::GetAPI(); }
-
-	private:
-		struct SceneData
-		{
-			glm::mat4 ViewProjectionMatrix;
-		};
-		static SceneData* m_SceneData;
 
 	};
 }

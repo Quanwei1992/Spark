@@ -15,6 +15,8 @@ struct aiScene;
 
 namespace Spark
 {
+	class MaterialInstance;
+	class Material;
 	class Shader;
 	struct Submesh
 	{
@@ -22,6 +24,7 @@ namespace Spark
 		uint32_t BaseIndex;
 		uint32_t MaterialIndex;
 		uint32_t IndexCount;
+		glm::mat4 Transform;
 	};
 
 	struct BoneInfo
@@ -37,14 +40,19 @@ namespace Spark
 		Mesh(const Path& filename);
 		~Mesh();
 
-		void Render(Timestep ts,Ref<Shader>& shader);
+		void Render(Timestep ts,Ref<MaterialInstance> materialInstance = Ref<MaterialInstance>());
+		void Render(Timestep ts,const glm::mat4& transform = glm::mat4(1.0f), Ref<MaterialInstance> materialInstance = Ref<MaterialInstance>());
+
 		void OnImGuiRender();
 		void DumpVertexBuffer();
 
+		inline Ref<Shader> GetMeshShader() const { return m_MeshShader; }
+		inline Ref<Material> GetMaterial() const { return m_Material; }
 		inline const Path& GetFilePath() const { return m_FilePath; }
 	private:
 		void BoneTransform(float time);
 		void ReadNodeHierarchy(float AnimationTime, const aiNode* pNode, const glm::mat4& ParentTransform);
+		void TraverseNodes(aiNode* node, int level = 0);
 
 		const aiNodeAnim* FindNodeAnim(const aiAnimation* animation, const std::string& nodeName);
 		uint32_t FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim);
@@ -53,6 +61,9 @@ namespace Spark
 		glm::vec3 InterpolateTranslation(float animationTime, const aiNodeAnim* nodeAnim);
 		glm::quat InterpolateRotation(float animationTime, const aiNodeAnim* nodeAnim);
 		glm::vec3 InterpolateScale(float animationTime, const aiNodeAnim* nodeAnim);
+
+		void LoadAnimatedMesh();
+		void LoadStaticMesh();
 	private:
 		Path m_FilePath;
 		std::vector<Submesh> m_Submeshes;
@@ -69,7 +80,13 @@ namespace Spark
 
 		const aiScene* m_Scene;
 		Ref<Assimp::Importer> m_Importer;
+
+		// Materials
+		Ref<Shader> m_MeshShader;
+		Ref<Material> m_Material;
+
 		// Animation
+		bool m_IsAnimated = false;
 		float m_AnimationTime = 0.0f;
 		float m_WorldTime = 0.0f;
 		float m_TimeMultiplier = 1.0f;

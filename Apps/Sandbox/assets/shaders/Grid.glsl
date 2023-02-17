@@ -23,16 +23,10 @@ void main()
 
 layout(location = 0) out vec4 color;
 
-uniform sampler2D u_Texture;
 uniform float u_Scale;
 uniform float u_Res;
 
 in vec2 v_TexCoord;
-
-/*void main()
-{
-	color = texture(u_Texture, v_TexCoord * 8.0);
-}*/
 
 float grid(vec2 st, float res)
 {

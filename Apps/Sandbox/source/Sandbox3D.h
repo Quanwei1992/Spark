@@ -52,7 +52,6 @@ public:
 private:
 	bool OnWindowResized(Spark::WindowResizeEvent& e);
 private:
-	Spark::Ref<Spark::Shader> m_SimplePBRShader;
 	Spark::Ref<Spark::Shader> m_QuadShader;
 	Spark::Ref<Spark::Shader> m_HDRShader;
 	Spark::Ref<Spark::Shader> m_GridShader;
@@ -60,7 +59,8 @@ private:
 	Spark::Ref<Spark::Mesh> m_SphereMesh, m_PlaneMesh;
 	Spark::Ref<Spark::Texture2D> m_BRDFLUT;
 
-	Spark::Ref<Spark::Material> m_PBRMaterial;
+	Spark::Ref<Spark::MaterialInstance> m_MeshMaterial;
+	Spark::Ref<Spark::MaterialInstance> m_GridMaterial;
 	std::vector<Spark::Ref<Spark::MaterialInstance>> m_MetalSphereMaterialInstances;
 	std::vector<Spark::Ref<Spark::MaterialInstance>> m_DielectricSphereMaterialInstances;
 

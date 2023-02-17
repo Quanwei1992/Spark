@@ -7,7 +7,13 @@
 #include "Spark/Renderer/Framebuffer.h"
 namespace Spark
 {
-	Renderer::SceneData* Renderer::m_SceneData = new Renderer::SceneData();
+	struct RendererData
+	{
+		Scope<ShaderLibrary> ShaderLib;
+	};
+
+	static RendererData* s_Data = nullptr;
+
 
 	void Renderer::Init()
 	{
@@ -15,6 +21,11 @@ namespace Spark
 		RenderCommand::Init();
 		FramebufferPool::Init();
 		//Renderer2D::Init();
+
+		s_Data = new RendererData;
+		s_Data->ShaderLib = CreateScope<ShaderLibrary>();
+		s_Data->ShaderLib->Load("assets/shaders/PBR_Static.glsl");
+		s_Data->ShaderLib->Load("assets/shaders/PBR_Anim.glsl");
 	}
 
 	void Renderer::Shutdown()
@@ -22,8 +33,6 @@ namespace Spark
 		//Renderer2D::Shutdown();
 		FramebufferPool::Shutdown();
 		RenderCommand::Shutdown();
-		delete m_SceneData;
-		m_SceneData = nullptr;
 	}
 
 	void Renderer::OnWindowResized(uint32_t width, uint32_t height)
@@ -31,9 +40,14 @@ namespace Spark
 		RenderCommand::SetViewport(0,0,width, height);
 	}
 
+	const Scope<ShaderLibrary>& Renderer::GetShaderLibrary()
+	{
+		return s_Data->ShaderLib;
+	}
+
 	void Renderer::BeginScene(OrthographicCamera& camera)
 	{
-		m_SceneData->ViewProjectionMatrix = camera.GetViewProjectionMatrix();
+		//m_SceneData->ViewProjectionMatrix = camera.GetViewProjectionMatrix();
 	}
 	void Renderer::EndScene()
 	{
@@ -43,10 +57,10 @@ namespace Spark
 		const Ref<VertexArray>& vertexArray,
 		const glm::mat4& transform)
 	{
-		shader->Bind();
-		shader->SetMat4("u_ViewProjection", m_SceneData->ViewProjectionMatrix);
-		shader->SetMat4("u_Transform", transform);
-		vertexArray->Bind();
-		RenderCommand::DrawIndexed(vertexArray);
+		//shader->Bind();
+		//shader->SetMat4("u_ViewProjection", m_SceneData->ViewProjectionMatrix);
+		//shader->SetMat4("u_Transform", transform);
+		//vertexArray->Bind();
+		//RenderCommand::DrawIndexed(vertexArray);
 	}
 }

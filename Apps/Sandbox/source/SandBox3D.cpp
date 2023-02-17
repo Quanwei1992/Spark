@@ -23,11 +23,17 @@ SandBox3D::~SandBox3D()
 
 void SandBox3D::OnAttach()
 {
-	m_SimplePBRShader = Shader::Create("assets/shaders/simplepbr.glsl");
 	m_QuadShader = Shader::Create("assets/shaders/quad.glsl");
 	m_HDRShader = Shader::Create("assets/shaders/hdr.glsl");
-	m_GridShader = Shader::Create("assets/shaders/Grid.glsl");
+
 	m_Mesh = CreateRef<Mesh>("assets/models/m1911/m1911.fbx");
+	m_MeshMaterial = MaterialInstance::Create(m_Mesh->GetMaterial());
+
+	m_GridShader = Shader::Create("assets/shaders/Grid.glsl");
+	m_GridMaterial = MaterialInstance::Create(Material::Create(m_GridShader));
+	m_GridMaterial->Set("u_Scale", m_GridScale);
+	m_GridMaterial->Set("u_Res", m_GridSize);
+
 
 	m_AlbedoInput.TextureMap = Texture2D::Create("assets/models/m1911/m1911_color.png",m_AlbedoInput.SRGB);
 	m_AlbedoInput.UseTexture = true;
@@ -56,13 +62,11 @@ void SandBox3D::OnAttach()
 	m_FrameBuffer = Framebuffer::Create({ 1920,1080,{FramebufferTextureFormat::RGBA16F,FramebufferTextureFormat::DEPTH24STENCIL8} });
 	m_FinalPresentBuffer = Framebuffer::Create({ 1920,1080,{FramebufferTextureFormat::RGBA8,FramebufferTextureFormat::DEPTH24STENCIL8} });
 
-	m_PBRMaterial = CreateRef<Material>(m_SimplePBRShader);
-
 	float x = -4.0f;
 	float roughness = 0.0f;
 	for (int i = 0; i < 8; ++i)
 	{
-		auto mi = CreateRef<MaterialInstance>(m_PBRMaterial);
+		auto mi = CreateRef<MaterialInstance>(m_SphereMesh->GetMaterial());
 		mi->Set("u_Metalness", 1.0f);
 		mi->Set("u_Roughness", roughness);
 		mi->Set("u_ModelMatrix", glm::translate(glm::mat4(1.0f), glm::vec3(x, 0.0f, 0.0f)));
@@ -75,7 +79,7 @@ void SandBox3D::OnAttach()
 	roughness = 0.0f;
 	for (int i = 0; i < 8; i++)
 	{
-		auto mi = CreateRef<MaterialInstance>(m_PBRMaterial);
+		auto mi = CreateRef<MaterialInstance>(m_SphereMesh->GetMaterial());
 		mi->Set("u_Metalness", 0.0f);
 		mi->Set("u_Roughness", roughness);
 		mi->Set("u_ModelMatrix", glm::translate(glm::mat4(1.0f), glm::vec3(x, 1.2f, 0.0f)));
@@ -134,6 +138,7 @@ void SandBox3D::OnDetach()
 
 void SandBox3D::OnUpdate(Timestep ts)
 {
+	using namespace glm;
 
 	m_Camera.Update(ts);
 	auto viewProjection = m_Camera.GetProjectionMatrix() * m_Camera.GetViewMatrix();
@@ -151,64 +156,69 @@ void SandBox3D::OnUpdate(Timestep ts)
 	RenderCommand::DrawIndexed(m_QuadVertexArray);
 	m_QuadVertexArray->Unbind();
 
-	m_PBRMaterial->Set("u_AlbedoColor", m_AlbedoInput.Color);
-	m_PBRMaterial->Set("u_Metalness", m_MetalnessInput.Value);
-	m_PBRMaterial->Set("u_Roughness", m_RoughnessInput.Value);
-	m_PBRMaterial->Set("u_ViewProjectionMatrix", viewProjection);
-	m_PBRMaterial->Set("u_ModelMatrix", glm::scale(glm::mat4(1.0f), glm::vec3(m_MeshScale)));
-	m_PBRMaterial->Set("lights", m_Light);
-	m_PBRMaterial->Set("u_CameraPosition", m_Camera.GetPosition());
-	m_PBRMaterial->Set("u_RadiancePrefilter", m_RadiancePrefilter ? 1.0f : 0.0f);
-	m_PBRMaterial->Set("u_AlbedoTexToggle", m_AlbedoInput.UseTexture ? 1.0f : 0.0f);
-	m_PBRMaterial->Set("u_NormalTexToggle", m_NormalInput.UseTexture ? 1.0f : 0.0f);
-	m_PBRMaterial->Set("u_MetalnessTexToggle", m_MetalnessInput.UseTexture ? 1.0f : 0.0f);
-	m_PBRMaterial->Set("u_RoughnessTexToggle", m_RoughnessInput.UseTexture ? 1.0f : 0.0f);
-	m_PBRMaterial->Set("u_EnvMapRotation", m_EnvMapRotation);
-	m_PBRMaterial->Set("u_EnvRadianceTex", m_EnvironmentCubeMap);
-	m_PBRMaterial->Set("u_EnvIrradianceTex", m_EnvironmentIrradiance);
-	m_PBRMaterial->Set("u_BRDFLUTTexture", m_BRDFLUT);
+	m_MeshMaterial->Set("u_AlbedoColor", m_AlbedoInput.Color);
+	m_MeshMaterial->Set("u_Metalness", m_MetalnessInput.Value);
+	m_MeshMaterial->Set("u_Roughness", m_RoughnessInput.Value);
+	m_MeshMaterial->Set("u_ViewProjectionMatrix", viewProjection);
+	m_MeshMaterial->Set("u_ModelMatrix", glm::scale(glm::mat4(1.0f), glm::vec3(m_MeshScale)));
+	m_MeshMaterial->Set("lights", m_Light);
+	m_MeshMaterial->Set("u_CameraPosition", m_Camera.GetPosition());
+	m_MeshMaterial->Set("u_RadiancePrefilter", m_RadiancePrefilter ? 1.0f : 0.0f);
+	m_MeshMaterial->Set("u_AlbedoTexToggle", m_AlbedoInput.UseTexture ? 1.0f : 0.0f);
+	m_MeshMaterial->Set("u_NormalTexToggle", m_NormalInput.UseTexture ? 1.0f : 0.0f);
+	m_MeshMaterial->Set("u_MetalnessTexToggle", m_MetalnessInput.UseTexture ? 1.0f : 0.0f);
+	m_MeshMaterial->Set("u_RoughnessTexToggle", m_RoughnessInput.UseTexture ? 1.0f : 0.0f);
+	m_MeshMaterial->Set("u_EnvMapRotation", m_EnvMapRotation);
+	m_MeshMaterial->Set("u_EnvRadianceTex", m_EnvironmentCubeMap);
+	m_MeshMaterial->Set("u_EnvIrradianceTex", m_EnvironmentIrradiance);
+	m_MeshMaterial->Set("u_BRDFLUTTexture", m_BRDFLUT);
 
 	if (m_AlbedoInput.TextureMap)
-		m_PBRMaterial->Set("u_AlbedoTexture", m_AlbedoInput.TextureMap);
+		m_MeshMaterial->Set("u_AlbedoTexture", m_AlbedoInput.TextureMap);
 	if (m_NormalInput.TextureMap)
-		m_PBRMaterial->Set("u_NormalTexture", m_NormalInput.TextureMap);
+		m_MeshMaterial->Set("u_NormalTexture", m_NormalInput.TextureMap);
 	if (m_MetalnessInput.TextureMap)
-		m_PBRMaterial->Set("u_MetalnessTexture", m_MetalnessInput.TextureMap);
+		m_MeshMaterial->Set("u_MetalnessTexture", m_MetalnessInput.TextureMap);
 	if (m_RoughnessInput.TextureMap)
-		m_PBRMaterial->Set("u_RoughnessTexture", m_RoughnessInput.TextureMap);
+		m_MeshMaterial->Set("u_RoughnessTexture", m_RoughnessInput.TextureMap);
+
+	m_SphereMesh->GetMaterial()->Set("u_AlbedoColor", m_AlbedoInput.Color);
+	m_SphereMesh->GetMaterial()->Set("u_Metalness", m_MetalnessInput.Value);
+	m_SphereMesh->GetMaterial()->Set("u_Roughness", m_RoughnessInput.Value);
+	m_SphereMesh->GetMaterial()->Set("u_ViewProjectionMatrix", viewProjection);
+	m_SphereMesh->GetMaterial()->Set("u_ModelMatrix", scale(mat4(1.0f), vec3(m_MeshScale)));
+	m_SphereMesh->GetMaterial()->Set("lights", m_Light);
+	m_SphereMesh->GetMaterial()->Set("u_CameraPosition", m_Camera.GetPosition());
+	m_SphereMesh->GetMaterial()->Set("u_RadiancePrefilter", m_RadiancePrefilter ? 1.0f : 0.0f);
+	m_SphereMesh->GetMaterial()->Set("u_AlbedoTexToggle", m_AlbedoInput.UseTexture ? 1.0f : 0.0f);
+	m_SphereMesh->GetMaterial()->Set("u_NormalTexToggle", m_NormalInput.UseTexture ? 1.0f : 0.0f);
+	m_SphereMesh->GetMaterial()->Set("u_MetalnessTexToggle", m_MetalnessInput.UseTexture ? 1.0f : 0.0f);
+	m_SphereMesh->GetMaterial()->Set("u_RoughnessTexToggle", m_RoughnessInput.UseTexture ? 1.0f : 0.0f);
+	m_SphereMesh->GetMaterial()->Set("u_EnvMapRotation", m_EnvMapRotation);
+	m_SphereMesh->GetMaterial()->Set("u_EnvRadianceTex", m_EnvironmentCubeMap);
+	m_SphereMesh->GetMaterial()->Set("u_EnvIrradianceTex", m_EnvironmentIrradiance);
+	m_SphereMesh->GetMaterial()->Set("u_BRDFLUTTexture", m_BRDFLUT);
+
 
 	RenderCommand::EnbaleDepthTest(true);
 	if (m_SceneType == SceneType::Spheres)
 	{
 		// Metals
 		for (int i = 0; i < 8; i++)
-		{
-			m_MetalSphereMaterialInstances[i]->Bind();
-			m_SphereMesh->Render(ts, m_SimplePBRShader);
-		}
+			m_SphereMesh->Render(ts, glm::mat4(1.0f), m_MetalSphereMaterialInstances[i]);
 
 		// Dielectrics
 		for (int i = 0; i < 8; i++)
-		{
-			m_DielectricSphereMaterialInstances[i]->Bind();
-			m_SphereMesh->Render(ts, m_SimplePBRShader);
-		}
+			m_SphereMesh->Render(ts, glm::mat4(1.0f), m_DielectricSphereMaterialInstances[i]);
 	}
 	else if (m_SceneType == SceneType::Model)
 	{
 		if (m_Mesh)
-		{
-			m_PBRMaterial->Bind();
-			m_Mesh->Render(ts, m_SimplePBRShader);
-		}
+			m_Mesh->Render(ts, scale(mat4(1.0f), vec3(m_MeshScale)), m_MeshMaterial);
 	}
 
-
-	m_GridShader->Bind();
-	m_GridShader->SetMat4("u_MVP", viewProjection * glm::scale(glm::mat4(1.0f), glm::vec3(16.0f)));
-	m_GridShader->SetFloat("u_Scale", m_GridScale);
-	m_GridShader->SetFloat("u_Res", m_GridSize);
-	m_PlaneMesh->Render(ts, m_GridShader);
+	m_GridMaterial->Set("u_MVP", viewProjection * glm::scale(glm::mat4(1.0f), glm::vec3(16.0f)));
+	m_PlaneMesh->Render(ts, m_GridMaterial);
 
 	m_FrameBuffer->Unbind();
 
@@ -384,7 +394,10 @@ void SandBox3D::OnImGuiRender()
 		{
 			std::string filename =  Spark::FileDialogs::OpenFile("All Files\0*.*\0");
 			if (filename != "")
-				m_Mesh.reset(new Spark::Mesh(filename));
+			{
+				m_Mesh = CreateRef<Mesh>(filename);
+				m_MeshMaterial = MaterialInstance::Create(m_Mesh->GetMaterial());
+			}
 		}
 	}
 	ImGui::Separator();
@@ -395,7 +408,7 @@ void SandBox3D::OnImGuiRender()
 		if (ImGui::CollapsingHeader("Albedo", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
-			ImGui::Image(m_AlbedoInput.TextureMap ? (void*)m_AlbedoInput.TextureMap->GetRendererID() : (void*)m_CheckerboradTex->GetRendererID(), ImVec2(64, 64));
+			ImGui::Image(m_AlbedoInput.TextureMap ? (void*)m_AlbedoInput.TextureMap->GetImGuiTextureID() :m_CheckerboradTex->GetImGuiTextureID(), ImVec2(64, 64));
 			ImGui::PopStyleVar();
 			if (ImGui::IsItemHovered())
 			{
@@ -405,7 +418,7 @@ void SandBox3D::OnImGuiRender()
 					ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
 					ImGui::TextUnformatted(m_AlbedoInput.TextureMap->GetPath().c_str());
 					ImGui::PopTextWrapPos();
-					ImGui::Image((void*)m_AlbedoInput.TextureMap->GetRendererID(), ImVec2(384, 384));
+					ImGui::Image((void*)m_AlbedoInput.TextureMap->GetImGuiTextureID(), ImVec2(384, 384));
 					ImGui::EndTooltip();
 				}
 				if (ImGui::IsItemClicked())
@@ -433,7 +446,7 @@ void SandBox3D::OnImGuiRender()
 		if (ImGui::CollapsingHeader("Normals", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
-			ImGui::Image(m_NormalInput.TextureMap ? (void*)m_NormalInput.TextureMap->GetRendererID() : (void*)m_CheckerboradTex->GetRendererID(), ImVec2(64, 64));
+			ImGui::Image(m_NormalInput.TextureMap ? (void*)m_NormalInput.TextureMap->GetImGuiTextureID() : (void*)m_CheckerboradTex->GetImGuiTextureID(), ImVec2(64, 64));
 			ImGui::PopStyleVar();
 			if (ImGui::IsItemHovered())
 			{
@@ -443,7 +456,7 @@ void SandBox3D::OnImGuiRender()
 					ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
 					ImGui::TextUnformatted(m_NormalInput.TextureMap->GetPath().c_str());
 					ImGui::PopTextWrapPos();
-					ImGui::Image((void*)m_NormalInput.TextureMap->GetRendererID(), ImVec2(384, 384));
+					ImGui::Image((void*)m_NormalInput.TextureMap->GetImGuiTextureID(), ImVec2(384, 384));
 					ImGui::EndTooltip();
 				}
 				if (ImGui::IsItemClicked())
@@ -462,7 +475,7 @@ void SandBox3D::OnImGuiRender()
 		if (ImGui::CollapsingHeader("Metalness", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
-			ImGui::Image(m_MetalnessInput.TextureMap ? (void*)m_MetalnessInput.TextureMap->GetRendererID() : (void*)m_CheckerboradTex->GetRendererID(), ImVec2(64, 64));
+			ImGui::Image(m_MetalnessInput.TextureMap ? (void*)m_MetalnessInput.TextureMap->GetImGuiTextureID() : (void*)m_CheckerboradTex->GetImGuiTextureID(), ImVec2(64, 64));
 			ImGui::PopStyleVar();
 			if (ImGui::IsItemHovered())
 			{
@@ -472,7 +485,7 @@ void SandBox3D::OnImGuiRender()
 					ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
 					ImGui::TextUnformatted(m_MetalnessInput.TextureMap->GetPath().c_str());
 					ImGui::PopTextWrapPos();
-					ImGui::Image((void*)m_MetalnessInput.TextureMap->GetRendererID(), ImVec2(384, 384));
+					ImGui::Image((void*)m_MetalnessInput.TextureMap->GetImGuiTextureID(), ImVec2(384, 384));
 					ImGui::EndTooltip();
 				}
 				if (ImGui::IsItemClicked())
@@ -493,7 +506,7 @@ void SandBox3D::OnImGuiRender()
 		if (ImGui::CollapsingHeader("Roughness", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
-			ImGui::Image(m_RoughnessInput.TextureMap ? (void*)m_RoughnessInput.TextureMap->GetRendererID() : (void*)m_CheckerboradTex->GetRendererID(), ImVec2(64, 64));
+			ImGui::Image(m_RoughnessInput.TextureMap ? (void*)m_RoughnessInput.TextureMap->GetImGuiTextureID() : (void*)m_CheckerboradTex->GetImGuiTextureID(), ImVec2(64, 64));
 			ImGui::PopStyleVar();
 			if (ImGui::IsItemHovered())
 			{
@@ -503,7 +516,7 @@ void SandBox3D::OnImGuiRender()
 					ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
 					ImGui::TextUnformatted(m_RoughnessInput.TextureMap->GetPath().c_str());
 					ImGui::PopTextWrapPos();
-					ImGui::Image((void*)m_RoughnessInput.TextureMap->GetRendererID(), ImVec2(384, 384));
+					ImGui::Image((void*)m_RoughnessInput.TextureMap->GetImGuiTextureID(), ImVec2(384, 384));
 					ImGui::EndTooltip();
 				}
 				if (ImGui::IsItemClicked())
@@ -538,7 +551,6 @@ void SandBox3D::OnImGuiRender()
 		ImGui::TreePop();
 	}
 
-
 	ImGui::End();
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
@@ -547,6 +559,7 @@ void SandBox3D::OnImGuiRender()
 	m_FrameBuffer->Resize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
 	m_FinalPresentBuffer->Resize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
 	m_Camera.SetProjectionMatrix(glm::perspectiveFov(glm::radians(45.0f), viewportSize.x, viewportSize.y, 0.1f, 10000.0f));
+	m_Camera.SetViewportSize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
 	ImGui::Image((void*)m_FinalPresentBuffer->GetColorAttachmentRendererID(), viewportSize, { 0, 1 }, { 1, 0 });
 	ImGui::End();
 	ImGui::PopStyleVar();
@@ -562,15 +575,11 @@ void SandBox3D::OnImGuiRender()
 
 void SandBox3D::OnEvent(Event& e)
 {
-	//m_EditorCamera.OnEvent(e);
-
 	EventDispatcher dispatcher(e);
 	dispatcher.Dispatch<WindowResizeEvent>(SK_BIND_EVENT_FN(SandBox3D::OnWindowResized));
 }
 
 bool SandBox3D::OnWindowResized(WindowResizeEvent& e)
 {
-	//m_EditorCamera.SetViewportSize((float)e.GetWidth(), (float)e.GetHeight());
-	//m_Camera.SetProjectionMatrix(glm::perspectiveFov(glm::radians(45.0f), (float)e.GetWidth(), (float)e.GetHeight(), 0.1f, 10000.0f));
-	return true;
+	return false;
 }

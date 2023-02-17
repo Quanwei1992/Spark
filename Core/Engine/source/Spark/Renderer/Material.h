@@ -82,7 +82,7 @@ namespace Spark {
 		{
 			auto decl = m_Material->FindUniformDeclaration(name);
 			SK_CORE_ASSERT(decl, "Could not find uniform with name '{0}'", name);
-			if (!del) return;
+			if (!decl) return;
 
 			auto& buffer = GetUniformBufferTarget(decl);
 			buffer.Write((byte*)&value, decl->GetSize(), decl->GetOffset());

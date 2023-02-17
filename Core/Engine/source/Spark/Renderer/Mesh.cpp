@@ -12,6 +12,8 @@
 #include <glad/glad.h>
 
 #include "imgui.h"
+#include "Material.h"
+#include "Renderer.h"
 
 namespace Spark
 {
@@ -42,17 +44,24 @@ namespace Spark
 
 	}
 
-	struct Vertex
+	struct StaticVertex
 	{
 		glm::vec3 Position;
 		glm::vec3 Normal;
 		glm::vec3 Tangent;
 		glm::vec3 Binormal;
 		glm::vec2 Texcoord;
+	};
 
+	struct AnimatedVertex
+	{
+		glm::vec3 Position;
+		glm::vec3 Normal;
+		glm::vec3 Tangent;
+		glm::vec3 Binormal;
+		glm::vec2 Texcoord;
 		uint32_t IDs[4] = { 0,0,0,0 };
 		float Weights[4] = { 0,0,0,0 };
-
 		void AddBoneData(uint32_t BoneID, float Weight)
 		{
 			for (size_t i = 0; i < 4; i++)
@@ -67,7 +76,6 @@ namespace Spark
 			// TODO: Keep top weights
 			SK_CORE_WARN("Vertex has more than four bones/weights affecting it, extra data will be discarded (BoneID={0}, Weight={1})", BoneID, Weight);
 		}
-
 	};
 	static const int NumAttributes = 5;
 
@@ -91,36 +99,19 @@ namespace Spark
 			return to;
 		}
 	}
-
-
-	Mesh::Mesh(const Path& filename)
-		:m_FilePath(filename)
+	void Mesh::LoadAnimatedMesh()
 	{
-		LogStream::Initialize();
-		SK_CORE_INFO("Loading mesh: {0}", filename.string().c_str());
-
-		m_Importer = CreateRef<Assimp::Importer>();
-
-		const aiScene* scene = m_Importer->ReadFile(filename.string(), s_MeshImportFlags);
-		if (!scene || !scene->HasMeshes())
-			SK_CORE_ERROR("Failed to load mesh file: {0}", filename);
-
-
-		m_Scene = scene;
-
-		m_InverseTransform = glm::inverse(Utils::aiMatrix4x4ToGlm(scene->mRootNode->mTransformation));
-
 		uint32_t vertexCount = 0;
 		uint32_t indexCount = 0;
 
-		std::vector<Vertex> vertices;
+		std::vector<AnimatedVertex> vertices;
 		std::vector<Index> indices;
 
 		// Submeshes
-		m_Submeshes.reserve(scene->mNumMeshes);
-		for (int m = 0; m < scene->mNumMeshes; ++m)
+		m_Submeshes.reserve(m_Scene->mNumMeshes);
+		for (int m = 0; m < m_Scene->mNumMeshes; ++m)
 		{
-			aiMesh* mesh = scene->mMeshes[m];
+			aiMesh* mesh = m_Scene->mMeshes[m];
 			Submesh submesh;
 			submesh.BaseVertex = vertexCount;
 			submesh.BaseIndex = indexCount;
@@ -137,7 +128,7 @@ namespace Spark
 			// Vertices
 			for (size_t i = 0; i < mesh->mNumVertices; i++)
 			{
-				Vertex vertex;
+				AnimatedVertex vertex;
 				vertex.Position = { mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z };
 				vertex.Normal = { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z };
 
@@ -160,10 +151,15 @@ namespace Spark
 			}
 		}
 
+		SK_CORE_TRACE("NODES:");
+		SK_CORE_TRACE("------------------------------------");
+		TraverseNodes(m_Scene->mRootNode);
+		SK_CORE_TRACE("------------------------------------");
+
 		// Bones
-		for (int m = 0; m < scene->mNumMeshes; ++m)
+		for (int m = 0; m < m_Scene->mNumMeshes; ++m)
 		{
-			aiMesh* mesh = scene->mMeshes[m];
+			aiMesh* mesh = m_Scene->mMeshes[m];
 			Submesh& submesh = m_Submeshes[m];
 			for (int i = 0; i < mesh->mNumBones; ++i)
 			{
@@ -171,7 +167,7 @@ namespace Spark
 				std::string boneName(bone->mName.data);
 				int boneIndex = 0;
 
-				if(m_BoneMapping.find(boneName) == m_BoneMapping.end())
+				if (m_BoneMapping.find(boneName) == m_BoneMapping.end())
 				{
 					boneIndex = m_BoneCount;
 					m_BoneCount++;
@@ -179,7 +175,8 @@ namespace Spark
 					bi.BoneOffset = Utils::aiMatrix4x4ToGlm(bone->mOffsetMatrix);
 					m_BoneInfo.push_back(bi);
 					m_BoneMapping[boneName] = boneIndex;
-				}else
+				}
+				else
 				{
 					SK_CORE_TRACE("Found existing bone in map");
 					boneIndex = m_BoneMapping[boneName];
@@ -193,7 +190,7 @@ namespace Spark
 			}
 		}
 
-		m_VertexBuffer = VertexBuffer::Create(vertices.data(), vertices.size() * sizeof(Vertex));
+		m_VertexBuffer = VertexBuffer::Create(vertices.data(), vertices.size() * sizeof(AnimatedVertex));
 		m_VertexBuffer->SetLayout({
 			{ShaderDataType::Float3,"a_Position"},
 			{ShaderDataType::Float3,"a_Normal"},
@@ -202,7 +199,7 @@ namespace Spark
 			{ShaderDataType::Float2,"a_Texcoord"},
 			{ShaderDataType::Int4,"a_IDs"},
 			{ShaderDataType::Float4,"a_Weights"},
-		});
+			});
 		m_IndexBuffer = IndexBuffer::Create((uint32_t*)indices.data(), indices.size() * 3);
 
 		m_VertexArray = VertexArray::Create();
@@ -210,10 +207,111 @@ namespace Spark
 		m_VertexArray->SetIndexBuffer(m_IndexBuffer);
 	}
 
+	void Mesh::LoadStaticMesh()
+	{
+		uint32_t vertexCount = 0;
+		uint32_t indexCount = 0;
+
+		std::vector<StaticVertex> vertices;
+		std::vector<Index> indices;
+
+		// Submeshes
+		m_Submeshes.reserve(m_Scene->mNumMeshes);
+		for (int m = 0; m < m_Scene->mNumMeshes; ++m)
+		{
+			aiMesh* mesh = m_Scene->mMeshes[m];
+			Submesh submesh;
+			submesh.BaseVertex = vertexCount;
+			submesh.BaseIndex = indexCount;
+			submesh.MaterialIndex = mesh->mMaterialIndex;
+			submesh.IndexCount = mesh->mNumFaces * 3;
+			m_Submeshes.push_back(submesh);
+
+			vertexCount += mesh->mNumVertices;
+			indexCount += submesh.IndexCount;
+
+			SK_CORE_ASSERT(mesh->HasPositions(), "Meshes require positions.");
+			SK_CORE_ASSERT(mesh->HasNormals(), "Meshes require normals.");
+
+			// Vertices
+			for (size_t i = 0; i < mesh->mNumVertices; i++)
+			{
+				StaticVertex vertex;
+				vertex.Position = { mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z };
+				vertex.Normal = { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z };
+
+				if (mesh->HasTangentsAndBitangents())
+				{
+					vertex.Tangent = { mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z };
+					vertex.Binormal = { mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z };
+				}
+
+				if (mesh->HasTextureCoords(0))
+					vertex.Texcoord = { mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y };
+				vertices.push_back(vertex);
+			}
+
+			// Indices
+			for (size_t i = 0; i < mesh->mNumFaces; i++)
+			{
+				SK_CORE_ASSERT(mesh->mFaces[i].mNumIndices == 3, "Must have 3 indices.");
+				indices.push_back({ mesh->mFaces[i].mIndices[0], mesh->mFaces[i].mIndices[1], mesh->mFaces[i].mIndices[2] });
+			}
+		}
+
+		SK_CORE_TRACE("NODES:");
+		SK_CORE_TRACE("------------------------------------");
+		TraverseNodes(m_Scene->mRootNode);
+		SK_CORE_TRACE("------------------------------------");
+
+		m_VertexBuffer = VertexBuffer::Create(vertices.data(), vertices.size() * sizeof(StaticVertex));
+		m_VertexBuffer->SetLayout({
+			{ShaderDataType::Float3,"a_Position"},
+			{ShaderDataType::Float3,"a_Normal"},
+			{ShaderDataType::Float3,"a_Tangent"},
+			{ShaderDataType::Float3,"a_Binormal"},
+			{ShaderDataType::Float2,"a_Texcoord"}
+			});
+		m_IndexBuffer = IndexBuffer::Create((uint32_t*)indices.data(), indices.size() * 3);
+
+		m_VertexArray = VertexArray::Create();
+		m_VertexArray->AddVertexBuffer(m_VertexBuffer);
+		m_VertexArray->SetIndexBuffer(m_IndexBuffer);
+	}
+
+
+	Mesh::Mesh(const Path& filename)
+		:m_FilePath(filename)
+	{
+		LogStream::Initialize();
+		SK_CORE_INFO("Loading mesh: {0}", filename.string().c_str());
+
+		m_Importer = CreateRef<Assimp::Importer>();
+
+		const aiScene* scene = m_Importer->ReadFile(filename.string(), s_MeshImportFlags);
+		if (!scene || !scene->HasMeshes())
+			SK_CORE_ERROR("Failed to load mesh file: {0}", filename);
+
+		m_IsAnimated = scene->mAnimations != nullptr;
+		std::string shaderName = "PBR_Static.glsl";
+		if (m_IsAnimated) shaderName = "PBR_Anim.glsl";
+
+		m_MeshShader = Renderer::GetShaderLibrary()->Get(shaderName);
+		m_Material = Material::Create(m_MeshShader);
+		m_Scene = scene;
+
+		m_InverseTransform = glm::inverse(Utils::aiMatrix4x4ToGlm(scene->mRootNode->mTransformation));
+
+		if (m_IsAnimated) LoadAnimatedMesh();
+		else LoadStaticMesh();
+	}
+
 	Mesh::~Mesh()
 	{
 
 	}
+
+
 
 	uint32_t Mesh::FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim)
 	{
@@ -303,6 +401,7 @@ namespace Spark
 	}
 
 
+
 	glm::quat Mesh::InterpolateRotation(float animationTime, const aiNodeAnim* nodeAnim)
 	{
 		if (nodeAnim->mNumRotationKeys == 1)
@@ -371,6 +470,28 @@ namespace Spark
 		for (uint32_t i = 0; i < pNode->mNumChildren; i++)
 			ReadNodeHierarchy(AnimationTime, pNode->mChildren[i], transform);
 	}
+
+	void Mesh::TraverseNodes(aiNode* node, int level)
+	{
+		std::string levelText;
+		for (int i = 0; i < level; ++i)
+		{
+			levelText += "-";
+		}
+		SK_CORE_TRACE("{0} Node name: {1}", levelText, std::string(node->mName.data));
+		for (int i = 0; i < node->mNumMeshes; ++i)
+		{
+			uint32_t mesh = node->mMeshes[i];
+			m_Submeshes[mesh].Transform = Utils::aiMatrix4x4ToGlm(node->mTransformation);
+		}
+
+		for (int i = 0; i < node->mNumChildren; ++i)
+		{
+			aiNode* child = node->mChildren[i];
+			TraverseNodes(child, level + 1);
+		}
+	}
+
 	void Mesh::BoneTransform(float time)
 	{
 		ReadNodeHierarchy(time, m_Scene->mRootNode, glm::mat4(1.0f));
@@ -378,22 +499,31 @@ namespace Spark
 		for (size_t i = 0; i < m_BoneCount; i++)
 			m_BoneTransforms[i] = m_BoneInfo[i].FinalTransformation;
 	}
-
-
-	void Mesh::Render(Timestep ts, Ref<Shader>& shader)
+	void Mesh::Render(Timestep ts, Ref<MaterialInstance> materialInstance)
 	{
-		if(m_AnimationPlaying && m_Scene->mAnimations)
-		{
-			m_WorldTime += ts;
-			float ticksPerSecond = (float)(m_Scene->mAnimations[0]->mTicksPerSecond != 0 ? m_Scene->mAnimations[0]->mTicksPerSecond : 25.0f) * m_TimeMultiplier;
-			m_AnimationTime += ts * ticksPerSecond;
-			m_AnimationTime = fmod(m_AnimationTime, (float)m_Scene->mAnimations[0]->mDuration);
-		}
+		Render(ts, glm::mat4(1.0f), materialInstance);
+	}
 
-		if(m_Scene->mAnimations)
+	void Mesh::Render(Timestep ts, const glm::mat4& transform, Ref<MaterialInstance> materialInstance)
+	{
+		if (m_IsAnimated)
 		{
+			if(m_AnimationPlaying)
+			{
+				m_WorldTime += ts;
+				float ticksPerSecond = (float)(m_Scene->mAnimations[0]->mTicksPerSecond != 0 ? m_Scene->mAnimations[0]->mTicksPerSecond : 25.0f) * m_TimeMultiplier;
+				m_AnimationTime += ts * ticksPerSecond;
+				m_AnimationTime = fmod(m_AnimationTime, (float)m_Scene->mAnimations[0]->mDuration);
+			}
 			BoneTransform(m_AnimationTime);
 		}
+
+		if(materialInstance)
+		{
+			materialInstance->Bind();
+		}
+
+		bool materialOverride = !!materialInstance;
 
 		m_VertexArray->Bind();
 
@@ -405,14 +535,18 @@ namespace Spark
 				for (size_t i = 0; i < m_BoneTransforms.size(); i++)
 				{
 					std::string uniformName = std::string("u_BoneTransforms[") + std::to_string(i) + std::string("]");
-					shader->SetMat4(uniformName, m_BoneTransforms[i]);
+					m_MeshShader->SetMat4(uniformName, m_BoneTransforms[i]);
 				}
 			}
+			if(!materialOverride)
+			{
+				m_MeshShader->SetMat4("u_ModelMatrix", transform * submesh.Transform);
+			}
+
 			glDrawElementsBaseVertex(GL_TRIANGLES, submesh.IndexCount, GL_UNSIGNED_INT, (void*)(sizeof(uint32_t) * submesh.BaseIndex), submesh.BaseVertex);
 		}
 
 		m_VertexArray->Unbind();
-
 	}
 
 	void Mesh::OnImGuiRender()
