@@ -3,6 +3,10 @@
 
 namespace Spark
 {
+	///////////////////////////////////////////////
+	// Material
+	///////////////////////////////////////////////
+
 	Material::Material(const Ref<Shader>& shader)
 		: m_Shader(shader)
 	{
@@ -12,6 +16,11 @@ namespace Spark
 
 	Material::~Material()
 	{
+	}
+
+	Ref<Material> Material::Create(const Ref<Shader>& shader)
+	{
+		return CreateRef<Material>(shader);
 	}
 
 	void Material::AllocateStorage()
@@ -103,6 +112,10 @@ namespace Spark
 		}
 	}
 
+	///////////////////////////////////////////////
+	// MaterialInstance
+	///////////////////////////////////////////////
+
 	MaterialInstance::MaterialInstance(const Ref<Material>& material)
 		: m_Material(material)
 	{
@@ -169,5 +182,10 @@ namespace Spark
 			if (texture)
 				texture->Bind(i);
 		}
+	}
+
+	Ref<MaterialInstance> MaterialInstance::Create(const Ref<Material>& material)
+	{
+		return CreateRef<MaterialInstance>(material);
 	}
 }
