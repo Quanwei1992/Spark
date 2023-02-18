@@ -46,7 +46,6 @@ namespace Spark
 		uint32_t Width, Height;
 		FramebufferAttachmentSpecification Attachments;
 		uint32_t Samples = 1;
-
 		bool SwapChainTarget = false;
 	};
 
@@ -78,7 +77,7 @@ namespace Spark
 		static void Init();
 		static void Shutdown();
 
-		static void Add(Ref<Framebuffer> framebuffer);
-		static const std::vector<Ref<Framebuffer>>& GetAll();
+		static void Add(std::weak_ptr<Framebuffer> framebuffer);
+		static const std::vector<std::weak_ptr<Framebuffer>>& GetAll();
 	};
 }

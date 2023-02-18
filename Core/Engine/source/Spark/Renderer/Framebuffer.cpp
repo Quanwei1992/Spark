@@ -27,7 +27,7 @@ namespace Spark
 
 	struct FramebufferPoolData
 	{
-		std::vector<Ref<Framebuffer>> Framebuffers;
+		std::vector<std::weak_ptr<Framebuffer>> Framebuffers;
 	};
 
 	FramebufferPoolData* s_Data = nullptr;
@@ -44,12 +44,12 @@ namespace Spark
 	}
 
 
-	void FramebufferPool::Add(Ref<Framebuffer> framebuffer)
+	void FramebufferPool::Add(std::weak_ptr<Framebuffer> framebuffer)
 	{
 		s_Data->Framebuffers.push_back(framebuffer);
 	}
 
-	const std::vector<Ref<Framebuffer>>& FramebufferPool::GetAll()
+	const std::vector<std::weak_ptr<Framebuffer>>& FramebufferPool::GetAll()
 	{
 		return s_Data->Framebuffers;
 	}

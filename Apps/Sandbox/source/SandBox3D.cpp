@@ -37,7 +37,7 @@ void SandBox3D::OnAttach()
 	m_GridMaterial->Set("u_Res", m_GridSize);
 
 
-	m_AlbedoInput.TextureMap = Texture2D::Create("assets/models/m1911/m1911_color.png",m_AlbedoInput.SRGB);
+	m_AlbedoInput.TextureMap = Texture2D::Create("assets/models/m1911/m1911_color.png", m_AlbedoInput.SRGB);
 	m_AlbedoInput.UseTexture = true;
 
 	m_NormalInput.TextureMap = Texture2D::Create("assets/models/m1911/m1911_normal.png", m_AlbedoInput.SRGB);
@@ -61,8 +61,29 @@ void SandBox3D::OnAttach()
 	m_EnvironmentIrradiance = TextureCube::Create("assets/textures/environments/Arches_E_PineTree_Irradiance.tga");
 	m_BRDFLUT = Texture2D::Create("assets/textures/BRDF_LUT.tga");
 
-	m_FrameBuffer = Framebuffer::Create({ 1920,1080,{FramebufferTextureFormat::RGBA16F,FramebufferTextureFormat::DEPTH24STENCIL8} });
-	m_FinalPresentBuffer = Framebuffer::Create({ 1920,1080,{FramebufferTextureFormat::RGBA8,FramebufferTextureFormat::DEPTH24STENCIL8} });
+
+	// Render Passes
+	FramebufferSpecification geoFrameBufferSpec;
+	geoFrameBufferSpec.Width = 1920;
+	geoFrameBufferSpec.Height = 1080;
+	geoFrameBufferSpec.Attachments = {
+		FramebufferTextureFormat::RGBA16F,FramebufferTextureFormat::DEPTH24STENCIL8
+	};
+	RenderPassSpecification geoRenderPassSpec;
+	geoRenderPassSpec.TargetFramebuffer = Framebuffer::Create(geoFrameBufferSpec);
+	m_GeoPass = RenderPass::Create(geoRenderPassSpec);
+
+
+	FramebufferSpecification compFrameBufferSpec;
+	compFrameBufferSpec.Width = 1920;
+	compFrameBufferSpec.Height = 1080;
+	compFrameBufferSpec.Attachments = {
+		FramebufferTextureFormat::RGBA8
+	};
+	RenderPassSpecification compRenderPassSpec;
+	compRenderPassSpec.TargetFramebuffer = Framebuffer::Create(compFrameBufferSpec);
+	m_CompositePass = RenderPass::Create(compRenderPassSpec);
+
 
 	float x = -4.0f;
 	float roughness = 0.0f;
@@ -146,8 +167,8 @@ void SandBox3D::OnUpdate(Timestep ts)
 	m_Camera.Update(ts);
 	auto viewProjection = m_Camera.GetProjectionMatrix() * m_Camera.GetViewMatrix();
 
-	m_FrameBuffer->Bind();
-	RenderCommand::SetClearColor(glm::vec4(0.0f, 0.0f, 0.0f, 1));
+	Renderer::BeginRenderPass(m_GeoPass);
+	RenderCommand::SetClearColor(glm::vec4(0.1f, 0.1f, 0.1f, 1));
 	RenderCommand::Clear();
 
 
@@ -223,18 +244,18 @@ void SandBox3D::OnUpdate(Timestep ts)
 	m_GridMaterial->Set("u_MVP", viewProjection * glm::scale(glm::mat4(1.0f), glm::vec3(16.0f)));
 	m_PlaneMesh->Render(ts, m_GridMaterial);
 
-	m_FrameBuffer->Unbind();
+	Renderer::EndRenderPass();
 
-
-	m_FinalPresentBuffer->Bind();
+	Renderer::BeginRenderPass(m_CompositePass);
+	RenderCommand::Clear();
 	m_HDRShader->Bind();
 	m_HDRShader->SetFloat("u_Exposure", m_Exposure);
-	m_FrameBuffer->BindTexture(0,0);
+	m_GeoPass->GetSpecification().TargetFramebuffer->BindTexture(0);
 	m_QuadVertexArray->Bind();
 	RenderCommand::EnbaleDepthTest(false);
 	RenderCommand::DrawIndexed(m_QuadVertexArray);
 	m_QuadVertexArray->Unbind();
-	m_FinalPresentBuffer->Unbind();
+	Renderer::EndRenderPass();
 }
 enum class PropertyFlag
 {
@@ -557,11 +578,12 @@ void SandBox3D::OnImGuiRender()
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 	ImGui::Begin("Viewport");
 	auto viewportSize = ImGui::GetContentRegionAvail();
-	m_FrameBuffer->Resize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
-	m_FinalPresentBuffer->Resize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
+	m_GeoPass->GetSpecification().TargetFramebuffer->Resize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
+	m_CompositePass->GetSpecification().TargetFramebuffer->Resize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
 	m_Camera.SetProjectionMatrix(glm::perspectiveFov(glm::radians(45.0f), viewportSize.x, viewportSize.y, 0.1f, 10000.0f));
 	m_Camera.SetViewportSize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
-	ImGui::Image((void*)m_FinalPresentBuffer->GetColorAttachmentRendererID(), viewportSize, { 0, 1 }, { 1, 0 });
+	ImTextureID renderId = (ImTextureID)(uint64_t)m_CompositePass->GetSpecification().TargetFramebuffer->GetColorAttachmentRendererID();
+	ImGui::Image(renderId, viewportSize, { 0, 1 }, { 1, 0 });
 
 	// Gizmos
 	if (m_GizmoType != -1)

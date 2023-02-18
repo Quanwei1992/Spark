@@ -1,6 +1,8 @@
 #pragma once
 #include "RendererAPI.h"
-#include "OrthographicCamera.h"
+#include "RenderPass.h"
+#include "Mesh.h"
+
 namespace Spark
 {
 	class Shader;
@@ -16,15 +18,17 @@ namespace Spark
 
 		static const Scope<ShaderLibrary>& GetShaderLibrary();
 
-		static void BeginScene(OrthographicCamera& camera);
-		static void EndScene();
-
 		static void Submit(const Ref<Shader>& shader,
 			const Ref<VertexArray>& vertexArray,
 			const glm::mat4& transform = glm::mat4(1.0f));
 
+		static void BeginRenderPass(const Ref<RenderPass>& renderPass);
+		static void EndRenderPass();
+		static void SubmitMesh(const Ref<Mesh>& mesh);
 
 		static inline RendererAPI::API GetAPI() { return RendererAPI::GetAPI(); }
+
+
 
 	};
 }

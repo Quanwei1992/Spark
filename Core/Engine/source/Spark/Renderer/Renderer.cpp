@@ -10,6 +10,7 @@ namespace Spark
 	struct RendererData
 	{
 		Scope<ShaderLibrary> ShaderLib;
+		Ref<RenderPass> ActiveRenderPass;
 	};
 
 	static RendererData* s_Data = nullptr;
@@ -45,14 +46,6 @@ namespace Spark
 		return s_Data->ShaderLib;
 	}
 
-	void Renderer::BeginScene(OrthographicCamera& camera)
-	{
-		//m_SceneData->ViewProjectionMatrix = camera.GetViewProjectionMatrix();
-	}
-	void Renderer::EndScene()
-	{
-
-	}
 	void Renderer::Submit(const Ref<Shader>& shader,
 		const Ref<VertexArray>& vertexArray,
 		const glm::mat4& transform)
@@ -62,5 +55,22 @@ namespace Spark
 		//shader->SetMat4("u_Transform", transform);
 		//vertexArray->Bind();
 		//RenderCommand::DrawIndexed(vertexArray);
+	}
+
+	void Renderer::BeginRenderPass(const Ref<RenderPass>& renderPass)
+	{
+		s_Data->ActiveRenderPass = renderPass;
+		renderPass->GetSpecification().TargetFramebuffer->Bind();
+	}
+
+	void Renderer::EndRenderPass()
+	{
+		SK_CORE_ASSERT(s_Data->ActiveRenderPass, "No active render pass!");
+		s_Data->ActiveRenderPass->GetSpecification().TargetFramebuffer->Unbind();
+		s_Data->ActiveRenderPass = nullptr;
+	}
+
+	void Renderer::SubmitMesh(const Ref<Mesh>& mesh)
+	{
 	}
 }

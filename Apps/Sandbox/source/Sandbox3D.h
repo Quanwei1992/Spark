@@ -73,7 +73,7 @@ private:
 	MetalnessInput m_MetalnessInput;
 	RoughnessInput m_RoughnessInput;
 
-	Spark::Ref<Spark::Framebuffer> m_FrameBuffer, m_FinalPresentBuffer;
+	Spark::Ref<Spark::RenderPass> m_GeoPass, m_CompositePass;
 
 	Spark::Ref<Spark::VertexArray> m_QuadVertexArray;
 	Spark::Ref<Spark::TextureCube> m_EnvironmentCubeMap, m_EnvironmentIrradiance;

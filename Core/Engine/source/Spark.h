@@ -22,7 +22,7 @@
 // --- Renderer -------------------
 #include "Spark/Renderer/Renderer.h"
 #include "Spark/Renderer/RenderCommand.h"
-
+#include "Spark/Renderer/RenderPass.h"
 #include "Spark/Renderer/Shader.h"
 #include "Spark/Renderer/Material.h"
 #include "Spark/Renderer/Buffer.h"
