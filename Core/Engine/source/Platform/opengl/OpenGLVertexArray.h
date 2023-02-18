@@ -20,7 +20,7 @@ namespace Spark
 
 	private:
 		std::vector<Ref<VertexBuffer>> m_VertexBuffers;
-		Ref<IndexBuffer> m_IndexBuffers;
+		Ref<IndexBuffer> m_IndexBuffer;
 		uint32_t m_RendererID;
 
 	};

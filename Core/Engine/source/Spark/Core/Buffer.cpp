@@ -38,7 +38,7 @@ namespace Spark
 		memcpy(Data + offset, data, size);
 	}
 
-	Buffer Buffer::Copy(void* data, uint32_t size)
+	Buffer Buffer::Copy(const void* data, uint32_t size)
 	{
 		Buffer buffer;
 		buffer.Allocate(size);

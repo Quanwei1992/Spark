@@ -18,8 +18,7 @@ namespace Spark
 		byte& operator[](int index)  { return Data[index]; }
 		byte operator[](int index) const { return Data[index]; }
 
-		static Buffer Copy(void* data, uint32_t size);
-
+		static Buffer Copy(const void* data, uint32_t size);
 
 		template<typename T>
 		T* As()

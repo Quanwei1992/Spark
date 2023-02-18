@@ -1,7 +1,6 @@
 #include "skpch.h"
-
 #include "OpenGLBuffer.h"
-
+#include "Spark/Renderer/RenderCommandQueue.h"
 #include <glad/glad.h>
 
 namespace Spark
@@ -27,41 +26,56 @@ namespace Spark
 	/////////////////////////////////////////////////////////////////////
 
 	OpenGLVertexBuffer::OpenGLVertexBuffer(const void* data, uint32_t size, VertexBufferUsage usage)
-		:m_Size(size)
+		:m_Size(size),m_Usage(usage)
 	{
-		SK_PROFILE_FUNCTION();
-		glCreateBuffers(1, &m_RendererID);
-		glNamedBufferData(m_RendererID, size, data, Utils::toGLenum(usage));
+		m_LocalData = Buffer::Copy(data, size);
 
+		RenderCommandQueue::Submit([this]()
+		{
+			glCreateBuffers(1, &m_RendererID);
+			glNamedBufferData(m_RendererID, m_Size, m_LocalData.Data, Utils::toGLenum(m_Usage));
+		});
 	}
 	OpenGLVertexBuffer::OpenGLVertexBuffer(uint32_t size, VertexBufferUsage usage)
-		:m_Size(size)
+		:m_Size(size), m_Usage(usage)
 	{
-		SK_PROFILE_FUNCTION();
-		glCreateBuffers(1, &m_RendererID);
-		glNamedBufferData(m_RendererID, size, nullptr, Utils::toGLenum(usage));
+		RenderCommandQueue::Submit([this]()
+		{
+			glCreateBuffers(1, &m_RendererID);
+			glNamedBufferData(m_RendererID, m_Size, nullptr, Utils::toGLenum(m_Usage));
+		});
 	}
 
 	OpenGLVertexBuffer::~OpenGLVertexBuffer()
 	{
-		SK_PROFILE_FUNCTION();
-		glDeleteBuffers(1, &m_RendererID);
+		RenderCommandQueue::Submit([this]()
+		{
+			glDeleteBuffers(1, &m_RendererID);
+		});
 	}
 	void OpenGLVertexBuffer::Bind() const
 	{
-		SK_PROFILE_FUNCTION();
-		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
+		RenderCommandQueue::Submit([this]()
+		{
+			glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
+		});
 	}
 	void OpenGLVertexBuffer::Unbind() const
 	{
-		SK_PROFILE_FUNCTION();
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		RenderCommandQueue::Submit([]()
+		{
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+		});
 	}
 
 	void OpenGLVertexBuffer::SetData(const void* data, uint32_t size,uint32_t offset)
 	{
 		m_Size = size;
-		glNamedBufferSubData(m_RendererID, offset, size, data);
+		m_LocalData = Buffer::Copy(data, size);
+		RenderCommandQueue::Submit([this, offset]()
+		{
+			glNamedBufferSubData(m_RendererID, offset, m_Size, m_LocalData.Data);
+		});
 	}
 
 	/////////////////////////////////////////////////////////////////////
@@ -71,31 +85,44 @@ namespace Spark
 	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t* indices, uint32_t size)
 		:m_Size(size)
 	{
-		SK_PROFILE_FUNCTION();
-		glCreateBuffers(1, &m_RendererID);
-		glNamedBufferData(m_RendererID, size, indices, GL_STATIC_DRAW);
+		m_LocalData = Buffer::Copy(indices, size);
+		RenderCommandQueue::Submit([this]()
+		{
+			glCreateBuffers(1, &m_RendererID);
+			glNamedBufferData(m_RendererID, m_Size, m_LocalData.Data, GL_STATIC_DRAW);
+		});
 	}
 	OpenGLIndexBuffer::~OpenGLIndexBuffer()
 	{
-		SK_PROFILE_FUNCTION();
-		glDeleteBuffers(1, &m_RendererID);
+		RenderCommandQueue::Submit([this]()
+		{
+			glDeleteBuffers(1, &m_RendererID);
+		});
 	}
 
 	void OpenGLIndexBuffer::SetData(const void* data, uint32_t size, uint32_t offset)
 	{
 		m_Size = size;
-		glNamedBufferSubData(m_RendererID, offset, size, data);
+		m_LocalData = Buffer::Copy(data, size);
+		RenderCommandQueue::Submit([this,offset]()
+		{
+			glNamedBufferSubData(m_RendererID, offset, m_Size, m_LocalData.Data);
+		});
 	}
 
 	void OpenGLIndexBuffer::Bind() const
 	{
-		SK_PROFILE_FUNCTION();
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID);
+		RenderCommandQueue::Submit([this]()
+		{
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID);
+		});
 	}
 	void OpenGLIndexBuffer::Unbind() const
 	{
-		SK_PROFILE_FUNCTION();
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		RenderCommandQueue::Submit([]()
+		{
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		});
 	}
 	uint32_t OpenGLIndexBuffer::GetCount() const
 	{

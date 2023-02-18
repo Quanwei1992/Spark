@@ -6,6 +6,8 @@
 #include "Spark/Scripting/ScriptEngine.h"
 #include <GLFW/glfw3.h>
 
+#include "Spark/Renderer/RenderCommandQueue.h"
+
 namespace Spark
 {
 
@@ -42,6 +44,17 @@ namespace Spark
 		}
 	}
 
+	void Application::RenderImGui()
+	{
+		SK_PROFILE_SCOPE("LayerStack OnImGuiUpdate");
+		m_ImGuiLayer->Begin();
+		for (Layer* layer : m_LayerStack)
+		{
+			layer->OnImGuiRender();
+		}
+		m_ImGuiLayer->End();
+	}
+
 	bool Application::OnWindowClosed(WindowCloseEvent& e)
 	{
 		m_Running = false;
@@ -63,8 +76,8 @@ namespace Spark
 
 	Application::~Application()
 	{
-		ScriptEngine::Shutdown();
-		Renderer::Shutdown();
+		//ScriptEngine::Shutdown();
+		//Renderer::Shutdown();
 	}
 
 	void Application::Run()
@@ -87,15 +100,13 @@ namespace Spark
 				}
 			}
 			{
-				SK_PROFILE_SCOPE("LayerStack OnImGuiUpdate");
-				m_ImGuiLayer->Begin();
-				for (Layer* layer : m_LayerStack)
+				// REnder ImGui on render thread
+				RenderCommandQueue::Submit([this]()
 				{
-					layer->OnImGuiRender();
-				}
-				m_ImGuiLayer->End();
+					RenderImGui();
+				});
 			}
-
+			RenderCommandQueue::Execute();
 			m_Window->OnUpdate();
 		};
 	}

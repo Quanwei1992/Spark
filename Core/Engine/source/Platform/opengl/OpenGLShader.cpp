@@ -3,6 +3,8 @@
 
 #include <gtc/type_ptr.hpp>
 
+#include "Spark/Renderer/RenderCommandQueue.h"
+
 
 namespace Spark
 {
@@ -26,19 +28,24 @@ namespace Spark
 		std::string source = ReadShaderFromFile(m_AssetPath);
 		m_ShaderSource = PreProcess(source);
 		Parse();
-		if (m_RendererID)
-			glDeleteShader(m_RendererID);
 
-		CompileAndUploadShader();
-		ResolveUniforms();
-		ValidateUniforms();
 
-		if (m_Loaded)
+		RenderCommandQueue::Submit([this]()
 		{
-			for (auto& callback : m_ShaderReloadedCallbacks)
-				callback();
-		}
-		m_Loaded = true;
+			if (m_RendererID)
+				glDeleteShader(m_RendererID);
+
+			CompileAndUploadShader();
+			ResolveUniforms();
+			ValidateUniforms();
+
+			if (m_Loaded)
+			{
+				for (auto& callback : m_ShaderReloadedCallbacks)
+					callback();
+			}
+			m_Loaded = true;
+		});
 	}
 
 	void OpenGLShader::AddShaderReloadedCallback(const ShaderReloadedCallback& callback)
@@ -48,8 +55,11 @@ namespace Spark
 
 	void OpenGLShader::Bind()
 	{
-
+		
+		RenderCommandQueue::Submit([this]()
+		{
 			glUseProgram(m_RendererID);
+		});
 
 	}
 
@@ -90,7 +100,10 @@ namespace Spark
 
 			size_t nextLinePos = source.find_first_not_of("\r\n", eol);
 			pos = source.find(typeToken, nextLinePos);
-			shaderSources[ShaderTypeFromString(type)] = source.substr(nextLinePos, pos - (nextLinePos == std::string::npos ? source.size() - 1 : nextLinePos));
+			shaderSources[ShaderTypeFromString(type)] = source.substr(nextLinePos,
+			                                                          pos - (nextLinePos == std::string::npos
+				                                                                 ? source.size() - 1
+				                                                                 : nextLinePos));
 		}
 
 		return shaderSources;
@@ -220,9 +233,9 @@ namespace Spark
 
 	static bool IsTypeStringResource(const std::string& type)
 	{
-		if (type == "sampler2D")		return true;
-		if (type == "samplerCube")		return true;
-		if (type == "sampler2DShadow")	return true;
+		if (type == "sampler2D") return true;
+		if (type == "samplerCube") return true;
+		if (type == "sampler2DShadow") return true;
 		return false;
 	}
 
@@ -262,7 +275,8 @@ namespace Spark
 
 		if (IsTypeStringResource(typeString))
 		{
-			ShaderResourceDeclaration* declaration = new OpenGLShaderResourceDeclaration(OpenGLShaderResourceDeclaration::StringToType(typeString), name, count);
+			ShaderResourceDeclaration* declaration = new OpenGLShaderResourceDeclaration(
+				OpenGLShaderResourceDeclaration::StringToType(typeString), name, count);
 			m_Resources.push_back(declaration);
 		}
 		else
@@ -285,9 +299,11 @@ namespace Spark
 			if (StartsWith(name, "r_"))
 			{
 				if (domain == ShaderDomain::Vertex)
-					((OpenGLShaderUniformBufferDeclaration*)m_VSRendererUniformBuffers.front())->PushUniform(declaration);
+					((OpenGLShaderUniformBufferDeclaration*)m_VSRendererUniformBuffers.front())->PushUniform(
+						declaration);
 				else if (domain == ShaderDomain::Pixel)
-					((OpenGLShaderUniformBufferDeclaration*)m_PSRendererUniformBuffers.front())->PushUniform(declaration);
+					((OpenGLShaderUniformBufferDeclaration*)m_PSRendererUniformBuffers.front())->PushUniform(
+						declaration);
 			}
 			else
 			{
@@ -340,7 +356,8 @@ namespace Spark
 				std::string c(s + 1, end - s);
 				count = atoi(c.c_str());
 			}
-			ShaderUniformDeclaration* field = new OpenGLShaderUniformDeclaration(domain, OpenGLShaderUniformDeclaration::StringToType(type), name, count);
+			ShaderUniformDeclaration* field = new OpenGLShaderUniformDeclaration(
+				domain, OpenGLShaderUniformDeclaration::StringToType(type), name, count);
 			uniformStruct->AddField(field);
 		}
 		m_Structs.push_back(uniformStruct);
@@ -352,7 +369,8 @@ namespace Spark
 
 		for (size_t i = 0; i < m_VSRendererUniformBuffers.size(); i++)
 		{
-			OpenGLShaderUniformBufferDeclaration* decl = (OpenGLShaderUniformBufferDeclaration*)m_VSRendererUniformBuffers[i];
+			OpenGLShaderUniformBufferDeclaration* decl = (OpenGLShaderUniformBufferDeclaration*)
+				m_VSRendererUniformBuffers[i];
 			const ShaderUniformList& uniforms = decl->GetUniformDeclarations();
 			for (size_t j = 0; j < uniforms.size(); j++)
 			{
@@ -376,7 +394,8 @@ namespace Spark
 
 		for (size_t i = 0; i < m_PSRendererUniformBuffers.size(); i++)
 		{
-			OpenGLShaderUniformBufferDeclaration* decl = (OpenGLShaderUniformBufferDeclaration*)m_PSRendererUniformBuffers[i];
+			OpenGLShaderUniformBufferDeclaration* decl = (OpenGLShaderUniformBufferDeclaration*)
+				m_PSRendererUniformBuffers[i];
 			const ShaderUniformList& uniforms = decl->GetUniformDeclarations();
 			for (size_t j = 0; j < uniforms.size(); j++)
 			{
@@ -479,7 +498,6 @@ namespace Spark
 
 	void OpenGLShader::ValidateUniforms()
 	{
-
 	}
 
 	int32_t OpenGLShader::GetUniformLocation(const std::string& name) const
@@ -572,16 +590,23 @@ namespace Spark
 
 	void OpenGLShader::SetVSMaterialUniformBuffer(Buffer buffer)
 	{
+		RenderCommandQueue::Submit([this,buffer]()
+		{
+			glUseProgram(m_RendererID);
+			ResolveAndSetUniforms(m_VSMaterialUniformBuffer, buffer);
+		});
 
-		glUseProgram(m_RendererID);
-		ResolveAndSetUniforms(m_VSMaterialUniformBuffer, buffer);
+
 	}
 
 	void OpenGLShader::SetPSMaterialUniformBuffer(Buffer buffer)
 	{
+		RenderCommandQueue::Submit([this,buffer]()
+		{
+			glUseProgram(m_RendererID);
+			ResolveAndSetUniforms(m_PSMaterialUniformBuffer, buffer);
+		});
 
-		glUseProgram(m_RendererID);
-		ResolveAndSetUniforms(m_PSMaterialUniformBuffer, buffer);
 	}
 
 	void OpenGLShader::ResolveAndSetUniforms(const Scope<OpenGLShaderUniformBufferDeclaration>& decl, Buffer buffer)
@@ -672,7 +697,8 @@ namespace Spark
 		}
 	}
 
-	void OpenGLShader::ResolveAndSetUniformField(const OpenGLShaderUniformDeclaration& field, byte* data, int32_t offset)
+	void OpenGLShader::ResolveAndSetUniformField(const OpenGLShaderUniformDeclaration& field, byte* data,
+	                                             int32_t offset)
 	{
 		switch (field.GetType())
 		{
@@ -704,47 +730,57 @@ namespace Spark
 
 	void OpenGLShader::UploadUniformBuffer(const UniformBufferBase& uniformBuffer)
 	{
-		for (unsigned int i = 0; i < uniformBuffer.GetUniformCount(); i++)
+		RenderCommandQueue::Submit([this,&uniformBuffer]()
 		{
-			const UniformDecl& decl = uniformBuffer.GetUniforms()[i];
-			switch (decl.Type)
-			{
-			case UniformType::Float:
-			{
-				const std::string& name = decl.Name;
-				float value = *(float*)(uniformBuffer.GetBuffer() + decl.Offset);
-					UploadUniformFloat(name, value);
-			}
-			case UniformType::Float3:
-			{
-				const std::string& name = decl.Name;
-				glm::vec3& values = *(glm::vec3*)(uniformBuffer.GetBuffer() + decl.Offset);
-					UploadUniformFloat3(name, values);
-			}
-			case UniformType::Float4:
-			{
-				const std::string& name = decl.Name;
-				glm::vec4& values = *(glm::vec4*)(uniformBuffer.GetBuffer() + decl.Offset);
-					UploadUniformFloat4(name, values);
-			}
-			case UniformType::Matrix4x4:
-			{
-				const std::string& name = decl.Name;
-				glm::mat4& values = *(glm::mat4*)(uniformBuffer.GetBuffer() + decl.Offset);
-					UploadUniformMat4(name, values);
-			}
-			}
-		}
+				for (unsigned int i = 0; i < uniformBuffer.GetUniformCount(); i++)
+				{
+					const UniformDecl& decl = uniformBuffer.GetUniforms()[i];
+					switch (decl.Type)
+					{
+					case UniformType::Float:
+					{
+						const std::string& name = decl.Name;
+						float value = *(float*)(uniformBuffer.GetBuffer() + decl.Offset);
+						UploadUniformFloat(name, value);
+					}
+					case UniformType::Float3:
+					{
+						const std::string& name = decl.Name;
+						glm::vec3& values = *(glm::vec3*)(uniformBuffer.GetBuffer() + decl.Offset);
+						UploadUniformFloat3(name, values);
+					}
+					case UniformType::Float4:
+					{
+						const std::string& name = decl.Name;
+						glm::vec4& values = *(glm::vec4*)(uniformBuffer.GetBuffer() + decl.Offset);
+						UploadUniformFloat4(name, values);
+					}
+					case UniformType::Matrix4x4:
+					{
+						const std::string& name = decl.Name;
+						glm::mat4& values = *(glm::mat4*)(uniformBuffer.GetBuffer() + decl.Offset);
+						UploadUniformMat4(name, values);
+					}
+					}
+				}
+		});
 	}
 
 	void OpenGLShader::SetFloat(const std::string& name, float value)
 	{
+		RenderCommandQueue::Submit([this,name,value]()
+		{
 			UploadUniformFloat(name, value);
+		});
+		
 	}
 
 	void OpenGLShader::SetMat4(const std::string& name, const glm::mat4& value)
 	{
-			UploadUniformMat4(name, value);
+		RenderCommandQueue::Submit([this,name,value]()
+		{
+				UploadUniformMat4(name, value);
+		});
 	}
 
 
@@ -856,5 +892,4 @@ namespace Spark
 		else
 			SK_LOG_UNIFORM("Uniform '{0}' not found!", name);
 	}
-
 }

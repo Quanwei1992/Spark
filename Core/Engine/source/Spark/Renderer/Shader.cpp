@@ -2,7 +2,6 @@
 
 #include "Spark/Renderer/Renderer.h"
 #include "Spark/Renderer/Shader.h"
-
 #include "Platform/OpenGL/OpenGLShader.h"
 
 

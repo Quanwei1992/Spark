@@ -42,6 +42,8 @@ namespace Spark
 		ImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
 		ApplicationCommandLineArgs GetCommandLineArgs() const { return m_CommandLineArgs; }
 	private:
+		void RenderImGui();
+	private:
 		bool OnWindowClosed(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);
 	private:

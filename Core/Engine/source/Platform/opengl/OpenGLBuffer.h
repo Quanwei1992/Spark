@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Spark/Core/Buffer.h"
 #include "Spark/Renderer/Buffer.h"
 
 namespace Spark
@@ -25,6 +26,8 @@ namespace Spark
 		uint32_t m_RendererID = 0;
 		uint32_t m_Size = 0;
 		BufferLayout m_Layout;
+		Buffer m_LocalData;
+		VertexBufferUsage m_Usage;
 	};
 
 	class OpenGLIndexBuffer : public IndexBuffer
@@ -43,5 +46,6 @@ namespace Spark
 	private:
 		uint32_t m_RendererID;
 		uint32_t m_Size = 0;
+		Buffer m_LocalData;
 	};
 }

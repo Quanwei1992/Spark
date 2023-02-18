@@ -13,6 +13,7 @@
 
 #include "imgui.h"
 #include "Material.h"
+#include "RenderCommandQueue.h"
 #include "Renderer.h"
 
 namespace Spark
@@ -151,10 +152,7 @@ namespace Spark
 			}
 		}
 
-		SK_CORE_TRACE("NODES:");
-		SK_CORE_TRACE("------------------------------------");
 		TraverseNodes(m_Scene->mRootNode);
-		SK_CORE_TRACE("------------------------------------");
 
 		// Bones
 		for (int m = 0; m < m_Scene->mNumMeshes; ++m)
@@ -259,10 +257,7 @@ namespace Spark
 			}
 		}
 
-		SK_CORE_TRACE("NODES:");
-		SK_CORE_TRACE("------------------------------------");
 		TraverseNodes(m_Scene->mRootNode);
-		SK_CORE_TRACE("------------------------------------");
 
 		m_VertexBuffer = VertexBuffer::Create(vertices.data(), vertices.size() * sizeof(StaticVertex));
 		m_VertexBuffer->SetLayout({
@@ -471,24 +466,17 @@ namespace Spark
 			ReadNodeHierarchy(AnimationTime, pNode->mChildren[i], transform);
 	}
 
-	void Mesh::TraverseNodes(aiNode* node, int level)
+	void Mesh::TraverseNodes(aiNode* node)
 	{
-		std::string levelText;
-		for (int i = 0; i < level; ++i)
-		{
-			levelText += "-";
-		}
-		SK_CORE_TRACE("{0} Node name: {1}", levelText, std::string(node->mName.data));
 		for (int i = 0; i < node->mNumMeshes; ++i)
 		{
 			uint32_t mesh = node->mMeshes[i];
 			m_Submeshes[mesh].Transform = Utils::aiMatrix4x4ToGlm(node->mTransformation);
 		}
-
 		for (int i = 0; i < node->mNumChildren; ++i)
 		{
 			aiNode* child = node->mChildren[i];
-			TraverseNodes(child, level + 1);
+			TraverseNodes(child);
 		}
 	}
 
@@ -542,10 +530,12 @@ namespace Spark
 			{
 				m_MeshShader->SetMat4("u_ModelMatrix", transform * submesh.Transform);
 			}
-
-			glDrawElementsBaseVertex(GL_TRIANGLES, submesh.IndexCount, GL_UNSIGNED_INT, (void*)(sizeof(uint32_t) * submesh.BaseIndex), submesh.BaseVertex);
+			RenderCommandQueue::Submit([this,submesh]()
+			{
+				glDrawElementsBaseVertex(GL_TRIANGLES, submesh.IndexCount, GL_UNSIGNED_INT, (void*)(sizeof(uint32_t) * submesh.BaseIndex), submesh.BaseVertex);
+			});
+			
 		}
-
 		m_VertexArray->Unbind();
 	}
 

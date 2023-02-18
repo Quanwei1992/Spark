@@ -1,6 +1,8 @@
 #include "skpch.h"
 
 #include "Spark/Renderer/Renderer.h"
+
+#include "RenderCommandQueue.h"
 #include "Spark/Renderer/RenderCommand.h"
 #include "Spark/Renderer/Shader.h"
 #include "Spark/Renderer/Renderer2D.h"
@@ -19,6 +21,7 @@ namespace Spark
 	void Renderer::Init()
 	{
 		SK_PROFILE_FUNCTION();
+		RenderCommandQueue::Init();
 		RenderCommand::Init();
 		FramebufferPool::Init();
 		//Renderer2D::Init();
@@ -27,6 +30,8 @@ namespace Spark
 		s_Data->ShaderLib = CreateScope<ShaderLibrary>();
 		s_Data->ShaderLib->Load("assets/shaders/PBR_Static.glsl");
 		s_Data->ShaderLib->Load("assets/shaders/PBR_Anim.glsl");
+
+		RenderCommandQueue::Execute();
 	}
 
 	void Renderer::Shutdown()
@@ -34,6 +39,7 @@ namespace Spark
 		//Renderer2D::Shutdown();
 		FramebufferPool::Shutdown();
 		RenderCommand::Shutdown();
+		RenderCommandQueue::Shutdown();
 	}
 
 	void Renderer::OnWindowResized(uint32_t width, uint32_t height)
