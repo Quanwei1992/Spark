@@ -51,6 +51,7 @@ public:
 	virtual void OnEvent(Spark::Event& event)override;
 private:
 	bool OnWindowResized(Spark::WindowResizeEvent& e);
+	bool OnKeyPressed(Spark::KeyPressedEvent& e);
 private:
 	Spark::Ref<Spark::Shader> m_QuadShader;
 	Spark::Ref<Spark::Shader> m_HDRShader;
@@ -93,4 +94,7 @@ private:
 
 	Spark::Ref<Spark::Texture2D> m_CheckerboradTex;
 	Spark::Camera m_Camera;
+
+	int m_GizmoType = -1; // no gizmo
+	glm::mat4 m_Transform;
 };

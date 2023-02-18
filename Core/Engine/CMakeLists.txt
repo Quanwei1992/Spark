@@ -30,4 +30,6 @@ if(WIN32)
     target_link_libraries(${this} PUBLIC bcrypt.lib Mswsock.lib ws2_32.lib psapi.lib version.lib winmm.lib)
 endif()
 
+target_compile_definitions(${this} PUBLIC  $<$<CONFIG:Debug>:SK_DEBUG>>)
+
 set_target_properties(${this} PROPERTIES FOLDER core)

@@ -4,6 +4,7 @@
 #include <Spark/Profile/Instrumentor.h>
 
 #include <imgui.h>
+#include <ImGuizmo.h>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
 
@@ -23,6 +24,7 @@ SandBox3D::~SandBox3D()
 
 void SandBox3D::OnAttach()
 {
+
 	m_QuadShader = Shader::Create("assets/shaders/quad.glsl");
 	m_HDRShader = Shader::Create("assets/shaders/hdr.glsl");
 
@@ -128,6 +130,7 @@ void SandBox3D::OnAttach()
 	m_Light.Direction = { -0.5f, -0.5f, 1.0f };
 	m_Light.Radiance = { 1.0f, 1.0f, 1.0f };
 
+	m_Transform = glm::scale(glm::mat4(1.0f), glm::vec3(m_MeshScale));
 }
 
 void SandBox3D::OnDetach()
@@ -160,7 +163,7 @@ void SandBox3D::OnUpdate(Timestep ts)
 	m_MeshMaterial->Set("u_Metalness", m_MetalnessInput.Value);
 	m_MeshMaterial->Set("u_Roughness", m_RoughnessInput.Value);
 	m_MeshMaterial->Set("u_ViewProjectionMatrix", viewProjection);
-	m_MeshMaterial->Set("u_ModelMatrix", glm::scale(glm::mat4(1.0f), glm::vec3(m_MeshScale)));
+	m_MeshMaterial->Set("u_ModelMatrix", m_Transform);
 	m_MeshMaterial->Set("lights", m_Light);
 	m_MeshMaterial->Set("u_CameraPosition", m_Camera.GetPosition());
 	m_MeshMaterial->Set("u_RadiancePrefilter", m_RadiancePrefilter ? 1.0f : 0.0f);
@@ -214,7 +217,7 @@ void SandBox3D::OnUpdate(Timestep ts)
 	else if (m_SceneType == SceneType::Model)
 	{
 		if (m_Mesh)
-			m_Mesh->Render(ts, scale(mat4(1.0f), vec3(m_MeshScale)), m_MeshMaterial);
+			m_Mesh->Render(ts,m_Transform, m_MeshMaterial);
 	}
 
 	m_GridMaterial->Set("u_MVP", viewProjection * glm::scale(glm::mat4(1.0f), glm::vec3(16.0f)));
@@ -333,8 +336,6 @@ void SandBox3D::OnImGuiRender()
 		dockspace_flags &= ~ImGuiDockNodeFlags_PassthruCentralNode;
 	}
 
-	if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
-		window_flags |= ImGuiWindowFlags_NoBackground;
 
 	if (!opt_padding)
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
@@ -561,6 +562,18 @@ void SandBox3D::OnImGuiRender()
 	m_Camera.SetProjectionMatrix(glm::perspectiveFov(glm::radians(45.0f), viewportSize.x, viewportSize.y, 0.1f, 10000.0f));
 	m_Camera.SetViewportSize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
 	ImGui::Image((void*)m_FinalPresentBuffer->GetColorAttachmentRendererID(), viewportSize, { 0, 1 }, { 1, 0 });
+
+	// Gizmos
+	if (m_GizmoType != -1)
+	{
+		float rw = (float)ImGui::GetWindowWidth();
+		float rh = (float)ImGui::GetWindowHeight();
+		ImGuizmo::SetOrthographic(false);
+		ImGuizmo::SetDrawlist();
+		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, rw, rh);
+		ImGuizmo::Manipulate(glm::value_ptr(m_Camera.GetViewMatrix()), glm::value_ptr(m_Camera.GetProjectionMatrix()), (ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(m_Transform));
+	}
+
 	ImGui::End();
 	ImGui::PopStyleVar();
 
@@ -577,9 +590,30 @@ void SandBox3D::OnEvent(Event& e)
 {
 	EventDispatcher dispatcher(e);
 	dispatcher.Dispatch<WindowResizeEvent>(SK_BIND_EVENT_FN(SandBox3D::OnWindowResized));
+	dispatcher.Dispatch<KeyPressedEvent>(SK_BIND_EVENT_FN(SandBox3D::OnKeyPressed));
 }
 
 bool SandBox3D::OnWindowResized(WindowResizeEvent& e)
 {
+	return false;
+}
+
+bool SandBox3D::OnKeyPressed(Spark::KeyPressedEvent& e)
+{
+	switch (e.GetKeyCode())
+	{
+	case Key::Q:
+		m_GizmoType = -1;
+		break;
+	case Key::W:
+		m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
+		break;
+	case Key::E:
+		m_GizmoType = ImGuizmo::OPERATION::ROTATE;
+		break;
+	case Key::R:
+		m_GizmoType = ImGuizmo::OPERATION::SCALE;
+		break;
+	}
 	return false;
 }
