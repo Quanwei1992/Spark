@@ -487,16 +487,12 @@ namespace Spark
 		for (size_t i = 0; i < m_BoneCount; i++)
 			m_BoneTransforms[i] = m_BoneInfo[i].FinalTransformation;
 	}
-	void Mesh::Render(Timestep ts, Ref<MaterialInstance> materialInstance)
-	{
-		Render(ts, glm::mat4(1.0f), materialInstance);
-	}
 
-	void Mesh::Render(Timestep ts, const glm::mat4& transform, Ref<MaterialInstance> materialInstance)
+	void Mesh::OnUpdate(Timestep ts)
 	{
 		if (m_IsAnimated)
 		{
-			if(m_AnimationPlaying)
+			if (m_AnimationPlaying)
 			{
 				m_WorldTime += ts;
 				float ticksPerSecond = (float)(m_Scene->mAnimations[0]->mTicksPerSecond != 0 ? m_Scene->mAnimations[0]->mTicksPerSecond : 25.0f) * m_TimeMultiplier;
@@ -505,38 +501,6 @@ namespace Spark
 			}
 			BoneTransform(m_AnimationTime);
 		}
-
-		if(materialInstance)
-		{
-			materialInstance->Bind();
-		}
-
-		bool materialOverride = !!materialInstance;
-
-		m_VertexArray->Bind();
-
-		for (Submesh& submesh : m_Submeshes)
-		{
-
-			if (m_Scene->mAnimations)
-			{
-				for (size_t i = 0; i < m_BoneTransforms.size(); i++)
-				{
-					std::string uniformName = std::string("u_BoneTransforms[") + std::to_string(i) + std::string("]");
-					m_MeshShader->SetMat4(uniformName, m_BoneTransforms[i]);
-				}
-			}
-			if(!materialOverride)
-			{
-				m_MeshShader->SetMat4("u_ModelMatrix", transform * submesh.Transform);
-			}
-			RenderCommandQueue::Submit([this,submesh]()
-			{
-				glDrawElementsBaseVertex(GL_TRIANGLES, submesh.IndexCount, GL_UNSIGNED_INT, (void*)(sizeof(uint32_t) * submesh.BaseIndex), submesh.BaseVertex);
-			});
-			
-		}
-		m_VertexArray->Unbind();
 	}
 
 	void Mesh::OnImGuiRender()

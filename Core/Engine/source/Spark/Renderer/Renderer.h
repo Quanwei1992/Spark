@@ -24,7 +24,7 @@ namespace Spark
 
 		static void BeginRenderPass(const Ref<RenderPass>& renderPass);
 		static void EndRenderPass();
-		static void SubmitMesh(const Ref<Mesh>& mesh);
+		static void SubmitMesh(const Ref<Mesh>& mesh,const glm::mat4& transform,Ref<MaterialInstance> material = Ref<MaterialInstance>());
 
 		static inline RendererAPI::API GetAPI() { return RendererAPI::GetAPI(); }
 

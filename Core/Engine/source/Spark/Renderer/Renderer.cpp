@@ -2,11 +2,17 @@
 
 #include "Spark/Renderer/Renderer.h"
 
+#include <assimp/scene.h>
+
 #include "RenderCommandQueue.h"
 #include "Spark/Renderer/RenderCommand.h"
 #include "Spark/Renderer/Shader.h"
 #include "Spark/Renderer/Renderer2D.h"
 #include "Spark/Renderer/Framebuffer.h"
+#include "Spark/Renderer/Material.h"
+
+#include <glad/glad.h>
+
 namespace Spark
 {
 	struct RendererData
@@ -76,7 +82,38 @@ namespace Spark
 		s_Data->ActiveRenderPass = nullptr;
 	}
 
-	void Renderer::SubmitMesh(const Ref<Mesh>& mesh)
+	void Renderer::SubmitMesh(const Ref<Mesh>& mesh, const glm::mat4& transform, Ref<MaterialInstance> material)
 	{
+		if (material)
+		{
+			material->Bind();
+		}
+
+		bool materialOverride = !!material;
+
+		mesh->m_VertexArray->Bind();
+
+		for (Submesh& submesh : mesh->m_Submeshes)
+		{
+
+			if (mesh->m_Scene->mAnimations)
+			{
+				for (size_t i = 0; i < mesh->m_BoneTransforms.size(); i++)
+				{
+					std::string uniformName = std::string("u_BoneTransforms[") + std::to_string(i) + std::string("]");
+					mesh->m_MeshShader->SetMat4(uniformName, mesh->m_BoneTransforms[i]);
+				}
+			}
+			if (!materialOverride)
+			{
+				mesh->m_MeshShader->SetMat4("u_ModelMatrix", transform * submesh.Transform);
+			}
+			RenderCommandQueue::Submit([submesh]()
+				{
+					glDrawElementsBaseVertex(GL_TRIANGLES, submesh.IndexCount, GL_UNSIGNED_INT, (void*)(sizeof(uint32_t) * submesh.BaseIndex), submesh.BaseVertex);
+				});
+
+		}
+		mesh->m_VertexArray->Unbind();
 	}
 }

@@ -40,8 +40,7 @@ namespace Spark
 		Mesh(const Path& filename);
 		~Mesh();
 
-		void Render(Timestep ts,Ref<MaterialInstance> materialInstance = Ref<MaterialInstance>());
-		void Render(Timestep ts,const glm::mat4& transform = glm::mat4(1.0f), Ref<MaterialInstance> materialInstance = Ref<MaterialInstance>());
+		void OnUpdate(Timestep ts);
 
 		void OnImGuiRender();
 		void DumpVertexBuffer();
@@ -49,6 +48,8 @@ namespace Spark
 		inline Ref<Shader> GetMeshShader() const { return m_MeshShader; }
 		inline Ref<Material> GetMaterial() const { return m_Material; }
 		inline const Path& GetFilePath() const { return m_FilePath; }
+
+
 	private:
 		void BoneTransform(float time);
 		void ReadNodeHierarchy(float AnimationTime, const aiNode* pNode, const glm::mat4& ParentTransform);
@@ -64,6 +65,8 @@ namespace Spark
 
 		void LoadAnimatedMesh();
 		void LoadStaticMesh();
+
+		friend class Renderer;
 	private:
 		Path m_FilePath;
 		std::vector<Submesh> m_Submeshes;

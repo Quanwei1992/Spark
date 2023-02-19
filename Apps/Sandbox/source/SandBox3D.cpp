@@ -165,6 +165,9 @@ void SandBox3D::OnUpdate(Timestep ts)
 	using namespace glm;
 
 	m_Camera.Update(ts);
+	m_Mesh->OnUpdate(ts);
+
+
 	auto viewProjection = m_Camera.GetProjectionMatrix() * m_Camera.GetViewMatrix();
 
 	Renderer::BeginRenderPass(m_GeoPass);
@@ -229,20 +232,20 @@ void SandBox3D::OnUpdate(Timestep ts)
 	{
 		// Metals
 		for (int i = 0; i < 8; i++)
-			m_SphereMesh->Render(ts, glm::mat4(1.0f), m_MetalSphereMaterialInstances[i]);
+			Renderer::SubmitMesh(m_SphereMesh, glm::mat4(1.0f), m_MetalSphereMaterialInstances[i]);
 
 		// Dielectrics
 		for (int i = 0; i < 8; i++)
-			m_SphereMesh->Render(ts, glm::mat4(1.0f), m_DielectricSphereMaterialInstances[i]);
+			Renderer::SubmitMesh(m_SphereMesh, glm::mat4(1.0f), m_DielectricSphereMaterialInstances[i]);
 	}
 	else if (m_SceneType == SceneType::Model)
 	{
 		if (m_Mesh)
-			m_Mesh->Render(ts,m_Transform, m_MeshMaterial);
+			Renderer::SubmitMesh(m_Mesh,m_Transform, m_MeshMaterial);
 	}
 
 	m_GridMaterial->Set("u_MVP", viewProjection * glm::scale(glm::mat4(1.0f), glm::vec3(16.0f)));
-	m_PlaneMesh->Render(ts, m_GridMaterial);
+	Renderer::SubmitMesh(m_PlaneMesh, glm::mat4(1.0f),m_GridMaterial);
 
 	Renderer::EndRenderPass();
 
