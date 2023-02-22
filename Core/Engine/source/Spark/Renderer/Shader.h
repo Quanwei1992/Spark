@@ -1,6 +1,7 @@
 #pragma once
 #include "Spark/Core/Base.h"
 #include "Spark/Core/Buffer.h"
+#include "Spark/Renderer/RendererAPI.h"
 #include "ShaderUniform.h"
 #include <string>
 #include <glm.hpp>
@@ -92,6 +93,7 @@ namespace Spark
 		virtual void Reload() = 0;
 
 		virtual void Bind() = 0;
+		virtual RendererID GetRendererID() const = 0;
 		virtual void UploadUniformBuffer(const UniformBufferBase& uniformBuffer) = 0;
 
 		// Temporary while we don't have materials
@@ -107,6 +109,8 @@ namespace Spark
 
 		virtual void SetVSMaterialUniformBuffer(Buffer buffer) = 0;
 		virtual void SetPSMaterialUniformBuffer(Buffer buffer) = 0;
+		virtual bool HasVSMaterialUniformBuffer() const = 0;
+		virtual bool HasPSMaterialUniformBuffer() const = 0;
 
 		virtual const ShaderUniformBufferList& GetVSRendererUniforms() const = 0;
 		virtual const ShaderUniformBufferList& GetPSRendererUniforms() const = 0;

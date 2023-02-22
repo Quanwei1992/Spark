@@ -18,10 +18,15 @@ namespace Spark {
 
 		virtual void Bind() override;
 
+		RendererID GetRendererID() const override { return m_RendererID; }
+
 		virtual void UploadUniformBuffer(const UniformBufferBase& uniformBuffer) override;
 
 		virtual void SetVSMaterialUniformBuffer(Buffer buffer) override;
 		virtual void SetPSMaterialUniformBuffer(Buffer buffer) override;
+
+		bool HasVSMaterialUniformBuffer() const override { return (bool)m_VSMaterialUniformBuffer; }
+		bool HasPSMaterialUniformBuffer() const override { return (bool)m_PSMaterialUniformBuffer; }
 
 		virtual void SetFloat(const std::string& name, float value) override;
 		virtual void SetMat4(const std::string& name, const glm::mat4& value) override;
@@ -30,6 +35,7 @@ namespace Spark {
 	private:
 		std::string ReadShaderFromFile(const std::string& filepath) const;
 		std::unordered_map<GLenum, std::string> PreProcess(const std::string& source);
+		void Load(const std::string& source);
 		void Parse();
 		void ParseUniform(const std::string& statement, ShaderDomain domain);
 		void ParseUniformStruct(const std::string& block, ShaderDomain domain);
@@ -74,9 +80,11 @@ namespace Spark {
 		inline const ShaderUniformBufferDeclaration& GetVSMaterialUniformBuffer() const override { return *m_VSMaterialUniformBuffer; }
 		inline const ShaderUniformBufferDeclaration& GetPSMaterialUniformBuffer() const override { return *m_PSMaterialUniformBuffer; }
 		inline const ShaderResourceList& GetResources() const override { return m_Resources; }
+
 	private:
 		RendererID m_RendererID = 0;
 		bool m_Loaded = false;
+		bool m_IsCompute = false;
 
 		std::string m_Name, m_AssetPath;
 		std::unordered_map<GLenum, std::string> m_ShaderSource;
