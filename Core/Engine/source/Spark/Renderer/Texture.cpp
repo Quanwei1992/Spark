@@ -40,6 +40,17 @@ namespace Spark
 		return nullptr;
 	}
 
+	Ref<TextureCube> TextureCube::Create(TextureFormat format, uint32_t width, uint32_t height)
+	{
+		switch (Renderer::GetAPI())
+		{
+		case RendererAPI::API::None: SK_CORE_ASSERT(false, "RendererAPI::None is current not support!"); return nullptr;
+		case RendererAPI::API::OpenGL: return CreateRef<OpenGLTextureCube>(format,width,height);
+		}
+		SK_CORE_ASSERT(false, "Unknown RendererAPI!");
+		return nullptr;
+	}
+
 	uint32_t Texture::GetBPP(TextureFormat format)
 	{
 		switch (format)
@@ -48,5 +59,15 @@ namespace Spark
 		case TextureFormat::RGBA:   return 4;
 		}
 		return 0;
+	}
+
+	uint32_t Texture::CalculateMipmapCount(uint32_t width, uint32_t height)
+	{
+		int levels = 1;
+		while ((width | height) >> levels)
+		{
+			levels++;
+		}
+		return levels;
 	}
 }

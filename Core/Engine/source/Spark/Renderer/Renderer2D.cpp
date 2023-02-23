@@ -153,7 +153,7 @@ namespace Spark
 
 		s_Data->WhiteTexture = Texture2D::Create(TextureFormat::RGBA,1, 1);
 		s_Data->WhiteTexture->Lock();
-		s_Data->WhiteTexture->GetWrieableBuffer()[0] = 0xffffffff;
+		s_Data->WhiteTexture->GetWriteableBuffer()[0] = 0xffffffff;
 		s_Data->WhiteTexture->Unlock();
 
 		s_Data->TextureSlots[0] = s_Data->WhiteTexture;
