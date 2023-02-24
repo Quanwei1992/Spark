@@ -28,6 +28,10 @@ namespace Spark
 		glm::vec3 GetRightDirection();
 		glm::vec3 GetForwardDirection();
 		const glm::vec3& GetPosition() const { return m_Position; }
+
+		float GetExposure() const { return m_Exposure; }
+		void SetExposure(float value) { m_Exposure = value; }
+
 	private:
 		void MousePan(const glm::vec2& delta);
 		void MouseRotate(const glm::vec2& delta);
@@ -46,8 +50,10 @@ namespace Spark
 		glm::vec3 m_InitialFocalPoint, m_InitialRotation;
 
 		float m_Distance;
-
 		float m_Pitch, m_Yaw;
+
+		float m_Exposure = 0.8f;
+
 		uint32_t m_ViewportWidth = 1920, m_ViewportHeight = 1080;
 	};
 }

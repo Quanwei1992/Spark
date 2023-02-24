@@ -15,6 +15,7 @@ struct aiScene;
 
 namespace Spark
 {
+	class Texture2D;
 	class MaterialInstance;
 	class Material;
 	class Shader;
@@ -42,13 +43,11 @@ namespace Spark
 
 		void OnUpdate(Timestep ts);
 
-		void OnImGuiRender();
-		void DumpVertexBuffer();
-
 		inline Ref<Shader> GetMeshShader() const { return m_MeshShader; }
-		inline Ref<Material> GetMaterial() const { return m_Material; }
+		inline Ref<Material> GetMaterial() const { return m_BaseMaterial; }
+		std::vector<Ref<MaterialInstance>>& GetMaterials() { return m_Materials; }
+		const std::vector<Ref<Texture2D>>& GetTextures() const { return m_Textures; }
 		inline const Path& GetFilePath() const { return m_FilePath; }
-
 
 	private:
 		void BoneTransform(float time);
@@ -65,6 +64,7 @@ namespace Spark
 
 		void LoadAnimatedMesh();
 		void LoadStaticMesh();
+		void LoadMaterials();
 
 		friend class Renderer;
 	private:
@@ -86,7 +86,10 @@ namespace Spark
 
 		// Materials
 		Ref<Shader> m_MeshShader;
-		Ref<Material> m_Material;
+		Ref<Material> m_BaseMaterial;
+		std::vector<Ref<Texture2D>> m_Textures;
+		std::vector<Ref<Texture2D>> m_NormalMaps;
+		std::vector<Ref<MaterialInstance>> m_Materials;
 
 		// Animation
 		bool m_IsAnimated = false;

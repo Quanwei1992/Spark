@@ -18,32 +18,29 @@
 
 namespace Spark
 {
-	namespace
+	constexpr  uint32_t s_MeshImportFlags =
+		aiProcess_CalcTangentSpace |        // Create binormals/tangents just in case
+		aiProcess_Triangulate |             // Make sure we're triangles
+		aiProcess_SortByPType |             // Split meshes by primitive type
+		aiProcess_GenNormals |              // Make sure we have legit normals
+		aiProcess_GenUVCoords |             // Convert UVs if required 
+		aiProcess_OptimizeMeshes |          // Batch draws where possible
+		aiProcess_ValidateDataStructure;    // Validation
+
+	struct LogStream : public Assimp::LogStream
 	{
-		constexpr  uint32_t s_MeshImportFlags =
-			aiProcess_CalcTangentSpace |        // Create binormals/tangents just in case
-			aiProcess_Triangulate |             // Make sure we're triangles
-			aiProcess_SortByPType |             // Split meshes by primitive type
-			aiProcess_GenNormals |              // Make sure we have legit normals
-			aiProcess_GenUVCoords |             // Convert UVs if required 
-			aiProcess_OptimizeMeshes |          // Batch draws where possible
-			aiProcess_ValidateDataStructure;    // Validation
-
-		 struct LogStream : public Assimp::LogStream
+		static void Initialize()
 		{
-			static void Initialize()
-			{
-				if (!Assimp::DefaultLogger::isNullLogger()) return;
-				Assimp::DefaultLogger::create("", Assimp::Logger::VERBOSE);
-				Assimp::DefaultLogger::get()->attachStream(new LogStream, Assimp::Logger::Err);
-			}
-			void write(const char* message) override
-			{
-				SK_CORE_ERROR("Assimp error: {0}", message);
-			}
-		};
+			if (!Assimp::DefaultLogger::isNullLogger()) return;
+			Assimp::DefaultLogger::create("", Assimp::Logger::VERBOSE);
+			Assimp::DefaultLogger::get()->attachStream(new LogStream, Assimp::Logger::Err);
+		}
+		void write(const char* message) override
+		{
+			SK_CORE_ERROR("Assimp error: {0}", message);
+		}
+	};
 
-	}
 
 	struct StaticVertex
 	{
@@ -78,7 +75,8 @@ namespace Spark
 			SK_CORE_WARN("Vertex has more than four bones/weights affecting it, extra data will be discarded (BoneID={0}, Weight={1})", BoneID, Weight);
 		}
 	};
-	static const int NumAttributes = 5;
+
+
 
 	struct Index
 	{
@@ -89,7 +87,7 @@ namespace Spark
 
 	namespace Utils
 	{
-		static glm::mat4 aiMatrix4x4ToGlm(const aiMatrix4x4& from)
+		static glm::mat4 Mat4FromAssimpMat4(const aiMatrix4x4& from)
 		{
 			glm::mat4 to;
 			//the a,b,c,d in assimp is the row ; the 1,2,3,4 is the column
@@ -170,7 +168,7 @@ namespace Spark
 					boneIndex = m_BoneCount;
 					m_BoneCount++;
 					BoneInfo bi;
-					bi.BoneOffset = Utils::aiMatrix4x4ToGlm(bone->mOffsetMatrix);
+					bi.BoneOffset = Utils::Mat4FromAssimpMat4(bone->mOffsetMatrix);
 					m_BoneInfo.push_back(bi);
 					m_BoneMapping[boneName] = boneIndex;
 				}
@@ -274,6 +272,55 @@ namespace Spark
 		m_VertexArray->SetIndexBuffer(m_IndexBuffer);
 	}
 
+	void Mesh::LoadMaterials()
+	{
+		if (!m_Scene->HasMaterials()) return;
+		m_Textures.resize(m_Scene->mNumMaterials);
+		m_Materials.resize(m_Scene->mNumMaterials);
+		for (int i = 0; i < m_Scene->mNumMaterials; ++i)
+		{
+			auto aiMaterial = m_Scene->mMaterials[i];
+			auto aiMaterialName = aiMaterial->GetName();
+
+			auto mi = MaterialInstance::Create(m_BaseMaterial);
+			m_Materials[i] = mi;
+
+			SK_CORE_TRACE("Material Name = {0}; Index = {1}", aiMaterialName.data, i);
+
+			uint32_t textureCount = aiMaterial->GetTextureCount(aiTextureType_DIFFUSE);
+			SK_CORE_TRACE(" Texture Count = {0}", textureCount);
+
+			aiColor3D aiColor;
+			aiMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, aiColor);
+			aiString aiTexPath;
+			bool useTexture = false;
+			if(aiMaterial->GetTexture(aiTextureType_DIFFUSE,0,&aiTexPath) == AI_SUCCESS)
+			{
+				Path path = m_FilePath.parent_path();
+				path /= std::string(aiTexPath.data);
+				std::string texturePath = path.string();
+
+				auto texture = Texture2D::Create(texturePath, true);
+				if(texture->IsLoaded())
+				{
+					m_Textures[i] = texture;
+					SK_CORE_TRACE("	Texture Path = {0}", texturePath);
+					mi->Set("u_AlbedoTexture", m_Textures[i]);
+					mi->Set("u_AlbedoTexToggle", 1.0f);
+					useTexture = true;
+				}
+			}
+
+			if(!useTexture)
+			{
+				mi->Set("u_AlbedoTexToggle", 0.0f);
+				mi->Set("u_AlbedoColor", glm::vec3(aiColor.r, aiColor.g, aiColor.b));
+			}
+
+		}
+
+	}
+
 
 	Mesh::Mesh(const Path& filename)
 		:m_FilePath(filename)
@@ -292,13 +339,16 @@ namespace Spark
 		if (m_IsAnimated) shaderName = "PBR_Anim.glsl";
 
 		m_MeshShader = Renderer::GetShaderLibrary()->Get(shaderName);
-		m_Material = Material::Create(m_MeshShader);
+		m_BaseMaterial = Material::Create(m_MeshShader);
 		m_Scene = scene;
 
-		m_InverseTransform = glm::inverse(Utils::aiMatrix4x4ToGlm(scene->mRootNode->mTransformation));
+		m_InverseTransform = glm::inverse(Utils::Mat4FromAssimpMat4(scene->mRootNode->mTransformation));
 
 		if (m_IsAnimated) LoadAnimatedMesh();
 		else LoadStaticMesh();
+
+
+
 	}
 
 	Mesh::~Mesh()
@@ -437,7 +487,7 @@ namespace Spark
 	{
 		std::string name(pNode->mName.data);
 		const aiAnimation* animation = m_Scene->mAnimations[0];
-		glm::mat4 nodeTransform(Utils::aiMatrix4x4ToGlm(pNode->mTransformation));
+		glm::mat4 nodeTransform(Utils::Mat4FromAssimpMat4(pNode->mTransformation));
 		const aiNodeAnim* nodeAnim = FindNodeAnim(animation, name);
 
 		if (nodeAnim)
@@ -471,7 +521,7 @@ namespace Spark
 		for (int i = 0; i < node->mNumMeshes; ++i)
 		{
 			uint32_t mesh = node->mMeshes[i];
-			m_Submeshes[mesh].Transform = Utils::aiMatrix4x4ToGlm(node->mTransformation);
+			m_Submeshes[mesh].Transform = Utils::Mat4FromAssimpMat4(node->mTransformation);
 		}
 		for (int i = 0; i < node->mNumChildren; ++i)
 		{
@@ -501,28 +551,5 @@ namespace Spark
 			}
 			BoneTransform(m_AnimationTime);
 		}
-	}
-
-	void Mesh::OnImGuiRender()
-	{
-		ImGui::Begin("Mesh Debug");
-		if (ImGui::CollapsingHeader(m_FilePath.string().c_str()))
-		{
-			if (ImGui::CollapsingHeader("Animation"))
-			{
-				if (ImGui::Button(m_AnimationPlaying ? "Pause" : "Play"))
-					m_AnimationPlaying = !m_AnimationPlaying;
-
-				ImGui::SliderFloat("##AnimationTime", &m_AnimationTime, 0.0f, (float)m_Scene->mAnimations[0]->mDuration);
-				ImGui::DragFloat("Time Scale", &m_TimeMultiplier, 0.05f, 0.0f, 10.0f);
-			}
-		}
-
-		ImGui::End();
-	}
-
-	void Mesh::DumpVertexBuffer()
-	{
-
 	}
 }
