@@ -45,7 +45,6 @@ namespace Spark
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 		//glDebugMessageControl(GL_DEBUG_SOURCE_API, GL_DEBUG_SEVERITY_HIGH, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 #endif
-
 	}
 	void OpenGLContext::SwapBuffers()
 	{

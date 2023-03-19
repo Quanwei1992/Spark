@@ -7,7 +7,7 @@
 #include "Spark/Core/UUID.h"
 #include "Spark/Scene/ScriptableEntity.h"
 #include "Spark/Renderer/Texture.h"
-
+#include "Spark/Renderer/Mesh.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <gtx/quaternion.hpp>
@@ -71,6 +71,16 @@ namespace Spark
 			return translation * rotation * scale;
 			
 		}
+	};
+
+	struct MeshRendererComponent
+	{
+		constexpr static const char* PrettyName = "MeshRenderer";
+		Ref<Mesh> Mesh;
+		Ref<MaterialInstance> Material;
+
+		MeshRendererComponent() = default;
+		MeshRendererComponent(const MeshRendererComponent&) = default;
 	};
 
 	struct SpriteRendererComponent

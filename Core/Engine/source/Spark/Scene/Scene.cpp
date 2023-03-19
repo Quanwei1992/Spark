@@ -4,6 +4,9 @@
 #include "Spark/Scene/Entity.h"
 #include "Spark/Scripting/ScriptEngine.h"
 #include "Spark/Renderer/Renderer2D.h"
+#include "Spark/Renderer/Material.h"
+#include "Spark/Renderer/Shader.h"
+#include "Spark/Renderer/SceneRenderer.h"
 
 #include <glm.hpp>
 #include <box2d/box2d.h>
@@ -29,12 +32,27 @@ namespace Spark
 	}
 
 
-	Scene::Scene()
+	Environment Environment::Load(const std::string& filepath)
 	{
+		return SceneRenderer::CreateEnvironmentMap(filepath);
+	}
+
+	Scene::Scene(const std::string& debugName)
+		:m_DebugName(debugName)
+	{
+		Init();
 	}
 
 	Scene::~Scene()
 	{
+		
+	}
+
+	void Scene::Init()
+	{
+		auto skyboxShader = Shader::Create("assets/shaders/Skybox.glsl");
+		m_SkyboxMaterial = MaterialInstance::Create(Material::Create(skyboxShader));
+		m_SkyboxMaterial->SetFlag(MaterialFlag::DepthTest, false);
 	}
 
 	template <typename T>
@@ -127,7 +145,7 @@ namespace Spark
 			}
 		}
 
-		// Render 2D
+
 		Camera* mainCamera = nullptr;
 		glm::mat4 mainCameraTransform;
 		auto view = m_Registry.view<TransformComponent, CameraComponent>();
@@ -145,7 +163,8 @@ namespace Spark
 		{
 			return;
 		}
-
+#if 0
+		// Render 2D
 		glm::mat4 viewProjection = mainCamera->GetProjectionMatrix() * glm::inverse(mainCameraTransform);
 		Renderer2D::BeginScene(viewProjection);
 		// Quads
@@ -165,10 +184,13 @@ namespace Spark
 			}
 		}
 		Renderer2D::EndScene();
+#endif
 	}
 
 	void Scene::OnUpdateEditor(Timestep ts, EditorCamera& camera)
 	{
+#if 0
+		// Render 2D
 		Renderer2D::BeginScene(camera.GetViewProjection());
 
 		// Quads
@@ -189,6 +211,20 @@ namespace Spark
 		}
 
 		Renderer2D::EndScene();
+#endif
+
+		m_SkyboxMaterial->Set("u_TextureLod", m_SkyboxLod);
+
+		SceneRenderer::BeginScene(this,camera);
+
+		auto view = m_Registry.view<TransformComponent, MeshRendererComponent>();
+		for (auto&& [entity, transform, meshRenderer] : view.each())
+		{
+			SceneRenderer::SubmitEntity({ entity ,this});
+		}
+
+		SceneRenderer::EndScene();
+
 	}
 
 	void Scene::OnViewportResize(uint32_t width, uint32_t height)
@@ -239,6 +275,18 @@ namespace Spark
 			}
 		}
 		return Entity::Empty;
+	}
+
+	void Scene::SetEnvironment(const Environment& Environment)
+	{
+		m_Environment = Environment;
+		SetSkybox(Environment.RadianceMap);
+	}
+
+	void Scene::SetSkybox(const Ref<TextureCube>& skybox)
+	{
+		m_SkyboxTexture = skybox;
+		m_SkyboxMaterial->Set("u_Texture", skybox);
 	}
 
 	void Scene::OnPhysics2DStart()
@@ -414,6 +462,10 @@ namespace Spark
 
 	template <>
 	void Scene::OnComponentAdded<ScriptComponent>(Entity entity, ScriptComponent& component)
+	{
+	}
+	template <>
+	void Scene::OnComponentAdded<MeshRendererComponent>(Entity entity, MeshRendererComponent& component)
 	{
 	}
 }

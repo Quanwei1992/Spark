@@ -56,7 +56,7 @@ void SandBox3D::OnAttach()
 	// Editor
 	m_CheckerboradTex = Texture2D::Create("assets/editor/Checkerboard.tga");
 
-	// Enviroment
+	// Environment
 	m_EnvironmentCubeMap = TextureCube::Create("assets/textures/environments/Arches_E_PineTree_Radiance.tga");
 	m_EnvironmentIrradiance = TextureCube::Create("assets/textures/environments/Arches_E_PineTree_Irradiance.tga");
 	m_BRDFLUT = Texture2D::Create("assets/textures/BRDF_LUT.tga");
@@ -603,9 +603,6 @@ void SandBox3D::OnImGuiRender()
 	ImGui::PopStyleVar();
 
 	ImGui::End();
-
-	if (m_Mesh)
-		m_Mesh->OnImGuiRender();
 
 	// static bool o = true;
 	// ImGui::ShowDemoWindow(&o);

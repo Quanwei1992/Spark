@@ -25,6 +25,7 @@ namespace Spark
 
 	void OpenGLShader::Reload()
 	{
+		SK_CORE_TRACE("Loading shader {0}", m_AssetPath);
 		std::string source = ReadShaderFromFile(m_AssetPath);
 		Load(source);
 	}
@@ -248,6 +249,7 @@ namespace Spark
 	{
 		if (type == "sampler2D") return true;
 		if (type == "samplerCube") return true;
+		if (type == "sampler2DMS")	return true;
 		if (type == "sampler2DShadow") return true;
 		return false;
 	}
@@ -791,6 +793,21 @@ namespace Spark
 		RenderCommandQueue::Submit([this,name,value]()
 		{
 			UploadUniformMat4(name, value);
+		});
+	}
+
+	void OpenGLShader::SetInt(const std::string& name, int value)
+	{
+		RenderCommandQueue::Submit([this, name, value]()
+		{
+			UploadUniformInt(name, value);
+		});
+	}
+
+	void OpenGLShader::SetIntArray(const std::string& name, int* values, uint32_t size)
+	{
+		RenderCommandQueue::Submit([=]() {
+			UploadUniformIntArray(name, values, size);
 		});
 	}
 

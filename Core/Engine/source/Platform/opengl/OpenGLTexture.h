@@ -12,7 +12,7 @@ namespace Spark
 		~OpenGLTexture2D() override;
 
 		virtual uint32_t GetWidth() const override { return m_Width; }
-		virtual uint32_t GeHeight() const override { return m_Height; }
+		virtual uint32_t GetHeight() const override { return m_Height; }
 		virtual uint32_t GetRendererID() const override { return m_RendererID; }
 		virtual ImTextureID GetImGuiTextureID() const override { return (ImTextureID)((uint64_t)m_RendererID); }
 		const std::string& GetPath() const override { return m_FilePath; }
@@ -51,7 +51,7 @@ namespace Spark
 		OpenGLTextureCube(TextureFormat format, uint32_t width, uint32_t height);
 		~OpenGLTextureCube() override;
 		virtual uint32_t GetWidth() const override { return m_Width; }
-		virtual uint32_t GeHeight() const override { return m_Height; }
+		virtual uint32_t GetHeight() const override { return m_Height; }
 		virtual uint32_t GetRendererID() const override { return m_RendererID; }
 		virtual ImTextureID GetImGuiTextureID() const override { return (ImTextureID)((uint64_t)m_RendererID); }
 		const std::string& GetPath() const override { return m_FilePath; }

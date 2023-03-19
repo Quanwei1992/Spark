@@ -115,6 +115,7 @@ namespace Spark
 
 	OpenGLTexture2D::~OpenGLTexture2D()
 	{
+		SK_CORE_TRACE("~OpenGLTexture2D {0}", m_FilePath);
 		RenderCommandQueue::Submit([this]()
 		{
 			glDeleteTextures(1, &m_RendererID);

@@ -129,10 +129,13 @@ namespace Spark
 	{
 		RenderCommandQueue::Submit([enable]()
 		{
-				if (enable)
+			if (enable)
+			{
 				glEnable(GL_DEPTH_TEST);
-				else
-					glDisable(GL_DEPTH_TEST);
+			}else
+			{
+				glDisable(GL_DEPTH_TEST);
+			}
 		});
 	}
 }

@@ -281,8 +281,7 @@ namespace Spark
 	{
 		RenderCommandQueue::Submit([this,slot, attachmentIndex]()
 		{
-			glActiveTexture(GL_TEXTURE0 + slot);
-			glBindTexture(GL_TEXTURE_2D, m_ColorAttachments[attachmentIndex]);
+			glBindTextureUnit(slot, m_ColorAttachments[attachmentIndex]);
 		});
 	}
 

@@ -30,6 +30,8 @@ namespace Spark {
 
 		virtual void SetFloat(const std::string& name, float value) override;
 		virtual void SetMat4(const std::string& name, const glm::mat4& value) override;
+		void SetInt(const std::string& name, int value) override;
+		void SetIntArray(const std::string& name, int* values, uint32_t size) override;
 
 		virtual const std::string& GetName() const override { return m_Name; }
 	private:
@@ -80,6 +82,8 @@ namespace Spark {
 		inline const ShaderUniformBufferDeclaration& GetVSMaterialUniformBuffer() const override { return *m_VSMaterialUniformBuffer; }
 		inline const ShaderUniformBufferDeclaration& GetPSMaterialUniformBuffer() const override { return *m_PSMaterialUniformBuffer; }
 		inline const ShaderResourceList& GetResources() const override { return m_Resources; }
+
+
 
 	private:
 		RendererID m_RendererID = 0;

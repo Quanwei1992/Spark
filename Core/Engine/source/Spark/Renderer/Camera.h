@@ -46,14 +46,12 @@ namespace Spark
 		glm::vec3 m_Position, m_Rotation, m_FocalPoint;
 
 		bool m_Panning, m_Rotating;
-		glm::vec2 m_InitialMousePosition;
+		glm::vec2 m_InitialMousePosition = { 0.0f, 0.0f };
 		glm::vec3 m_InitialFocalPoint, m_InitialRotation;
-
-		float m_Distance;
-		float m_Pitch, m_Yaw;
-
 		float m_Exposure = 0.8f;
+		float m_Distance = 10.0f;
+		float m_Pitch = 0.0f, m_Yaw = 0.0f;
 
-		uint32_t m_ViewportWidth = 1920, m_ViewportHeight = 1080;
+		float m_ViewportWidth = 1920, m_ViewportHeight = 1080;
 	};
 }

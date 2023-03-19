@@ -10,6 +10,8 @@
 #include <gtc/type_ptr.hpp>
 #include <ImGuizmo.h>
 
+#include "Spark/Renderer/SceneRenderer.h"
+
 namespace Spark
 {
 	EditorLayer::EditorLayer()
@@ -44,12 +46,32 @@ namespace Spark
 			OpenScene(sceneFilePath);
 		}
 
-		m_EditorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
+		m_EditorCamera = EditorCamera(45.0f, 1.778f, 0.1f, 10000.0f);
 
 		m_SceneHierarchyPanel.SetContext(m_EditorScene);
 
 		m_IconPlay = Texture2D::Create("resources/icons/PlayButton.png");
 		m_IconStop = Texture2D::Create("resources/icons/StopButton.png");
+
+		auto environment = Environment::Load("assets/env/birchwood_4k.hdr");
+		m_EditorScene->SetEnvironment(environment);
+
+
+		m_MeshEntity = m_EditorScene->CreateEntity("Test Entity");
+
+		auto mesh = CreateRef<Mesh>("assets/meshes/TestScene.fbx");
+		m_MeshMaterial = mesh->GetMaterial();
+		auto& meshComponent = m_MeshEntity.AddComponent<MeshRendererComponent>();
+		meshComponent.Mesh = mesh;
+
+		auto gunEntity = m_EditorScene->CreateEntity("Gun Entity");
+		auto& gunTransform = gunEntity.GetComponent<TransformComponent>();
+		gunTransform.Translation = {5,5,5};
+		gunTransform.Scale = { 10,10,10 };
+
+		// Set lights
+		m_Light.Direction = { -0.5f, -0.5f, 1.0f };
+		m_Light.Radiance = { 1.0f, 1.0f, 1.0f };
 	}
 
 	void EditorLayer::OnDetach()
@@ -61,6 +83,16 @@ namespace Spark
 	void EditorLayer::OnUpdate(Timestep ts)
 	{
 		SK_PROFILE_FUNCTION();	
+
+		m_MeshMaterial->Set("u_AlbedoColor", m_AlbedoInput.Color);
+		m_MeshMaterial->Set("u_Metalness", m_MetalnessInput.Value);
+		m_MeshMaterial->Set("u_Roughness", m_RoughnessInput.Value);
+		m_MeshMaterial->Set("lights", m_Light);
+		m_MeshMaterial->Set("u_AlbedoTexToggle", m_AlbedoInput.UseTexture ? 1.0f : 0.0f);
+		m_MeshMaterial->Set("u_NormalTexToggle", m_NormalInput.UseTexture ? 1.0f : 0.0f);
+		m_MeshMaterial->Set("u_MetalnessTexToggle", m_MetalnessInput.UseTexture ? 1.0f : 0.0f);
+		m_MeshMaterial->Set("u_RoughnessTexToggle", m_RoughnessInput.UseTexture ? 1.0f : 0.0f);
+		m_MeshMaterial->Set("u_EnvMapRotation", m_EnvMapRotation);
 
 
 		Ref<Scene> activeScene = m_SceneState == SceneState::Edit ? m_EditorScene : m_RuntimeScene;
@@ -77,7 +109,7 @@ namespace Spark
 		}
 		
 		// Render
-		Renderer2D::ResetStats();
+		//Renderer2D::ResetStats();
 		m_Framebuffer->Bind();
 		RenderCommand::SetClearColor(glm::vec4(0.1f, 0.1f, 0.1f, 1));
 		RenderCommand::Clear();
@@ -222,22 +254,22 @@ namespace Spark
 			ImGui::EndMenuBar();
 		}
 
-		ImGui::Begin("Stats");
-		{
-			auto stats = Renderer2D::GetStats();
-			ImGui::Text("Draw Calls %d", stats.DrawCalls);
-			ImGui::Text("Quads %d", stats.QuadCount);
-			ImGui::Text("Vertices %d", stats.GetTotalVertexCount());
-			ImGui::Text("Indices %d", stats.GetTotalIndexCount());
+		//ImGui::Begin("Stats");
+		//{
+		//	auto stats = Renderer2D::GetStats();
+		//	ImGui::Text("Draw Calls %d", stats.DrawCalls);
+		//	ImGui::Text("Quads %d", stats.QuadCount);
+		//	ImGui::Text("Vertices %d", stats.GetTotalVertexCount());
+		//	ImGui::Text("Indices %d", stats.GetTotalIndexCount());
 
-			std::string name = "None";
-			if (m_HoveredEntity)
-			{
-				name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
-			}
-			ImGui::Text("Hovered Entity: %s", name.c_str());
-		}
-		ImGui::End();
+		//	std::string name = "None";
+		//	if (m_HoveredEntity)
+		//	{
+		//		name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
+		//	}
+		//	ImGui::Text("Hovered Entity: %s", name.c_str());
+		//}
+		//ImGui::End();
 
 
 		ImGui::Begin("Settings");
@@ -264,7 +296,7 @@ namespace Spark
 				m_ViewportSize = { viewportPanelSize.x,viewportPanelSize.y };
 			}
 
-			uint64_t rendererID = (uint64_t)m_Framebuffer->GetColorAttachmentRendererID();
+			uint64_t rendererID = (uint64_t)SceneRenderer::GetFinalColorBufferRendererID();
 			ImGui::Image((void*)rendererID, viewportPanelSize, ImVec2{ 0,1 }, ImVec2{ 1,0 });
 
 			if (ImGui::BeginDragDropTarget())
@@ -306,7 +338,7 @@ namespace Spark
 		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
 
 
-		const auto& cameraProjection = m_EditorCamera.GetProjection();
+		const auto& cameraProjection = m_EditorCamera.GetProjectionMatrix();
 		glm::mat4 cameraView = m_EditorCamera.GetViewMatrix();
 
 		// Entity Transform
@@ -550,62 +582,61 @@ namespace Spark
 
 	void EditorLayer::OnOverlayRender()
 	{
-		auto activeScene = GetActiveScene();
+		//auto activeScene = GetActiveScene();
 
-		if (m_SceneState == SceneState::Play)
-		{
-			auto cameraEntity = activeScene->GetPrimaryCameraEntity();
-			if (!cameraEntity) return;
+		//if (m_SceneState == SceneState::Play)
+		//{
+		//	auto cameraEntity = activeScene->GetPrimaryCameraEntity();
+		//	if (!cameraEntity) return;
 
-			auto transform = cameraEntity.GetComponent<TransformComponent>();
-			auto mainCamera = cameraEntity.GetComponent<CameraComponent>().Camera;
+		//	auto transform = cameraEntity.GetComponent<TransformComponent>();
+		//	auto mainCamera = cameraEntity.GetComponent<CameraComponent>().Camera;
 
-			glm::mat4 viewProjection = mainCamera.GetProjection() * glm::inverse(transform.GetTransform());
+		//	glm::mat4 viewProjection = mainCamera.GetProjectionMatrix() * glm::inverse(transform.GetTransform());
 
-			Renderer2D::BeginScene(viewProjection);
-		}
-		else {
-			Renderer2D::BeginScene(m_EditorCamera.GetViewProjection());
-		}
+		//	Renderer2D::BeginScene(viewProjection);
+		//}
+		//else {
+		//	Renderer2D::BeginScene(m_EditorCamera.GetViewProjection());
+		//}
 
-
-		if (m_ShowPhysicsColliders)
-		{
-			// Circle Colliders
-			{
-				auto view = activeScene->GetAllEntitiesWith<TransformComponent, CircleCollider2DComponent>();
-				for (auto&& [entity, tc, cc2d] : view.each())
-				{
-					glm::vec3 translation = tc.Translation + glm::vec3(cc2d.Offset, 0.001f);
-					glm::vec3 scale = tc.Scale * glm::vec3(cc2d.Radius * 2.0f);
-
-
-					glm::mat4 transform = glm::translate(glm::mat4(1.0f), translation)
-						* glm::scale(glm::mat4(1.0f), scale);
-
-					Renderer2D::DrawCircle(transform, glm::vec4(0, 1, 0, 1), 0.01f);
-				}
-			}
-			// Box Colliders
-			{
-				auto view = activeScene->GetAllEntitiesWith<TransformComponent, BoxCollider2DComponent>();
-				for (auto&& [entity, tc, bc2d] : view.each())
-				{
-					glm::vec3 translation = tc.Translation + glm::vec3(bc2d.Offset, 0.001f);
-					glm::vec3 scale = tc.Scale * glm::vec3(bc2d.Size * 2.0f, 1.0f);
+		//if (m_ShowPhysicsColliders)
+		//{
+		//	// Circle Colliders
+		//	{
+		//		auto view = activeScene->GetAllEntitiesWith<TransformComponent, CircleCollider2DComponent>();
+		//		for (auto&& [entity, tc, cc2d] : view.each())
+		//		{
+		//			glm::vec3 translation = tc.Translation + glm::vec3(cc2d.Offset, 0.001f);
+		//			glm::vec3 scale = tc.Scale * glm::vec3(cc2d.Radius * 2.0f);
 
 
-					glm::mat4 transform = glm::translate(glm::mat4(1.0f), translation)
-						* glm::rotate(glm::mat4(1.0f), tc.Rotation.z, glm::vec3(0, 0, 1))
-						* glm::scale(glm::mat4(1.0f), scale);
+		//			glm::mat4 transform = glm::translate(glm::mat4(1.0f), translation)
+		//				* glm::scale(glm::mat4(1.0f), scale);
 
-					Renderer2D::DrawRect(transform, glm::vec4(0, 1, 0, 1));
-				}
-			}
-		}
+		//			Renderer2D::DrawCircle(transform, glm::vec4(0, 1, 0, 1), 0.01f);
+		//		}
+		//	}
+		//	// Box Colliders
+		//	{
+		//		auto view = activeScene->GetAllEntitiesWith<TransformComponent, BoxCollider2DComponent>();
+		//		for (auto&& [entity, tc, bc2d] : view.each())
+		//		{
+		//			glm::vec3 translation = tc.Translation + glm::vec3(bc2d.Offset, 0.001f);
+		//			glm::vec3 scale = tc.Scale * glm::vec3(bc2d.Size * 2.0f, 1.0f);
+
+
+		//			glm::mat4 transform = glm::translate(glm::mat4(1.0f), translation)
+		//				* glm::rotate(glm::mat4(1.0f), tc.Rotation.z, glm::vec3(0, 0, 1))
+		//				* glm::scale(glm::mat4(1.0f), scale);
+
+		//			Renderer2D::DrawRect(transform, glm::vec4(0, 1, 0, 1));
+		//		}
+		//	}
+		//}
 
 	
-		Renderer2D::EndScene();
+		//Renderer2D::EndScene();
 	}
 
 	Ref<Scene> EditorLayer::GetActiveScene()

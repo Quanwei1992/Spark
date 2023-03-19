@@ -51,8 +51,8 @@ namespace Spark
 
 	private:
 		void BoneTransform(float time);
-		void ReadNodeHierarchy(float AnimationTime, const aiNode* pNode, const glm::mat4& ParentTransform);
-		void TraverseNodes(aiNode* node);
+		void ReadNodeHierarchy(float animationTime, const aiNode* pNode, const glm::mat4& parentTransform);
+		void TraverseNodes(aiNode* node, const glm::mat4& parentTransform=glm::mat4(1.0f), uint32_t level = 0);
 
 		const aiNodeAnim* FindNodeAnim(const aiAnimation* animation, const std::string& nodeName);
 		uint32_t FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim);

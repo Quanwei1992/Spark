@@ -317,10 +317,158 @@ namespace Spark
 				mi->Set("u_AlbedoColor", glm::vec3(aiColor.r, aiColor.g, aiColor.b));
 			}
 
+			for (int i = 0; i < aiMaterial->mNumProperties; ++i)
+			{
+				auto prop = aiMaterial->mProperties[i];
+				SK_CORE_TRACE("Material Property:");
+				SK_CORE_TRACE("    Name = {0}", prop->mKey.data);
+				switch (prop->mSemantic)
+				{
+				case aiTextureType_NONE:
+					SK_CORE_TRACE("  Semantic = aiTextureType_NONE");
+					break;
+				case aiTextureType_DIFFUSE:
+					SK_CORE_TRACE("  Semantic = aiTextureType_DIFFUSE");
+					break;
+				case aiTextureType_SPECULAR:
+					SK_CORE_TRACE("  Semantic = aiTextureType_SPECULAR");
+					break;
+				case aiTextureType_AMBIENT:
+					SK_CORE_TRACE("  Semantic = aiTextureType_AMBIENT");
+					break;
+				case aiTextureType_EMISSIVE:
+					SK_CORE_TRACE("  Semantic = aiTextureType_EMISSIVE");
+					break;
+				case aiTextureType_HEIGHT:
+					SK_CORE_TRACE("  Semantic = aiTextureType_HEIGHT");
+					break;
+				case aiTextureType_NORMALS:
+					SK_CORE_TRACE("  Semantic = aiTextureType_NORMALS");
+					break;
+				case aiTextureType_SHININESS:
+					SK_CORE_TRACE("  Semantic = aiTextureType_SHININESS");
+					break;
+				case aiTextureType_OPACITY:
+					SK_CORE_TRACE("  Semantic = aiTextureType_OPACITY");
+					break;
+				case aiTextureType_DISPLACEMENT:
+					SK_CORE_TRACE("  Semantic = aiTextureType_DISPLACEMENT");
+					break;
+				case aiTextureType_LIGHTMAP:
+					SK_CORE_TRACE("  Semantic = aiTextureType_LIGHTMAP");
+					break;
+				case aiTextureType_REFLECTION:
+					SK_CORE_TRACE("  Semantic = aiTextureType_REFLECTION");
+					break;
+				case aiTextureType_UNKNOWN:
+					SK_CORE_TRACE("  Semantic = aiTextureType_UNKNOWN");
+					break;
+				}
+				if (prop->mType == aiPTI_String)
+				{
+					uint32_t strLength = *(uint32_t*)prop->mData;
+					std::string str(prop->mData + 4, strLength);
+					SK_CORE_TRACE("  Value = {0}", str);
+
+					std::string key = prop->mKey.data;
+					if (key == "$raw.ReflectionFactor|file")
+					{
+						std::filesystem::path path = m_FilePath;
+						auto parentPath = path.parent_path();
+						parentPath /= str;
+						std::string texturePath = parentPath.string();
+
+						auto texture = Texture2D::Create(texturePath);
+						if (texture->IsLoaded())
+						{
+							SK_CORE_TRACE("  Metalness map path = {0}", texturePath);
+							mi->Set("u_MetalnessTexture", texture);
+							mi->Set("u_MetalnessTexToggle", 1.0f);
+						}
+						else
+						{
+							SK_CORE_ERROR("Could not load texture: {0}", texturePath);
+							mi->Set("u_Metalness", 0.5f);
+							mi->Set("u_MetalnessTexToggle", 1.0f);
+						}
+					}
+				}
+
+				// Normal maps
+				if (aiMaterial->GetTexture(aiTextureType_NORMALS, 0, &aiTexPath) == AI_SUCCESS)
+				{
+					// TODO: Temp - this should be handled by Hazel's filesystem
+					std::filesystem::path path = m_FilePath;
+					auto parentPath = path.parent_path();
+					parentPath /= std::string(aiTexPath.data);
+					std::string texturePath = parentPath.string();
+
+					auto texture = Texture2D::Create(texturePath);
+					if (texture->IsLoaded())
+					{
+						SK_CORE_TRACE("  Normal map path = {0}", texturePath);
+						mi->Set("u_NormalTexture", texture);
+						mi->Set("u_NormalTexToggle", 1.0f);
+					}
+					else
+					{
+						SK_CORE_ERROR("Could not load texture: {0}", texturePath);
+						//mi->Set("u_AlbedoTexToggle", 0.0f);
+						// mi->Set("u_AlbedoColor", glm::vec3{ color.r, color.g, color.b });
+					}
+				}
+				// Roughness map
+				if (aiMaterial->GetTexture(aiTextureType_SHININESS, 0, &aiTexPath) == AI_SUCCESS)
+				{
+					// TODO: Temp - this should be handled by Hazel's filesystem
+					std::filesystem::path path = m_FilePath;
+					auto parentPath = path.parent_path();
+					parentPath /= std::string(aiTexPath.data);
+					std::string texturePath = parentPath.string();
+
+					auto texture = Texture2D::Create(texturePath);
+					if (texture->IsLoaded())
+					{
+						SK_CORE_TRACE("  Roughness map path = {0}", texturePath);
+						mi->Set("u_RoughnessTexture", texture);
+						mi->Set("u_RoughnessTexToggle", 1.0f);
+					}
+					else
+					{
+						SK_CORE_ERROR("Could not load texture: {0}", texturePath);
+						mi->Set("u_RoughnessTexToggle", 1.0f);
+						mi->Set("u_Roughness", 0.5f);
+					}
+				}
+
+				// Metalness map
+				if (aiMaterial->Get("$raw.ReflectionFactor|file", aiPTI_String, 0, aiTexPath) == AI_SUCCESS)
+				{
+					// TODO: Temp - this should be handled by Hazel's filesystem
+					std::filesystem::path path = m_FilePath;
+					auto parentPath = path.parent_path();
+					parentPath /= std::string(aiTexPath.data);
+					std::string texturePath = parentPath.string();
+
+					auto texture = Texture2D::Create(texturePath);
+					if (texture->IsLoaded())
+					{
+						SK_CORE_TRACE("  Metalness map path = {0}", texturePath);
+						mi->Set("u_MetalnessTexture", texture);
+						mi->Set("u_MetalnessTexToggle", 1.0f);
+					}
+					else
+					{
+						SK_CORE_ERROR("Could not load texture: {0}", texturePath);
+						mi->Set("u_Metalness", 0.5f);
+						mi->Set("u_MetalnessTexToggle", 1.0f);
+					}
+				}
+
+			}
+			
 		}
-
 	}
-
 
 	Mesh::Mesh(const Path& filename)
 		:m_FilePath(filename)
@@ -347,7 +495,7 @@ namespace Spark
 		if (m_IsAnimated) LoadAnimatedMesh();
 		else LoadStaticMesh();
 
-
+		LoadMaterials();
 
 	}
 
@@ -483,7 +631,7 @@ namespace Spark
 		return nullptr;
 	}
 
-	void Mesh::ReadNodeHierarchy(float AnimationTime, const aiNode* pNode, const glm::mat4& ParentTransform)
+	void Mesh::ReadNodeHierarchy(float animationTime, const aiNode* pNode, const glm::mat4& parentTransform)
 	{
 		std::string name(pNode->mName.data);
 		const aiAnimation* animation = m_Scene->mAnimations[0];
@@ -492,19 +640,19 @@ namespace Spark
 
 		if (nodeAnim)
 		{
-			glm::vec3 translation = InterpolateTranslation(AnimationTime, nodeAnim);
+			glm::vec3 translation = InterpolateTranslation(animationTime, nodeAnim);
 			glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(translation.x, translation.y, translation.z));
 
-			glm::quat rotation = InterpolateRotation(AnimationTime, nodeAnim);
+			glm::quat rotation = InterpolateRotation(animationTime, nodeAnim);
 			glm::mat4 rotationMatrix = glm::toMat4(rotation);
 
-			glm::vec3 scale = InterpolateScale(AnimationTime, nodeAnim);
+			glm::vec3 scale = InterpolateScale(animationTime, nodeAnim);
 			glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(scale.x, scale.y, scale.z));
 
 			nodeTransform = translationMatrix * rotationMatrix * scaleMatrix;
 		}
 
-		glm::mat4 transform = ParentTransform * nodeTransform;
+		glm::mat4 transform = parentTransform * nodeTransform;
 
 		if (m_BoneMapping.find(name) != m_BoneMapping.end())
 		{
@@ -513,20 +661,33 @@ namespace Spark
 		}
 
 		for (uint32_t i = 0; i < pNode->mNumChildren; i++)
-			ReadNodeHierarchy(AnimationTime, pNode->mChildren[i], transform);
+			ReadNodeHierarchy(animationTime, pNode->mChildren[i], transform);
 	}
 
-	void Mesh::TraverseNodes(aiNode* node)
+	static std::string LevelToSpaces(uint32_t level)
 	{
+		std::string result = "";
+		for (uint32_t i = 0; i < level; i++)
+			result += "--";
+		return result;
+	}
+
+	void Mesh::TraverseNodes(aiNode* node,const glm::mat4& parentTransform,uint32_t level)
+	{
+
+		glm::mat4 transform = parentTransform * Utils::Mat4FromAssimpMat4(node->mTransformation);
+
 		for (int i = 0; i < node->mNumMeshes; ++i)
 		{
 			uint32_t mesh = node->mMeshes[i];
-			m_Submeshes[mesh].Transform = Utils::Mat4FromAssimpMat4(node->mTransformation);
+			m_Submeshes[mesh].Transform = transform;
 		}
+		SK_CORE_TRACE("{0} {1}", LevelToSpaces(level), node->mName.C_Str());
+
 		for (int i = 0; i < node->mNumChildren; ++i)
 		{
 			aiNode* child = node->mChildren[i];
-			TraverseNodes(child);
+			TraverseNodes(child,transform,level+1);
 		}
 	}
 
